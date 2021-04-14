@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: 100
+      author: bart
+      dbms: PostgreSQL
+      comment: Create bestuurlijkgebied
+      changes:
+        - createTable:
+            schemaName: public
+            tableName: BESTUURLIJKGEBIED
+            columns:
+              - column:
+                  name: ID
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: IDENTIFICATIE
+                  type: varchar(24)
+              - column:
+                  name: DOMEIN
+                  type: varchar(128)
+              - column:
+                  name: TYPE
+                  type: varchar(128)
+              - column:
+                  name: OPENBAARLICHAAM_ID
+                  type: BIGINT
+              - column:
+                  name: GEOMETRY
+                  type: geometry(GEOMETRY, 28992)
+        - rollback:
+            dropTable:
+              - tableName: BESTUURLIJKGEBIED
