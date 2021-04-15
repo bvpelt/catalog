@@ -3,6 +3,7 @@ package com.bsoft.catalogus.services;
 import com.bsoft.catalogus.api.ConceptschemasApi;
 import com.bsoft.catalogus.model.InlineResponse200;
 import io.swagger.annotations.ApiParam;
+import liquibase.pro.packaged.S;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -60,6 +61,13 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                 "-------------------------------------------" + System.lineSeparator() +
                 "Used headers: " + buildGetRequestHeaders().toString() + System.lineSeparator() +
                 "-------------------------------------------" + System.lineSeparator() +
+                "REQUEST PARAMETERS BEGIN" + System.lineSeparator() +
+                "uri: " + uri + System.lineSeparator() +
+                "gepubliceerdDoor: " + gepubliceerdDoor + System.lineSeparator() +
+                "geldigOp: " + geldigOp + System.lineSeparator() +
+                "page: " + page.toString() + System.lineSeparator() +
+                "pageSize: " + pageSize.toString() + System.lineSeparator() +
+                "_expandScope: " + expandScope.get(0) + System.lineSeparator() +
                 "REQUEST PARAMETERS END" + System.lineSeparator() +
                 "-------------------------------------------");
 

@@ -231,8 +231,11 @@ components:
           example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/conceptscheme/Stelselcatalogus"
         type:
           description: "rdf:type"
-          type: "string"
-          example: "http://www.w3.org/2004/02/skos/core#ConceptScheme"
+          type: array
+          items:
+            type: "string"
+          example:
+            - "http://www.w3.org/2004/02/skos/core#ConceptScheme"
         naam:
           description: "rdfs:label"
           type: "string"
