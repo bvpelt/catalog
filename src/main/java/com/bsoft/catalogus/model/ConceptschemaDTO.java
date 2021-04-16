@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 @Entity(name = "ConceptschemaDTO")
-@Table(name = "conceptschema")
+@Table(name = "CONCEPTSCHEMA")
 @Data
 public class ConceptschemaDTO implements Serializable {
     @Id

@@ -5,6 +5,7 @@ import com.bsoft.catalogus.model.ConceptschemaTypeDTO;
 import com.bsoft.catalogus.repository.ConceptschemaRepository;
 import com.bsoft.catalogus.repository.ConceptschemaTypeRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -17,15 +18,17 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
+
 @Slf4j
 //@DataJpaTest
 @RunWith(SpringRunner.class)
 //@ContextConfiguration(classes = CatalogusApplication.class)
-//@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.AUTO_CONFIGURED)
-//@TestPropertySource(value = {
+@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.AUTO_CONFIGURED)
+@TestPropertySource(value = {
 //        "classpath:application.properties",
-//        "classpath:application-test.properties"
-//})
+        "classpath:bart.properties"
+})
 @SpringBootTest(classes=CatalogusApplication.class)
 public class StorageTests {
 
@@ -49,5 +52,9 @@ public class StorageTests {
         conceptschemaDTO.setUri("uri");
 
         conceptschemaRepository.save(conceptschemaDTO);
+
+        List<ConceptschemaDTO> conceptschemaDTOS = conceptschemaRepository.findAll();
+        Assert.assertNotNull(conceptschemaDTOS);
+        Assert.assertEquals(1, conceptschemaDTOS.size());
     }
 }

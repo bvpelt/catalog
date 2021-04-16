@@ -7,7 +7,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity(name = "ConceptschemaTypeDTO")
-@Table(name = "conceptschematype")
+@Table(name = "CONCEPTSCHEMATYPE")
 @Data
 public class ConceptschemaTypeDTO implements Serializable {
     @Id

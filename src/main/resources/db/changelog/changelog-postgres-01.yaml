@@ -3,11 +3,11 @@ databaseChangeLog:
       id: 100
       author: bart
       dbms: PostgreSQL
-      comment: Create conceptschema
+      comment: Create CONCEPTSCHEMA
       changes:
         - createTable:
-            schemaName: public
-            tableName: conceptschema
+            schemaName: PUBLIC
+            tableName: CONCEPTSCHEMA
             columns:
               - column:
                   name: ID
@@ -28,20 +28,19 @@ databaseChangeLog:
               - column:
                   name: BEGINDATUMGELDIGHEID
                   type: varchar(10)
-
-        - rollback:
-            dropTable:
-              - tableName: conceptschema
+#        - rollback:
+#            dropTable:
+#              - tableName: CONCEPTSCHEMA
 
   - changeSet:
       id: 110
       author: bart
       dbms: PostgreSQL
-      comment: Create conceptschematype
+      comment: Create CONCEPTSCHEMATYPE
       changes:
         - createTable:
-            schemaName: public
-            tableName: conceptschematype
+            schemaName: PUBLIC
+            tableName: CONCEPTSCHEMATYPE
             columns:
               - column:
                   name: ID
@@ -56,7 +55,6 @@ databaseChangeLog:
               - column:
                   name: conceptschemaDTO_id
                   type: BIGINT
-
-        - rollback:
-            dropTable:
-              - tableName: conceptschematype
+#        - rollback:
+#            dropTable:
+#              - tableName: CONCEPTSCHEMATYPE
