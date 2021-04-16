@@ -61,6 +61,7 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
+			<version>1.4.200</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -94,10 +95,12 @@
 					<groupId>joda-time</groupId>
 					<artifactId>joda-time</artifactId>
 				</exclusion>
+				<!--
 				<exclusion>
 					<groupId>ch.qos.logback</groupId>
 					<artifactId>logback-classic</artifactId>
 				</exclusion>
+				-->
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -115,24 +118,28 @@
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
 			<version>3.0.0</version>
+			<!--
 			<exclusions>
 				<exclusion>
 					<groupId>ch.qos.logback</groupId>
 					<artifactId>logback-classic</artifactId>
 				</exclusion>
 			</exclusions>
+			-->
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>${javax.servlet-api.version}</version>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.13.2</version>
 			<scope>test</scope>
 		</dependency>
+		-->
 	</dependencies>
 
 	<build>
@@ -177,10 +184,6 @@
 								<java8>true</java8>
 								<useBeanValidation>true</useBeanValidation>
 							</configOptions>
-							<library>spring-boot</library>
-							<apiPackage>com.northlabs.demo.api</apiPackage>
-							<modelPackage>com.northlabs.demo.api.model</modelPackage>
-							<invokerPackage>com.northlabs.demo.api.handler</invokerPackage>
 						</configuration>
 					</execution>
 				</executions>

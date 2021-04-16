@@ -28,9 +28,9 @@ databaseChangeLog:
               - column:
                   name: BEGINDATUMGELDIGHEID
                   type: varchar(10)
-#        - rollback:
-#            dropTable:
-#              - tableName: CONCEPTSCHEMA
+  #        - rollback:
+  #            dropTable:
+  #              - tableName: CONCEPTSCHEMA
 
   - changeSet:
       id: 110
