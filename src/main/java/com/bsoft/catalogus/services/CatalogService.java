@@ -17,7 +17,7 @@ public class CatalogService {
                                                                 String geldigOp,
                                                                 Integer page,
                                                                 Integer pageSize,
-                                                                List<String> expandScope)  {
+                                                                List<String> expandScope) {
         return catalogEndpoint.getConceptschemas(uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
     }
 }

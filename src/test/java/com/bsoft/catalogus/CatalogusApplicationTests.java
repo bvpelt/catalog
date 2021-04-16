@@ -44,12 +44,13 @@ class CatalogusApplicationTests {
 
 		OperationResult<InlineResponse200> result =  catalogService.getConceptschemas(uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
 		Assert.notNull(result, "Result expected");
-
+		InlineResponse200 inlineResponse200 = result.getSuccessResult();
 		try {
 			log.info("Result as string: {}", result.toString());
 			ObjectMapper mapper = new ObjectMapper();
-			String jsonString = mapper.writeValueAsString(result);
-			log.info("Result as json: {}", jsonString);
+			//String jsonString = mapper.writeValueAsString(inlineResponse200);
+			String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(inlineResponse200);
+			log.info("Result as json: \n{}", jsonString);
 		} catch (JsonProcessingException ex) {
 			log.error("Error processing json: {}", ex);
 		}

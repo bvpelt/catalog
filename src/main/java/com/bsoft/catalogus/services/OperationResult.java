@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @AllArgsConstructor()
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class OperationResult <T>{
+public class OperationResult<T> {
 
     private final T successResult;
 

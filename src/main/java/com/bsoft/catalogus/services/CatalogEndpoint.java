@@ -2,8 +2,6 @@ package com.bsoft.catalogus.services;
 
 import com.bsoft.catalogus.api.ConceptschemasApi;
 import com.bsoft.catalogus.model.InlineResponse200;
-import io.swagger.annotations.ApiParam;
-import liquibase.pro.packaged.S;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -32,16 +30,16 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
     }
 
     public OperationResult getConceptschemas(String uri,
-                                                               String gepubliceerdDoor,
-                                                               String geldigOp,
-                                                               Integer page,
-                                                               Integer pageSize,
-                                                               List<String> expandScope) {
+                                             String gepubliceerdDoor,
+                                             String geldigOp,
+                                             Integer page,
+                                             Integer pageSize,
+                                             List<String> expandScope) {
         try {
             ResponseEntity<InlineResponse200> responseEntity = conceptschemasGet(uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
             return OperationResult.success(responseEntity.getBody());
         } catch (HttpClientErrorException httpClientErrorException) {
-            return  OperationResult.failure(httpClientErrorException.getMessage());
+            return OperationResult.failure(httpClientErrorException.getMessage());
         }
     }
 

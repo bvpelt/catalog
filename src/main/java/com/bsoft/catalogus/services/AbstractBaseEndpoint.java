@@ -16,7 +16,7 @@ public class AbstractBaseEndpoint {
 
     private final String apiKey;
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     public RestTemplate getRestTemplate() {
 
