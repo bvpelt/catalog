@@ -1,0 +1,60 @@
+databaseChangeLog:
+  - changeSet:
+      id: 100
+      author: bart
+      dbms: PostgreSQL
+      comment: Create CONCEPTSCHEMA
+      changes:
+        - createTable:
+            schemaName: PUBLIC
+            tableName: CONCEPTSCHEMA
+            columns:
+              - column:
+                  name: ID
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: URI
+                  type: varchar(24)
+              - column:
+                  name: NAAM
+                  type: varchar(128)
+              - column:
+                  name: EIGENAAR
+                  type: varchar(128)
+              - column:
+                  name: BEGINDATUMGELDIGHEID
+                  type: varchar(10)
+#        - rollback:
+#            dropTable:
+#              - tableName: CONCEPTSCHEMA
+
+  - changeSet:
+      id: 110
+      author: bart
+      dbms: PostgreSQL
+      comment: Create CONCEPTSCHEMATYPE
+      changes:
+        - createTable:
+            schemaName: PUBLIC
+            tableName: CONCEPTSCHEMATYPE
+            columns:
+              - column:
+                  name: ID
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: TYPE
+                  type: varchar(24)
+              - column:
+                  name: conceptschemaDTO_id
+                  type: BIGINT
+#        - rollback:
+#            dropTable:
+#              - tableName: CONCEPTSCHEMATYPE

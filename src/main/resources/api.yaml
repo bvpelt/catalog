@@ -1,0 +1,1245 @@
+---
+openapi: "3.0.0"
+info:
+  title: "Catalogus API"
+  version: "3.0.0"
+  description: "De Stelselcatalogus voor de Omgevingswet verbindt definities, toelichtingen\
+    \ en uitleg van concepten, regels,\ninformatiemodellen, producten en services\
+    \ met elkaar.\n\n# Omschrijving\nMet deze API kunnen concepten worden opgevraagd.\
+    \ Van ieder concept geeft de API (voor zover relevant) de formele\ndefinitie,\
+    \ uitleg in klare taal, bron en gerelateerde concepten (semantische relatie, generalisatie,\
+    \ specialisatie,\nonderdeel van, bestaat uit).\n\nOm te kunnen tijdreizen wordt\
+    \ metadata meegegeven:\n  - de datum waarop het concepte (juridisch) geldig is\
+    \ geworden\n  - de datum waarop de (juridische) geldigheid vervalt.\n\nConcepten\
+    \ zijn geordend per domein. Dit domein wordt beschreven als een conceptschema.\
+    \ Binnen een conceptschema kunnen concepten\nworden geordend in collecties.\n\
+    De conceptschema worden federatief beheerd door de verschillende bronhouders.\
+    \ Bij ieder conceptschema wordt aangegeven wie de\nbronhouder is en daarmee verantwoordelijk\
+    \ is voor de inhoud.\n\n# Documentatie\n[Beschrijving van de informatie over concepten,\
+    \ geldigheid/provenance, collecties en datasets](http://bp4mc2.org/modelleringswijze/)\n\
+    (op basis van Best Practices for meaningful connected computing).\n\n# API-key\n\
+    Om API's te gebruiken dient bij elke request een API key meegegeven te worden\
+    \ (via een x-api-key header).\nBij verkeerd gebruik of misbruik van de API kunnen\
+    \ we in contact treden en in het uiterste geval de API key intrekken."
+paths:
+  /:
+    get:
+      summary: "Api profiel van de Catalogus Opvragen API"
+      description: "Endpoint voor het opvragen van het API profiel"
+      responses:
+        "200":
+          description: "Open api spec van de Catalogus opvragen api"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+  /conceptschemas:
+    get:
+      summary: "Conceptschema's opvragen"
+      description: "Endpoint voor het opvragen van alle conceptschema's"
+      parameters:
+        - $ref: "#/components/parameters/ConceptschemaUri"
+        - $ref: "#/components/parameters/GepubliceerdDoor"
+        - $ref: "#/components/parameters/GeldigOp"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/ExpandScopeConceptschema"
+      responses:
+        "200":
+          $ref: "#/components/responses/Conceptschemas"
+  /collecties:
+    get:
+      summary: "Collecties opvragen"
+      description: "Endpoint voor het opvragen van collecties"
+      parameters:
+        - $ref: "#/components/parameters/CollectieUri"
+        - $ref: "#/components/parameters/GepubliceerdDoor"
+        - $ref: "#/components/parameters/GeldigOp"
+        - $ref: "#/components/parameters/CollectiesInConceptschemaUri"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/ExpandScopeCollectie"
+      responses:
+        "200":
+          $ref: "#/components/responses/Collecties"
+  /concepten:
+    get:
+      summary: "Concepten opvragen"
+      description: "Endpoint voor het opvragen van concepten"
+      parameters:
+        - $ref: "#/components/parameters/ConceptUri"
+        - $ref: "#/components/parameters/GepubliceerdDoor"
+        - $ref: "#/components/parameters/GeldigOp"
+        - $ref: "#/components/parameters/ConceptenInConceptschemaUri"
+        - $ref: "#/components/parameters/ConceptenInCollectieUri"
+        - $ref: "#/components/parameters/ConceptenInWaardelijstUri"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          $ref: "#/components/responses/Concepten"
+  /bronnen:
+    get:
+      summary: "Bronnen opvragen"
+      description: "Endpoint voor het opvragen van bronnen"
+      parameters:
+        - $ref: "#/components/parameters/BronUri"
+        - $ref: "#/components/parameters/GepubliceerdDoor"
+        - $ref: "#/components/parameters/GeldigOp"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          $ref: "#/components/responses/Bronnen"
+  /waardelijsten:
+    get:
+      summary: "Waardelijsten opvragen"
+      description: "Endpoint voor het opvragen van waardelijsten"
+      parameters:
+        - $ref: "#/components/parameters/WaardelijstUri"
+        - $ref: "#/components/parameters/GepubliceerdDoor"
+        - $ref: "#/components/parameters/ExpandScopeWaardelijsten"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          $ref: "#/components/responses/Waardelijsten"
+  /informatieproducten:
+    get:
+      summary: "Informatieproducten opvragen"
+      description: "Endpoint voor het opvragen van informatieproducten"
+      parameters:
+        - $ref: "#/components/parameters/InformatieproductUri"
+        - $ref: "#/components/parameters/GepubliceerdDoor"
+        - $ref: "#/components/parameters/GeldigOp"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          $ref: "#/components/responses/InformatieProducten"
+  /info:
+    get:
+      summary: "Applicatie-eigenschappen van de Stelselcatalogus opvragen"
+      description: "Endpoint voor het opvragen van de applicatie-eigenschappen"
+      responses:
+        "200":
+          $ref: "#/components/responses/ApplicatieEigenschappen"
+  /health:
+    get:
+      summary: "Health status van de Stelselcatalogus opvragen"
+      description: "Endpoint voor het opvragen van de health status"
+      responses:
+        "200":
+          $ref: "#/components/responses/Health"
+components:
+  headers:
+    ApiVersionHeader:
+      description: "Versienummer van de API"
+      schema:
+        type: "string"
+        example: "3.0.0"
+    X-Pagination-Limit:
+      description: "Aantal Objecten per pagina"
+      schema:
+        format: "int32"
+        type: "integer"
+    X-Pagination-Page:
+      description: "Nummer van de huidige pagina (paginanummering start bij 1)"
+      schema:
+        format: "int32"
+        type: "integer"
+  schemas:
+    PageInfo:
+      type: "object"
+      required:
+        - "size"
+        - "totalElements"
+        - "totalPages"
+        - "number"
+      properties:
+        size:
+          format: "int32"
+          type: "integer"
+          example: 10
+        totalElements:
+          format: "int32"
+          type: "integer"
+          example: 200
+        totalPages:
+          format: "int32"
+          type: "integer"
+          example: 20
+        number:
+          format: "int32"
+          type: "integer"
+          example: 1
+    Links:
+      type: "object"
+      required:
+        - "self"
+      properties:
+        next:
+          type: "object"
+          required:
+            - "href"
+          description: "Absolute link naar volgende pagina (niet aanwezig als er geen\
+            \ volgende pagina is)"
+          properties:
+            href:
+              description: "URL van de link"
+              format: "uri"
+              type: "string"
+              example: "https://service.omgevingswet.overheid.nl/publiek/catalogus/api/opvragen/v3/concepten?page=3"
+        prev:
+          type: "object"
+          required:
+            - "href"
+          description: "Absolute link naar vorige pagina (niet aanwezig als er geen\
+            \ vorige pagina is)"
+          properties:
+            href:
+              description: "URL van de link"
+              format: "uri"
+              type: "string"
+              example: "https://service.omgevingswet.overheid.nl/publiek/catalogus/api/opvragen/v3/concepten?page=1"
+        self:
+          type: "object"
+          required:
+            - "href"
+          description: "Absolute link naar huidige pagina"
+          properties:
+            href:
+              description: "URL van de link"
+              format: "uri"
+              type: "string"
+              example: "https://service.omgevingswet.overheid.nl/publiek/catalogus/api/opvragen/v3/concepten?page=2"
+    Conceptschema:
+      type: "object"
+      required:
+        - "uri"
+        - "type"
+        - "naam"
+        - "uitleg"
+        - "eigenaar"
+        - "begindatumGeldigheid"
+        - "einddatumGeldigheid"
+        - "metadata"
+      properties:
+        uri:
+          description: "Unieke identificatie van het Conceptschema"
+          type: "string"
+          example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/conceptscheme/Stelselcatalogus"
+        type:
+          description: "rdf:type"
+          type: array
+          items:
+            type: "string"
+          example:
+            - "http://www.w3.org/2004/02/skos/core#ConceptScheme"
+        naam:
+          description: "rdfs:label"
+          type: "string"
+          example: "Stelselcatalogus"
+        uitleg:
+          nullable: true
+          description: "rdfs:comment"
+          type: "string"
+          example: "Korte uitleg waarom dit conceptschema tot stand is gekomen."
+        eigenaar:
+          type: "string"
+          example: "https://standaarden.overheid.nl/owms/terms/Geonovum"
+        begindatumGeldigheid:
+          type: "string"
+          pattern: "^(\\d{4}-[01]\\d-[0-3]\\d)$"
+          example: "2020-04-17"
+        einddatumGeldigheid:
+          nullable: true
+          type: "string"
+          pattern: "^(\\d{4}-[01]\\d-[0-3]\\d)$"
+          example: "2020-04-27"
+        metadata:
+          type: "string"
+          example: "http://stelselcatalogus.omgevingswet.overheid.nl/doc/2018041200000000/conceptscheme/Stelselcatalogus"
+        _embedded:
+          type: "object"
+          properties:
+            concepten:
+              nullable: true
+              type: "array"
+              items:
+                $ref: "#/components/schemas/Concept"
+            collecties:
+              nullable: true
+              type: "array"
+              items:
+                $ref: "#/components/schemas/Collectie"
+    Concept:
+      type: "object"
+      required:
+        - "uri"
+        - "type"
+        - "naam"
+        - "term"
+        - "uitleg"
+        - "definitie"
+        - "eigenaar"
+        - "conceptschema"
+        - "toelichtingen"
+        - "rationales"
+        - "verbeeldingen"
+        - "codes"
+        - "begindatumGeldigheid"
+        - "einddatumGeldigheid"
+        - "verborgenZoektermen"
+        - "synoniemen"
+        - "bronnen"
+        - "heeftBetrekkingOp"
+        - "isOnderdeelVan"
+        - "bestaatUit"
+        - "isSpecialisatieVan"
+        - "isGeneralisatieVan"
+        - "isHetzelfdeAls"
+        - "isOngeveerHetzelfdeAls"
+        - "zieOok"
+        - "isBrederDan"
+        - "isEngerDan"
+        - "isGerelateerd"
+        - "isHarmonisatie"
+        - "metadata"
+      properties:
+        uri:
+          type: "string"
+          example: "http://stelselcatalogus.omgevingswet.overheid.nl/programming/id/concept/API"
+        type:
+          type: "string"
+          example: "http://www.w3.org/2004/02/skos/core#Concept"
+        naam:
+          type: "string"
+          example: "Application programming interface"
+        term:
+          type: "string"
+          example: "Application programming interface"
+        uitleg:
+          nullable: true
+          type: "string"
+          description: "Uitleg over de definitie in 'begrijpelijke' taal."
+          example: "Je zou kunnen zeggen dat een API de boodschapper is die een verzoek\
+            \ indient bij een provider en vervolgens het antwoord terugkoppelt naar\
+            \ jou."
+        definitie:
+          nullable: true
+          type: "string"
+          example: "Een API (Application Programming Interface) is een software-interface\
+            \ die het mogelijk maakt dat twee applicaties met elkaar kunnen communiceren."
+        eigenaar:
+          nullable: true
+          type: "string"
+          example: "https://standaarden.overheid.nl/owms/terms/Geonovum"
+        conceptschema:
+          type: "string"
+          example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/conceptscheme/Stelselcatalogus"
+        toelichtingen:
+          nullable: true
+          type: "array"
+          description: "Array met aanvullende toelichtingen op de definitie indien\
+            \ gewenst."
+          items:
+            type: "string"
+          example:
+            - "API's kunnen zowel in REST als in SOAP vorm voorkomen."
+        rationales:
+          nullable: true
+          type: "array"
+          description: "Waarom is er voor deze definitie gekozen?"
+          items:
+            type: "string"
+          example:
+            - "Definitie is in samenspraak met een grote groep mensen tot stand gekomen."
+        verbeeldingen:
+          nullable: true
+          type: "array"
+          description: "Verwijzing middels een url naar een afbeelding."
+          items:
+            type: "string"
+          example:
+            - "https://d1.awsstatic.com/serverless/New-API-GW-Diagram.c9fc9835d2a9aa00ef90d0ddc4c6402a2536de0d.png"
+        codes:
+          nullable: true
+          type: "array"
+          description: "Codes met betrekking tot het concept."
+          items:
+            type: "string"
+          example:
+            - 303.4833
+        begindatumGeldigheid:
+          type: "string"
+          pattern: "^(\\d{4}-[01]\\d-[0-3]\\d)$"
+          example: "2020-04-17"
+        einddatumGeldigheid:
+          nullable: true
+          type: "string"
+          pattern: "^(\\d{4}-[01]\\d-[0-3]\\d)$"
+          example: "2020-04-27"
+        verborgenZoektermen:
+          nullable: true
+          type: "array"
+          items:
+            type: "string"
+          example:
+            - "API"
+            - "REST"
+            - "SOAP"
+        synoniemen:
+          nullable: true
+          type: "array"
+          description: "Array met woorden die synoniem zijn aan het concept"
+          items:
+            type: "string"
+          example:
+            - "Application Programming Interface"
+            - "Digitaal informatie uitwisselingskanaal"
+        bronnen:
+          nullable: true
+          type: "array"
+          description: "Array met verwijzingen middels url's naar de bronnen"
+          items:
+            type: "string"
+            example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/bibliograficresouce/restfull-programming"
+        heeftBetrekkingOp:
+          nullable: true
+          type: "array"
+          description: "Relatie naar andere concepten (skos:semanticRelation)"
+          items:
+            type: "string"
+            example: "http://stelselcatalogus.omgevingswet.overheid.nl/programming/id/concept/SOAP"
+        isOnderdeelVan:
+          nullable: true
+          type: "array"
+          description: "Relatie naar andere concepten (skosthes:broaderPartitive)"
+          items:
+            type: "string"
+            example: "http://stelselcatalogus.omgevingswet.overheid.nl/programming/id/concept/SOAP"
+        bestaatUit:
+          nullable: true
+          type: "array"
+          description: "Relatie naar andere concepten (skosthes:narrowerPartitive)"
+          items:
+            type: "string"
+            example: "http://stelselcatalogus.omgevingswet.overheid.nl/programming/id/concept/SOAP"
+        isSpecialisatieVan:
+          nullable: true
+          type: "array"
+          description: "Relatie naar andere concepten (skosthes:broaderGeneric)"
+          items:
+            type: "string"
+            example: "http://stelselcatalogus.omgevingswet.overheid.nl/programming/id/concept/SOAP"
+        isGeneralisatieVan:
+          nullable: true
+          type: "array"
+          description: "Relatie naar andere concepten (skosthes:narrowerGeneric)"
+          items:
+            type: "string"
+            example: "http://stelselcatalogus.omgevingswet.overheid.nl/programming/id/concept/SOAP"
+        isHetzelfdeAls:
+          nullable: true
+          type: "array"
+          description: "Relatie naar andere concepten (skos:exactMatch)"
+          items:
+            type: "string"
+            example: "http://stelselcatalogus.omgevingswet.overheid.nl/programming/id/concept/SOAP"
+        isOngeveerHetzelfdeAls:
+          nullable: true
+          type: "array"
+          description: "Relatie naar andere concepten (skos:closeMatch)"
+          items:
+            type: "string"
+            example: "http://stelselcatalogus.omgevingswet.overheid.nl/programming/id/concept/SOAP"
+        zieOok:
+          nullable: true
+          type: "array"
+          description: "Relatie naar andere concepten (skos:relatedMatch)"
+          items:
+            type: "string"
+            example: "http://stelselcatalogus.omgevingswet.overheid.nl/programming/id/concept/SOAP"
+        isBrederDan:
+          nullable: true
+          type: "array"
+          description: "Relatie naar andere concepten (skos:broadMatch)"
+          items:
+            type: "string"
+            example: "http://stelselcatalogus.omgevingswet.overheid.nl/programming/id/concept/SOAP"
+        isEngerDan:
+          nullable: true
+          type: "array"
+          description: "Relatie naar andere concepten (skos:narrowMatch)"
+          items:
+            type: "string"
+            example: "http://stelselcatalogus.omgevingswet.overheid.nl/programming/id/concept/SOAP"
+        isGerelateerd:
+          nullable: true
+          type: "array"
+          description: "Relatie naar andere concepten (skos:related)"
+          items:
+            type: "string"
+            example: "http://stelselcatalogus.omgevingswet.overheid.nl/programming/id/concept/SOAP"
+        isHarmonisatie:
+          nullable: true
+          type: "array"
+          description: "Relatie naar andere concepten (skos:mappingRelation)"
+          items:
+            type: "string"
+            example: "http://stelselcatalogus.omgevingswet.overheid.nl/programming/id/concept/SOAP"
+        metadata:
+          type: "string"
+          example: "http://stelselcatalogus.omgevingswet.overheid.nl/programming/doc/2018041200000000/concept/API"
+    Collectie:
+      type: "object"
+      required:
+        - "uri"
+        - "type"
+        - "naam"
+        - "term"
+        - "eigenaar"
+        - "conceptschema"
+        - "begindatumGeldigheid"
+        - "einddatumGeldigheid"
+        - "metadata"
+      properties:
+        uri:
+          type: "string"
+          example: "http://stelselcatalogus.omgevingswet.overheid.nl/stelselcatalogus/id/collection/Collectie"
+        type:
+          type: "string"
+          example: "http://www.w3.org/2004/02/skos/core#Collection"
+        naam:
+          type: "string"
+          example: "Collectie van concepten"
+        term:
+          type: "string"
+          example: "Collectie van concepten"
+        eigenaar:
+          type: "string"
+          example: "https://standaarden.overheid.nl/owms/terms/Geonovum"
+        conceptschema:
+          type: "string"
+          example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/conceptscheme/Stelselcatalogus"
+        begindatumGeldigheid:
+          type: "string"
+          pattern: "^(\\d{4}-[01]\\d-[0-3]\\d)$"
+          example: "2020-04-17"
+        einddatumGeldigheid:
+          nullable: true
+          type: "string"
+          pattern: "^(\\d{4}-[01]\\d-[0-3]\\d)$"
+          example: "2020-04-27"
+        metadata:
+          type: "string"
+          example: "http://stelselcatalogus.omgevingswet.overheid.nl/stelselcatalogus/doc/2018041200000000/collection/Collectie"
+        _embedded:
+          type: "object"
+          properties:
+            concepten:
+              nullable: true
+              type: "array"
+              items:
+                $ref: "#/components/schemas/Concept"
+    Bron:
+      type: "object"
+      required:
+        - "uri"
+        - "type"
+        - "titel"
+        - "webpagina"
+        - "resource"
+        - "begindatumGeldigheid"
+        - "einddatumGeldigheid"
+        - "eigenaar"
+        - "metadata"
+      properties:
+        uri:
+          type: "string"
+          example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/bibliograficresouce/restfull-programming"
+        titel:
+          type: "string"
+          example: "Restfull programming"
+        webpagina:
+          type: "string"
+          example: "https://en.wikipedia.org/wiki/Representational_state_transfer"
+          nullable: true
+        resource:
+          type: "string"
+          example: "http://data.example.org/Restfull_programming"
+          nullable: true
+        type:
+          type: "string"
+          example: "http://purl.org/dc/terms/BibliographicResource"
+        begindatumGeldigheid:
+          type: "string"
+          pattern: "^(\\d{4}-[01]\\d-[0-3]\\d)$"
+          example: "2020-04-17"
+        einddatumGeldigheid:
+          nullable: true
+          type: "string"
+          pattern: "^(\\d{4}-[01]\\d-[0-3]\\d)$"
+          example: "2020-04-27"
+        eigenaar:
+          nullable: true
+          type: "string"
+          example: "https://standaarden.overheid.nl/owms/terms/Geonovum"
+        metadata:
+          type: "string"
+          example: "http://stelselcatalogus.acc.omgevingswet.overheid.nl/doc/20180412000000/dataset/OverbruggingsfunctieRuimtelijkeOrdening"
+    Waardelijst:
+      type: "object"
+      required:
+        - "uri"
+        - "naam"
+        - "titel"
+        - "beschrijving"
+        - "websites"
+        - "versie"
+        - "versienotities"
+        - "eigenaar"
+        - "metadata"
+      properties:
+        uri:
+          type: "string"
+          example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/waardelijst/SoftwareEngineering_1.0.3"
+        naam:
+          nullable: true
+          type: "string"
+          example: "Software engineering"
+        titel:
+          type: "string"
+          example: "Software engineering"
+        beschrijving:
+          nullable: true
+          type: "string"
+          example: "Waardelijst welke concepten bevat die betrekking hebben op software\
+            \ engineering"
+        websites:
+          nullable: true
+          type: "array"
+          items:
+            type: "string"
+            example:
+              - "https://martinfowler.com/"
+        versie:
+          type: "string"
+          example: "1.0.3"
+        versienotities:
+          nullable: true
+          type: "string"
+          example: "Dit veld bevat informatie specifiek over deze versie"
+        eigenaar:
+          type: "string"
+          example: "https://standaarden.overheid.nl/owms/terms/Geonovum"
+        metadata:
+          type: "string"
+          example: "http://stelselcatalogus.omgevingswet.overheid.nl/doc/20200719220320/waardelijst/SoftwareEngineering_1.0.3"
+        _embedded:
+          type: "object"
+          properties:
+            waarden:
+              nullable: true
+              type: "array"
+              items:
+                $ref: "#/components/schemas/Concept"
+    InformatieProduct:
+      type: "object"
+      required:
+        - "uri"
+        - "naam"
+        - "titel"
+        - "websites"
+        - "beschrijving"
+        - "model"
+        - "service"
+        - "kwaliteit"
+        - "oderwerpen"
+        - "eigenaar"
+        - "metadata"
+      properties:
+        uri:
+          type: "string"
+          example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/dataset/OverbruggingsfunctieRuimtelijkeOrdening"
+        naam:
+          type: "string"
+          example: "Overbruggingsfunctie Ruimtelijke Ordening"
+        titel:
+          type: "string"
+          example: "Overbruggingsfunctie Ruimtelijke Ordening"
+        websites:
+          type: "array"
+          items:
+            type: "string"
+            example: "http://nationaalgeoregister.nl/"
+        beschrijving:
+          type: "string"
+          example: "Ontsluiting van Ruimtelijke plannen in het kader van het Digitaal\
+            \ Stelsel Omgevingswet (DSO). Middels de overbruggingsfunctie worden plannen\
+            \ conform de Wro in combinatie met plannen conform de Omgevingswet zo\
+            \ beschikbaar gesteld dat de vigerende situatie duidelijk is."
+        model:
+          $ref: "#/components/schemas/InformatieModel"
+        service:
+          $ref: "#/components/schemas/InformatieService"
+        kwaliteit:
+          $ref: "#/components/schemas/Kwaliteit"
+        onderwerpen:
+          type: "array"
+          items:
+            type: "string"
+          example:
+            - "http://stelselcatalogus.omgevingswet.overheid.nl/stelselcatalogus/id/collection/APIManager"
+            - "http://stelselcatalogus.omgevingswet.overheid.nl/stelselcatalogus/id/collection/API"
+        metadata:
+          type: "string"
+          example: "http://stelselcatalogus.acc.omgevingswet.overheid.nl/doc/20180412000000/dataset/OverbruggingsfunctieRuimtelijkeOrdening"
+        eigenaar:
+          type: "string"
+          example: "https://standaarden.overheid.nl/owms/terms/Geonovum"
+    InformatieModel:
+      type: "object"
+      required:
+        - "beschrijving"
+        - "titel"
+        - "naam"
+        - "websites"
+      properties:
+        beschrijving:
+          type: "string"
+          example: "Standaard voor de ruimtelijke ordening waarin de plannen, visies,\
+            \ besluiten e.d. met hun objecten zijn gedefinieerd. Het IMRO is gekoppeld\
+            \ aan de Wet ruimtelijke ordening (Wro)."
+        titel:
+          type: "string"
+          example: "Informatiemodel Overbruggingsfunctie Ruimtelijke Ordening"
+        naam:
+          type: "string"
+          example: "IMRO2006 - IMRO2008 - IMRO2012"
+        websites:
+          type: "array"
+          items:
+            type: "string"
+            example: "https://www.geonovum.nl/geo-standaarden/ro-standaarden-ruimtelijke-ordening/"
+    InformatieService:
+      type: "object"
+      required:
+        - "endpoint"
+        - "beschrijving"
+      properties:
+        endpoint:
+          type: "string"
+          example: "https://ruimte.omgevingswet.overheid.nl/ruimtelijke-plannen/api/opvragen/v3"
+        beschrijving:
+          type: "string"
+          example: "https://ruimte.omgevingswet.overheid.nl/ruimtelijke-plannen/api/opvragen/v3"
+    Kwaliteit:
+      type: "object"
+      required:
+        - "actualiteit"
+        - "begrijpelijkheid"
+        - "compleetheid"
+        - "consistentie"
+        - "nauwkeurigheid"
+        - "plausibiliteit"
+        - "precisie"
+        - "traceerbaarheid"
+      properties:
+        actualiteit:
+          type: "object"
+          required:
+            - "beschrijving"
+          properties:
+            beschrijving:
+              type: "string"
+              example: "De data in deze API wordt meerder keren per dag bijgewerkt\
+                \ vanuit de Landelijke Voorziening Ruimtelijke plannen. De Landelijke\
+                \ Voorziening Ruimtelijke Plannen haalt meerdere keren per dag de\
+                \ wijzigingen bij de bronhouder op."
+        begrijpelijkheid:
+          type: "object"
+          required:
+            - "beschrijving"
+          properties:
+            beschrijving:
+              type: "string"
+              example: "Dit informatieproduct verstrekt IMRO data, voor het interpreteren\
+                \ van deze informatie is een basis kennis van IMRO noodzakelijk."
+        compleetheid:
+          type: "object"
+          required:
+            - "beschrijving"
+          properties:
+            beschrijving:
+              type: "string"
+              example: "De data in deze API is net zo compleet als de data die bij\
+                \ de Landelijke Voorziening Ruimtelijke Plannen beschikbaar is."
+        consistentie:
+          type: "object"
+          required:
+            - "beschrijving"
+          properties:
+            beschrijving:
+              type: "string"
+              example: "De data in dit informatieproduct bestaat uit plannen conform\
+                \ IMRO 2006, 2008 en 2012. De mate van consitentie van de data zelf\
+                \ hangt sterk af van hoe de verschillende bronhouders deze aanleveren\
+                \ en is daramee niet te garanderen. Wel wordt de data in de API op\
+                \ een consistente manier ontsloten."
+        nauwkeurigheid:
+          type: "object"
+          required:
+            - "beschrijving"
+          properties:
+            beschrijving:
+              type: "string"
+              example: "De data in dit informatieproduct is zo nauwkeurig als de bronhouder\
+                \ deze heeft opgesteld. Hiermee kan de nauwkeurigheid per bronhouder\
+                \ verschillen."
+        plausibiliteit:
+          type: "object"
+          required:
+            - "beschrijving"
+          properties:
+            beschrijving:
+              type: "string"
+              example: "De data in dit informatieproduct is gebaseerd op de officiele\
+                \ publicatie van een besluit."
+        precisie:
+          type: "object"
+          required:
+            - "beschrijving"
+          properties:
+            beschrijving:
+              type: "string"
+              example: "Van deze data hangt af van de precisie die de bronhouder gehanteerd\
+                \ heeft bij het opstellen van de plannen, dit kan per plan verschillen."
+        traceerbaarheid:
+          type: "object"
+          required:
+            - "beschrijving"
+          properties:
+            beschrijving:
+              type: "string"
+              example: "De data in dit informatieproduct wordt opgehaald bij de bronhouder\
+                \ waarbij de bronhouder de traceerbaarheid garandeert, bij de Landelijke\
+                \ Voorziening Ruimtelijke Plannen is inzichtelijk wanneer welke plannen\
+                \ zijn opgehaald in de audittrail, in de verwerking aan de kant van\
+                \ Informatiehuis Ruimte is ook duidelijk hoe de plannen verwerkt zijn\
+                \ en wanneer ze in de database zijn geplaatst en dus ontsloten zijn."
+    Info:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          example: "Stelselcatalogus Omgevingswet"
+        version:
+          type: "string"
+          example: "3.0.0"
+        description:
+          type: "string"
+          example: "De Stelselcatalogus Omgevingswet is het online naslagwerk met\
+            \ concepten over de fysieke leefomgeving. In de catalogus vind je alle\
+            \ concepten uit de Omgevingswet en uit omgevingsbesluiten. Daarnaast worden\
+            \ er per domein concepten beschreven. Er wordt uitgelegd wat de begrippen\
+            \ betekenen en hoe ze aan elkaar zijn gerelateerd."
+  parameters:
+    ConceptschemaUri:
+      description: "uri van het op te vragen conceptschema"
+      in: "query"
+      name: "uri"
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: "string"
+        example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/conceptscheme/Stelselcatalogus"
+    ConceptenInConceptschemaUri:
+      description: "uri van het conceptschema waar de te filteren concepten onderdeel\
+        \ van uit maken"
+      in: "query"
+      name: "conceptschema"
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: "string"
+        example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/conceptscheme/Stelselcatalogus"
+    ConceptenInCollectieUri:
+      description: "uri van de collectie waar de te filteren concepten onderdeel van\
+        \ uit maken"
+      in: "query"
+      name: "collectie"
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: "string"
+        example: "http://stelselcatalogus.omgevingswet.overheid.nl/stelselcatalogus/id/collection/Collectie"
+    ConceptenInWaardelijstUri:
+      description: "uri van de waardelijst waar de te filteren concepten onderdeel\
+        \ van uit maken"
+      in: "query"
+      name: "waardelijst"
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: "string"
+        example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/waardelijst/ActiviteitenGroep_1.0.0"
+    ConceptUri:
+      description: "uri van het op te vragen concept"
+      in: "query"
+      name: "uri"
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: "string"
+        example: "http://stelselcatalogus.omgevingswet.overheid.nl/stelselcatalogus/id/concept/API"
+    CollectieUri:
+      description: "uri van de op te vragen collectie"
+      in: "query"
+      name: "uri"
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: "string"
+        example: "http://stelselcatalogus.omgevingswet.overheid.nl/stelselcatalogus/id/collection/Collectie"
+    CollectiesInConceptschemaUri:
+      description: "uri van het conceptschema waar de te filteren collecties onderdeel\
+        \ van uit maken"
+      in: "query"
+      name: "conceptschema"
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: "string"
+        example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/conceptscheme/Stelselcatalogus"
+    BronUri:
+      description: "uri van de op te vragen bron"
+      in: "query"
+      name: "uri"
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: "string"
+        example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/bibliograficresouce/Omgevingswet"
+    WaardelijstUri:
+      description: "uri van de op te vragen waardelijst"
+      in: "query"
+      name: "uri"
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: "string"
+        example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/waardelijst/ActiviteitenGroep_1.0.0"
+    InformatieproductUri:
+      description: "uri van het op te vragen informatieproduct"
+      in: "query"
+      name: "uri"
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: "string"
+        example: "http://stelselcatalogus.omgevingswet.overheid.nl/id/dataset/OverbruggingsfunctieRuimtelijkeOrdening"
+    GepubliceerdDoor:
+      description: "owms uri van de eigenaar de op te vragen resources"
+      in: "query"
+      name: "gepubliceerdDoor"
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: "string"
+        example: "https://standaarden.overheid.nl/owms/terms/Geonovum"
+    GeldigOp:
+      description: "Filter op het moment waarop de resource geldig is binnen de Stelselcatalogus\
+        \ op basis van de prov:Entity"
+      in: "query"
+      name: "geldigOp"
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: "string"
+        format: "YYYY-MM-dd"
+        example: "2020-08-23"
+    Expand:
+      description: "Toon embedded gegevens van de resource, alleen te gebruiken in\
+        \ combinatie met _expandScope"
+      in: "query"
+      name: "_expand"
+      required: false
+      schema:
+        type: "boolean"
+        default: false
+    ExpandScopeConceptschema:
+      description: "Query paramater voor het aangeven welke gegevens voor het conceptschema\
+        \ dienen te worden embed"
+      in: "query"
+      name: "_expandScope"
+      required: false
+      schema:
+        type: "array"
+        items:
+          type: "string"
+          enum:
+            - "concepten"
+            - "collecties"
+    ExpandScopeCollectie:
+      description: "Query paramater voor het aangeven welke gegevens voor de collectie\
+        \ dienen te worden embed"
+      in: "query"
+      name: "_expandScope"
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: "array"
+        items:
+          type: "string"
+          enum:
+            - "concepten"
+    ExpandScopeWaardelijsten:
+      description: "Query paramater voor het aangeven welke gegevens voor de waardelijst\
+        \ dienen te worden embed"
+      in: "query"
+      name: "_expandScope"
+      required: false
+      allowEmptyValue: false
+      schema:
+        type: "array"
+        items:
+          type: "string"
+          enum:
+            - "waarden"
+    Page:
+      description: "Paginanummer voor paginering. Deze is gelimiteerd zodat het totaal\
+        \ aantal op te vragen resultaten niet hoger is dan 10000. Gebruik het `_links.next.href`\
+        \ object om te navigeren."
+      in: "query"
+      name: "page"
+      required: false
+      schema:
+        default: 1
+        format: "int32"
+        minimum: 1
+        type: "integer"
+    PageSize:
+      description: "Aantal resultaten per pagina"
+      in: "query"
+      name: "pageSize"
+      required: false
+      schema:
+        default: 10
+        enum:
+          - 10
+          - 20
+          - 40
+        format: "int32"
+        type: "integer"
+  responses:
+    Concepten:
+      description: "OK"
+      headers:
+        X-Pagination-Limit:
+          $ref: "#/components/headers/X-Pagination-Limit"
+        X-Pagination-Page:
+          $ref: "#/components/headers/X-Pagination-Page"
+        API-version:
+          $ref: "#/components/headers/ApiVersionHeader"
+      content:
+        application/hal+json:
+          schema:
+            type: "object"
+            required:
+              - "_links"
+              - "_embedded"
+              - "page"
+            properties:
+              _links:
+                $ref: "#/components/schemas/Links"
+              _embedded:
+                type: "object"
+                required:
+                  - "concepten"
+                properties:
+                  concepten:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Concept"
+              page:
+                $ref: "#/components/schemas/PageInfo"
+    Conceptschemas:
+      description: "OK"
+      headers:
+        X-Pagination-Limit:
+          $ref: "#/components/headers/X-Pagination-Limit"
+        X-Pagination-Page:
+          $ref: "#/components/headers/X-Pagination-Page"
+        API-version:
+          $ref: "#/components/headers/ApiVersionHeader"
+      content:
+        application/hal+json:
+          schema:
+            type: "object"
+            required:
+              - "_links"
+              - "_embedded"
+              - "page"
+            properties:
+              _links:
+                $ref: "#/components/schemas/Links"
+              _embedded:
+                type: "object"
+                required:
+                  - "conceptschemas"
+                properties:
+                  conceptschemas:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Conceptschema"
+              page:
+                $ref: "#/components/schemas/PageInfo"
+    Collecties:
+      description: "OK"
+      headers:
+        X-Pagination-Limit:
+          $ref: "#/components/headers/X-Pagination-Limit"
+        X-Pagination-Page:
+          $ref: "#/components/headers/X-Pagination-Page"
+        API-version:
+          $ref: "#/components/headers/ApiVersionHeader"
+      content:
+        application/hal+json:
+          schema:
+            type: "object"
+            required:
+              - "_links"
+              - "_embedded"
+              - "page"
+            properties:
+              _links:
+                $ref: "#/components/schemas/Links"
+              _embedded:
+                type: "object"
+                required:
+                  - "collecties"
+                properties:
+                  collecties:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Collectie"
+              page:
+                $ref: "#/components/schemas/PageInfo"
+    Bronnen:
+      description: "OK"
+      headers:
+        X-Pagination-Limit:
+          $ref: "#/components/headers/X-Pagination-Limit"
+        X-Pagination-Page:
+          $ref: "#/components/headers/X-Pagination-Page"
+        API-version:
+          $ref: "#/components/headers/ApiVersionHeader"
+      content:
+        application/hal+json:
+          schema:
+            type: "object"
+            required:
+              - "_links"
+              - "_embedded"
+              - "page"
+            properties:
+              _links:
+                $ref: "#/components/schemas/Links"
+              _embedded:
+                type: "object"
+                required:
+                  - "bronnen"
+                properties:
+                  bronnen:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Bron"
+              page:
+                $ref: "#/components/schemas/PageInfo"
+    Waardelijsten:
+      description: "OK"
+      headers:
+        X-Pagination-Limit:
+          $ref: "#/components/headers/X-Pagination-Limit"
+        X-Pagination-Page:
+          $ref: "#/components/headers/X-Pagination-Page"
+        API-version:
+          $ref: "#/components/headers/ApiVersionHeader"
+      content:
+        application/hal+json:
+          schema:
+            type: "object"
+            required:
+              - "_links"
+              - "_embedded"
+              - "page"
+            properties:
+              _links:
+                $ref: "#/components/schemas/Links"
+              _embedded:
+                type: "object"
+                required:
+                  - "waardelijsten"
+                properties:
+                  waardelijsten:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Waardelijst"
+              page:
+                $ref: "#/components/schemas/PageInfo"
+    InformatieProducten:
+      description: "OK"
+      headers:
+        X-Pagination-Limit:
+          $ref: "#/components/headers/X-Pagination-Limit"
+        X-Pagination-Page:
+          $ref: "#/components/headers/X-Pagination-Page"
+        API-version:
+          $ref: "#/components/headers/ApiVersionHeader"
+      content:
+        application/hal+json:
+          schema:
+            type: "object"
+            required:
+              - "_links"
+              - "_embedded"
+              - "page"
+            properties:
+              _links:
+                $ref: "#/components/schemas/Links"
+              _embedded:
+                type: "object"
+                required:
+                  - "informatieproducten"
+                properties:
+                  informatieproducten:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/InformatieProduct"
+              page:
+                $ref: "#/components/schemas/PageInfo"
+    ApplicatieEigenschappen:
+      description: "Applicatie eigenschappen van de API"
+      content:
+        application/json:
+          schema:
+            type: "object"
+            required:
+              - "app"
+            properties:
+              app:
+                $ref: "#/components/schemas/Info"
+    Health:
+      description: "Health status van de API"
+      content:
+        application/json:
+          schema:
+            type: "object"
+            required:
+              - "status"
+            properties:
+              status:
+                type: "string"
+                example: "UP"
