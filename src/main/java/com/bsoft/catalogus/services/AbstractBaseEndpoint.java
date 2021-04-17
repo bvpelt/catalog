@@ -38,6 +38,7 @@ public class AbstractBaseEndpoint {
     public HttpHeaders buildPostRequestHeaders(boolean withRdNewCrsHeaders) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
+        headers.add("Accept-Type", "application/json");
         headers.add("x-api-key", getApiKey());
 
         if (withRdNewCrsHeaders) {

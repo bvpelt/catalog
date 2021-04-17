@@ -1,0 +1,68 @@
+databaseChangeLog:
+  - changeSet:
+      id:  200
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create CONCEPTSCHEMA uri index
+      changes:
+        - createIndex:
+            clustered:  true
+            columns:
+              - column:
+                  descending:  true
+                  name:  URI
+            indexName:  idx_uri
+            schemaName:  public
+            tableName:  CONCEPTSCHEMA
+            unique:  true
+
+  - changeSet:
+        id:  210
+        author:  bart
+        dbms: PostgreSQL
+        comment: Create CONCEPTSCHEMATYPE type index
+        changes:
+            - createIndex:
+                  clustered:  true
+                  columns:
+                      - column:
+                            descending:  true
+                            name:  TYPE
+                  indexName:  idx_type
+                  schemaName:  public
+                  tableName:  CONCEPTSCHEMATYPE
+                  unique:  true
+
+  - changeSet:
+        id:  220
+        author:  bart
+        dbms: PostgreSQL
+        comment: Create TYPES_CONCEPTSCHEMAS CONCEPTSCHEMATYPE_ID index
+        changes:
+            - createIndex:
+                  clustered:  true
+                  columns:
+                      - column:
+                            descending:  true
+                            name:  CONCEPTSCHEMATYPE_ID
+                  indexName:  idx_conceptschematype_id
+                  schemaName:  public
+                  tableName:  TYPES_CONCEPTSCHEMAS
+                  unique:  false
+
+  - changeSet:
+      id:  230
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create TYPES_CONCEPTSCHEMAS CONCEPTSCHEMA_ID index
+      changes:
+        - createIndex:
+            clustered:  true
+            columns:
+              - column:
+                  descending:  true
+                  name:  CONCEPTSCHEMA_ID
+            indexName:  idx_conceptschema_id
+            schemaName:  public
+            tableName:  TYPES_CONCEPTSCHEMAS
+            unique:  false

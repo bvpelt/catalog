@@ -21,3 +21,7 @@ Start h2 console in seperate session
 ```shell
 # java -jar ~/.m2/repository/com/h2database/h2/1.4.200/h2-1.4.200.jar
 ```
+
+## Generate code from OpenAPI Spec
+- See https://www.north-47.com/knowledge-base/generate-spring-boot-rest-api-using-swagger-openapi/
+
