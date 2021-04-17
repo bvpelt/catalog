@@ -19,6 +19,7 @@
 	<properties>
 		<java.version>11</java.version>
 		<javax.servlet-api.version>4.0.1</javax.servlet-api.version>
+		<maven.compiler.release>11</maven.compiler.release>
 	</properties>
 
 	<dependencies>

@@ -2,6 +2,7 @@
 
 ## Generate code from api spec
 ```shell
+# export JAVA_POST_PROCESS_FILE="/usr/local/bin/clang-format -i"
 # maven generate-resources
 ```
 
