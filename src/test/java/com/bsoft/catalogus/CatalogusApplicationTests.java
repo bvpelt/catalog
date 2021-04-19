@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -33,7 +34,7 @@ public class CatalogusApplicationTests {
         String geldigOp = "2021-04-14";
         Integer page = 1;
         Integer pageSize = 50;
-        List<String> expandScope = Arrays.asList("collecties");
+        List<String> expandScope = Collections.singletonList("collecties");
 
         OperationResult<InlineResponse200> result = catalogService.getConceptschemas(uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
         Assert.notNull(result, "Result expected");
