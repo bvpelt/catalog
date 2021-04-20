@@ -26,8 +26,8 @@ public class ConceptSchemaLoader {
 
     public OperationResult loadConceptSchemas(final CatalogService catalogService) {
 
-        String uri = "http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
-        String gepubliceerdDoor = "https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
+        String uri = null; //"http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
+        String gepubliceerdDoor = null; //"https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
         String geldigOp = "2021-04-14";
         Integer page = 1;
         Integer pageSize = 10;
@@ -91,7 +91,7 @@ public class ConceptSchemaLoader {
         for (int i = 0; i < conceptschemas.size(); i++) {
             log.info("persistConceptSchemas: begin found conceptschema: {}", conceptschemas.get(i).getNaam());
             ConceptschemaDTO conceptschemaDTO = convertToConcepschemaDTO(conceptschemas.get(i));
-            log.info("persistConceptSchemas: end   found conceptschema: {}", conceptschemaDTO.getNaam());
+            log.info("persistConceptSchemas: end   found conceptschema: {}", conceptschemaDTO == null ? "(null)" : conceptschemaDTO.getNaam());
         }
     }
 
