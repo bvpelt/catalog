@@ -124,12 +124,12 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                 "Used headers: " + buildGetRequestHeaders().toString() + System.lineSeparator() +
                 "-------------------------------------------" + System.lineSeparator() +
                 "REQUEST PARAMETERS BEGIN" + System.lineSeparator() +
-                "uri: " + uri + System.lineSeparator() +
-                "gepubliceerdDoor: " + gepubliceerdDoor + System.lineSeparator() +
-                "geldigOp: " + geldigOp + System.lineSeparator() +
+                "uri: " + (uri == null ? "" : uri) + System.lineSeparator() +
+                "gepubliceerdDoor: " + (gepubliceerdDoor == null ? "" : gepubliceerdDoor) + System.lineSeparator() +
+                "geldigOp: " + (geldigOp == null ? "" : geldigOp) + System.lineSeparator() +
                 "page: " + page.toString() + System.lineSeparator() +
                 "pageSize: " + pageSize.toString() + System.lineSeparator() +
-                "_expandScope: " + expandScope.get(0) + System.lineSeparator() +
+                "_expandScope: " + (expandScope == null ? "": expandScope.get(0) )+ System.lineSeparator() +
                 "REQUEST PARAMETERS END" + System.lineSeparator() +
                 "-------------------------------------------" + System.lineSeparator() +
                 "PARAMETERS: " + parameters + System.lineSeparator() +

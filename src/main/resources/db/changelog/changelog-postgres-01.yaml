@@ -83,10 +83,10 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: CONCEPTSCHEMATYPE_ID
+                  name: CONCEPTSCHEMA_ID
                   type: BIGINT
               - column:
-                  name: CONCEPTSCHEMA_ID
+                  name: CONCEPTSCHEMATYPE_ID
                   type: BIGINT
         - rollback:
             dropTable:

@@ -6,6 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity(name = "ConceptschemaDTO")
@@ -24,6 +25,7 @@ public class ConceptschemaDTO implements Serializable {
 
 //    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    //@ManyToMany
     @JoinTable(name = "CONCEPTSCHEMAS_TYPES",
             joinColumns = {
                     @JoinColumn(name = "conceptschema_id", referencedColumnName = "id",
@@ -50,6 +52,19 @@ public class ConceptschemaDTO implements Serializable {
 
     @Column(name = "METADATA")
     private String metadata;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ConceptschemaDTO)) return false;
+        ConceptschemaDTO that = (ConceptschemaDTO) o;
+        return Objects.equals(id, that.id) && Objects.equals(uri, that.uri) && Objects.equals(naam, that.naam) && Objects.equals(uitleg, that.uitleg) && Objects.equals(eigenaar, that.eigenaar) && Objects.equals(begindatumGeldigheid, that.begindatumGeldigheid) && Objects.equals(einddatumGeldigheid, that.einddatumGeldigheid) && Objects.equals(metadata, that.metadata);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, uri, naam, uitleg, eigenaar, begindatumGeldigheid, einddatumGeldigheid, metadata);
+    }
 }
 
 

@@ -1,5 +1,6 @@
 package com.bsoft.catalogus.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,4 +15,6 @@ public class ProcesResult {
     private int pages;
     private int status;
     private String message;
+
+    private boolean more;
 }

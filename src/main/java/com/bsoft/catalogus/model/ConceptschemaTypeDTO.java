@@ -7,6 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity(name = "ConceptschemaTypeDTO")
@@ -25,7 +26,21 @@ public class ConceptschemaTypeDTO implements Serializable {
 
     //@ManyToMany(mappedBy = "types", fetch = FetchType.LAZY)
     @ManyToMany(mappedBy = "types", cascade = { CascadeType.ALL})
+    //@ManyToMany(mappedBy = "types")
     private Set<ConceptschemaDTO> conceptschemas = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ConceptschemaTypeDTO)) return false;
+        ConceptschemaTypeDTO that = (ConceptschemaTypeDTO) o;
+        return Objects.equals(id, that.id) && Objects.equals(type, that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, type);
+    }
 }
 
 
