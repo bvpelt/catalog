@@ -14,6 +14,8 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 @Component
@@ -52,6 +54,14 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                                                                @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
                                                                @Valid @RequestParam(value = "_expandScope", required = false) List<String> expandScope) {
 
+        String parameters = String.format("?uri=%s&gepubliceerdDoor=%s&geldigOp=%s&page=%d&pageSize=%d&_expandScope=%s",
+                    uri,
+                    gepubliceerdDoor,
+                    geldigOp,
+                    page,
+                    pageSize,
+                    String.join(",", expandScope));
+
         log.info("-------------------------------------------" + System.lineSeparator() +
                 "REQUEST PARAMETERS START" + System.lineSeparator() +
                 "-------------------------------------------" + System.lineSeparator() +
@@ -67,10 +77,13 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                 "pageSize: " + pageSize.toString() + System.lineSeparator() +
                 "_expandScope: " + expandScope.get(0) + System.lineSeparator() +
                 "REQUEST PARAMETERS END" + System.lineSeparator() +
+                "-------------------------------------------" + System.lineSeparator() +
+                "PARAMETERS: " + parameters + System.lineSeparator() +
                 "-------------------------------------------");
 
+
         return getRestTemplate().exchange(
-                getBaseUrl() + CONCEPT_SCHEMA_PREFIX,
+                getBaseUrl() + CONCEPT_SCHEMA_PREFIX + parameters,
                 HttpMethod.GET,
                 new HttpEntity<>(buildGetRequestHeaders()),
                 InlineResponse200.class

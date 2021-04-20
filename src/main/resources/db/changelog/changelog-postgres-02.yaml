@@ -34,27 +34,10 @@ databaseChangeLog:
                   unique:  true
 
   - changeSet:
-        id:  220
-        author:  bart
-        dbms: PostgreSQL
-        comment: Create TYPES_CONCEPTSCHEMAS CONCEPTSCHEMATYPE_ID index
-        changes:
-            - createIndex:
-                  clustered:  true
-                  columns:
-                      - column:
-                            descending:  true
-                            name:  CONCEPTSCHEMATYPE_ID
-                  indexName:  idx_conceptschematype_id
-                  schemaName:  public
-                  tableName:  TYPES_CONCEPTSCHEMAS
-                  unique:  false
-
-  - changeSet:
-      id:  230
+      id:  220
       author:  bart
       dbms: PostgreSQL
-      comment: Create TYPES_CONCEPTSCHEMAS CONCEPTSCHEMA_ID index
+      comment: Create CONCEPTSCHEMAS_TYPES CONCEPTSCHEMA_ID index
       changes:
         - createIndex:
             clustered:  true
@@ -64,5 +47,22 @@ databaseChangeLog:
                   name:  CONCEPTSCHEMA_ID
             indexName:  idx_conceptschema_id
             schemaName:  public
-            tableName:  TYPES_CONCEPTSCHEMAS
+            tableName:  CONCEPTSCHEMAS_TYPES
+            unique:  false
+
+  - changeSet:
+      id:  230
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create CONCEPTSCHEMAS_TYPES CONCEPTSCHEMATYPE_ID index
+      changes:
+        - createIndex:
+            clustered:  true
+            columns:
+              - column:
+                  descending:  true
+                  name:  CONCEPTSCHEMATYPE_ID
+            indexName:  idx_conceptschematype_id
+            schemaName:  public
+            tableName:  CONCEPTSCHEMAS_TYPES
             unique:  false

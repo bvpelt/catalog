@@ -72,11 +72,11 @@ databaseChangeLog:
       id: 120
       author: bart
       dbms: PostgreSQL
-      comment: Create TYPES_CONCEPTSCHEMAS
+      comment: Create CONCEPTSCHEMAS_TYPES
       changes:
         - createTable:
             schemaName: PUBLIC
-            tableName: TYPES_CONCEPTSCHEMAS
+            tableName: CONCEPTSCHEMAS_TYPES
             columns:
               - column:
                   name: ID
@@ -93,4 +93,4 @@ databaseChangeLog:
                   type: BIGINT
         - rollback:
             dropTable:
-              - tableName: TYPES_CONCEPTSCHEMAS
+              - tableName: CONCEPTSCHEMAS_TYPES

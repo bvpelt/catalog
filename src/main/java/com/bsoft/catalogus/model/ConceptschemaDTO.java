@@ -21,9 +21,8 @@ public class ConceptschemaDTO implements Serializable {
     @Column(name = "URI")
     private String uri;
 
-//    @ManyToMany(mappedBy = "conceptschemas", fetch = FetchType.LAZY)
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinTable(name = "TYPES_CONCEPTSCHEMAS",
+    @JoinTable(name = "CONCEPTSCHEMAS_TYPES",
             joinColumns = {
                     @JoinColumn(name = "conceptschema_id", referencedColumnName = "id",
                             nullable = false, updatable = false)},
