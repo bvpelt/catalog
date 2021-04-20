@@ -25,4 +25,6 @@ Start h2 console in seperate session
 ## Generate code from OpenAPI Spec
 - See https://www.north-47.com/knowledge-base/generate-spring-boot-rest-api-using-swagger-openapi/
 ## JPA
-- see https://attacomsian.com/blog/spring-data-jpa-many-to-many-mapping
+See
+- https://attacomsian.com/blog/spring-data-jpa-many-to-many-mapping
+- https://www.javaguides.net/2019/08/spring-boot-hibernate-many-to-many-example.html

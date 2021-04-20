@@ -1,5 +1,6 @@
 package com.bsoft.catalogus.model;
 
+
 import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -22,7 +23,8 @@ public class ConceptschemaTypeDTO implements Serializable {
     @Column(name = "TYPE")
     private String type;
 
-    @ManyToMany(mappedBy = "types", fetch = FetchType.LAZY)
+    //@ManyToMany(mappedBy = "types", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "types", cascade = { CascadeType.ALL})
     private Set<ConceptschemaDTO> conceptschemas = new HashSet<>();
 }
 

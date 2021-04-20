@@ -117,6 +117,12 @@ public class ConceptSchemaLoader {
 
             List<String> conceptschemaType = conceptschema.getType();
             Set<ConceptschemaTypeDTO> types = findTypes(conceptschemaType);
+
+            for (ConceptschemaTypeDTO x : types) {
+                log.info("findTypes: used conceptschematype: {}", x.getId(), x.getType());
+                x.getConceptschemas().add(savedConceptschema);
+            }
+
             conceptschemaDTO.setTypes(types);
 
             savedConceptschema.getTypes().addAll(types);
