@@ -61,9 +61,6 @@ databaseChangeLog:
               - column:
                   name: TYPE
                   type: varchar(256)
-              - column:
-                  name: CONCEPTSCHEMADTO_ID
-                  type: BIGINT
         - rollback:
             dropTable:
               - tableName: CONCEPTSCHEMATYPE

@@ -53,7 +53,7 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                                                                @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
                                                                @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
                                                                @Valid @RequestParam(value = "_expandScope", required = false) List<String> expandScope) {
-
+/*
         String parameters = String.format("?uri=%s&gepubliceerdDoor=%s&geldigOp=%s&page=%d&pageSize=%d&_expandScope=%s",
                     uri,
                     gepubliceerdDoor,
@@ -61,6 +61,33 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                     page,
                     pageSize,
                     String.join(",", expandScope));
+
+ */
+        String parameters = "?";
+        String andSign = "";
+        if ((uri != null) && (uri.length() > 0)) {
+            parameters = parameters + String.format("uri=%s", uri);
+            andSign = "&";
+        }
+        if ((gepubliceerdDoor != null) && (gepubliceerdDoor.length() > 0)) {
+            parameters = parameters + andSign + String.format("gepubliceerdDoor=%s", gepubliceerdDoor);
+            andSign = "&";
+        }
+        if ((geldigOp != null) && (geldigOp.length() > 0)) {
+            parameters = parameters + andSign + String.format("geldigOp=%s", geldigOp);
+            andSign = "&";
+        }
+        if (page != null) {
+            parameters = parameters + andSign + String.format("page=%d", page);
+            andSign = "&";
+        }
+        if (pageSize != null) {
+            parameters = parameters + andSign + String.format("pageSize=%d", pageSize);
+            andSign = "&";
+        }
+        if ((expandScope != null) && (expandScope.size() > 0)) {
+            parameters = parameters +  andSign +String.format("_expandScope=%s", String.join(",", expandScope));
+        }
 
         log.info("-------------------------------------------" + System.lineSeparator() +
                 "REQUEST PARAMETERS START" + System.lineSeparator() +
