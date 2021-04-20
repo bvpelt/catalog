@@ -34,12 +34,12 @@ public class ConceptSchemaLoader {
 
     public  OperationResult loadConceptSchemas(CatalogService catalogService) {
 
-        String uri = null; // "http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
-        String gepubliceerdDoor = null; // "https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
+        String uri = "http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
+        String gepubliceerdDoor = "https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
         String geldigOp = "2021-04-14";
         Integer page = 1;
         Integer pageSize = 10;
-        List<String> expandScope = Arrays.asList("collecties");
+        List<String> expandScope = Arrays.asList("concepten");
         boolean goOn = true;
 
         OperationResult<InlineResponse200> result = null;

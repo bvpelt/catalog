@@ -2,11 +2,13 @@ package com.bsoft.catalogus.services;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 
 @Getter
 @AllArgsConstructor
@@ -18,11 +20,23 @@ public class AbstractBaseEndpoint {
 
     private final RestTemplate restTemplate;
 
+    private RestTemplate restTemplateWithConnectReadTimeout;
+
     public RestTemplate getRestTemplate() {
 
         restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
 
         return restTemplate;
+    }
+
+    public RestTemplate getRestTemplateWithConnectReadTimeout() {
+        int TIMEOUT = 60*1000; // 60 * 1000 ms
+        restTemplateWithConnectReadTimeout = new RestTemplateBuilder()
+                .messageConverters(new StringHttpMessageConverter(StandardCharsets.UTF_8))
+                .setConnectTimeout(Duration.ofMillis(TIMEOUT))
+                .setReadTimeout(Duration.ofMillis(TIMEOUT))
+                .build();
+        return restTemplateWithConnectReadTimeout;
     }
 
 
@@ -47,6 +61,5 @@ public class AbstractBaseEndpoint {
         }
         return headers;
     }
-
 
 }

@@ -2,6 +2,7 @@ package com.bsoft.catalogus.services;
 
 import com.bsoft.catalogus.api.ConceptschemasApi;
 import com.bsoft.catalogus.model.InlineResponse200;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -16,6 +17,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.Duration;
 import java.util.List;
 
 @Component
@@ -27,7 +29,7 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
     public CatalogEndpoint(RestTemplate restTemplate,
                            @Value("${catalog.rest.api.baseurl}") String catalogBaseUrl,
                            @Value("${catalog.rest.api.key}") String apiKey) {
-        super(catalogBaseUrl, apiKey, restTemplate);
+        super(catalogBaseUrl, apiKey, restTemplate, restTemplate);
 
     }
 
@@ -39,6 +41,13 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                                              List<String> expandScope) {
         try {
             ResponseEntity<InlineResponse200> responseEntity = conceptschemasGet(uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseEntity.getBody());
+                log.info("getConceptschemas:: result: {}", jsonString);
+            } catch (Exception e) {
+                log.error("cannot convert object to json");
+            }
             return OperationResult.success(responseEntity.getBody());
         } catch (HttpClientErrorException httpClientErrorException) {
             return OperationResult.failure(httpClientErrorException.getMessage());
@@ -63,29 +72,47 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                     String.join(",", expandScope));
 
  */
-        String parameters = "?";
+        String parameters = "";
         String andSign = "";
         if ((uri != null) && (uri.length() > 0)) {
+            if (parameters.length() == 0) {
+                parameters = "?";
+            }
             parameters = parameters + String.format("uri=%s", uri);
             andSign = "&";
         }
         if ((gepubliceerdDoor != null) && (gepubliceerdDoor.length() > 0)) {
+            if (parameters.length() == 0) {
+                parameters = "?";
+            }
             parameters = parameters + andSign + String.format("gepubliceerdDoor=%s", gepubliceerdDoor);
             andSign = "&";
         }
         if ((geldigOp != null) && (geldigOp.length() > 0)) {
+            if (parameters.length() == 0) {
+                parameters = "?";
+            }
             parameters = parameters + andSign + String.format("geldigOp=%s", geldigOp);
             andSign = "&";
         }
         if (page != null) {
+            if (parameters.length() == 0) {
+                parameters = "?";
+            }
             parameters = parameters + andSign + String.format("page=%d", page);
             andSign = "&";
         }
         if (pageSize != null) {
+            if (parameters.length() == 0) {
+                parameters = "?";
+            }
             parameters = parameters + andSign + String.format("pageSize=%d", pageSize);
             andSign = "&";
         }
         if ((expandScope != null) && (expandScope.size() > 0)) {
+            if (parameters.length() == 0) {
+                parameters = "?";
+            }
             parameters = parameters +  andSign +String.format("_expandScope=%s", String.join(",", expandScope));
         }
 
@@ -109,7 +136,16 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                 "-------------------------------------------");
 
 
+/*
         return getRestTemplate().exchange(
+                getBaseUrl() + CONCEPT_SCHEMA_PREFIX + parameters,
+                HttpMethod.GET,
+                new HttpEntity<>(buildGetRequestHeaders()),
+                InlineResponse200.class
+        );
+
+ */
+        return getRestTemplateWithConnectReadTimeout().exchange(
                 getBaseUrl() + CONCEPT_SCHEMA_PREFIX + parameters,
                 HttpMethod.GET,
                 new HttpEntity<>(buildGetRequestHeaders()),
