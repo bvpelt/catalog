@@ -29,7 +29,7 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
     public CatalogEndpoint(RestTemplate restTemplate,
                            @Value("${catalog.rest.api.baseurl}") String catalogBaseUrl,
                            @Value("${catalog.rest.api.key}") String apiKey) {
-        super(catalogBaseUrl, apiKey, restTemplate, restTemplate);
+        super(catalogBaseUrl, apiKey, restTemplate);
 
     }
 
@@ -113,7 +113,7 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
             if (parameters.length() == 0) {
                 parameters = "?";
             }
-            parameters = parameters +  andSign +String.format("_expandScope=%s", String.join(",", expandScope));
+            parameters = parameters + andSign + String.format("_expandScope=%s", String.join(",", expandScope));
         }
 
         log.info("-------------------------------------------" + System.lineSeparator() +
@@ -136,7 +136,6 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                 "-------------------------------------------");
 
 
-/*
         return getRestTemplate().exchange(
                 getBaseUrl() + CONCEPT_SCHEMA_PREFIX + parameters,
                 HttpMethod.GET,
@@ -144,12 +143,5 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                 InlineResponse200.class
         );
 
- */
-        return getRestTemplateWithConnectReadTimeout().exchange(
-                getBaseUrl() + CONCEPT_SCHEMA_PREFIX + parameters,
-                HttpMethod.GET,
-                new HttpEntity<>(buildGetRequestHeaders()),
-                InlineResponse200.class
-        );
     }
 }

@@ -20,8 +20,6 @@ public class AbstractBaseEndpoint {
 
     private final RestTemplate restTemplate;
 
-    private RestTemplate restTemplateWithConnectReadTimeout;
-
     public RestTemplate getRestTemplate() {
 
         restTemplate.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
@@ -29,21 +27,10 @@ public class AbstractBaseEndpoint {
         return restTemplate;
     }
 
-    public RestTemplate getRestTemplateWithConnectReadTimeout() {
-        int TIMEOUT = 60*1000; // 60 * 1000 ms
-        restTemplateWithConnectReadTimeout = new RestTemplateBuilder()
-                .messageConverters(new StringHttpMessageConverter(StandardCharsets.UTF_8))
-                .setConnectTimeout(Duration.ofMillis(TIMEOUT))
-                .setReadTimeout(Duration.ofMillis(TIMEOUT))
-                .build();
-        return restTemplateWithConnectReadTimeout;
-    }
-
 
     public HttpHeaders buildGetRequestHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Accept", "*/*");
-        headers.add("Content-Type", "application/json");
         headers.add("Content-Type", "application/problem+json");
         headers.add("x-api-key", getApiKey());
         return headers;
