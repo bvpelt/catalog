@@ -18,16 +18,16 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: URI
-                  type: varchar(256)
+                  type: text
               - column:
                   name: NAAM
-                  type: varchar(256)
+                  type: text
               - column:
                   name: UITLEG
-                  type: varchar(256)
+                  type: text
               - column:
                   name: EIGENAAR
-                  type: varchar(256)
+                  type: text
               - column:
                   name: BEGINDATUMGELDIGHEID
                   type: varchar(10)
@@ -36,7 +36,7 @@ databaseChangeLog:
                   type: varchar(10)
               - column:
                   name: METADATA
-                  type: varchar(256)
+                  type: text
         - rollback:
             dropTable:
               - tableName: CONCEPTSCHEMA
@@ -60,7 +60,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: TYPE
-                  type: varchar(256)
+                  type: text
         - rollback:
             dropTable:
               - tableName: CONCEPTSCHEMATYPE

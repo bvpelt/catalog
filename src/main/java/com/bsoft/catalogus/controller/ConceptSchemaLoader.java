@@ -36,6 +36,9 @@ public class ConceptSchemaLoader {
 
         ProcesResult procesResult = new ProcesResult();
         procesResult.setMore(goOn);
+        procesResult.setEntries(0);
+        procesResult.setPages(0);
+
         while (goOn) {
             log.info("page: {}", page);
             procesResult = getPage(catalogService, procesResult, uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
@@ -85,8 +88,7 @@ public class ConceptSchemaLoader {
     }
 
     private void persistConceptSchemas(final List<Conceptschema> conceptschemas) {
-        log.info("persistConceptSchemas");
-
+        log.info("persistConceptSchemas number found: {}", conceptschemas.size());
 
         for (int i = 0; i < conceptschemas.size(); i++) {
             log.info("persistConceptSchemas: begin found conceptschema: {}", conceptschemas.get(i).getNaam());

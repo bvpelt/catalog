@@ -15,6 +15,9 @@ git commit -m "my commit"
 git remote set-url origin git@github.com:username/repo.git
 git push origin main
 ```
+## OpenAPI
+See 
+- https://github.com/OpenAPITools/openapi-generator/tree/master/modules/openapi-generator-maven-pluginsee 
 
 ## H2
 Start h2 console in seperate session

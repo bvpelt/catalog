@@ -26,7 +26,6 @@ public class ConceptschemaController {
     @Autowired
     CatalogService catalogService;
 
-
     @Autowired
     ConceptschemaRepository conceptschemaRepository;
 

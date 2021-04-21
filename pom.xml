@@ -182,6 +182,7 @@
 								<withXml>true</withXml>
 								<dateLibrary>java8</dateLibrary>
 								<library>spring-boot</library>
+								<skipIfSpecIsUnchanged>true</skipIfSpecIsUnchanged>
 								<java8>true</java8>
 								<useBeanValidation>true</useBeanValidation>
 							</configOptions>
