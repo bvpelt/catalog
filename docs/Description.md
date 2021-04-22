@@ -18,6 +18,7 @@ git push origin main
 ## OpenAPI
 See 
 - https://github.com/OpenAPITools/openapi-generator/tree/master/modules/openapi-generator-maven-pluginsee 
+- https://apitools.dev/swagger-parser/online/# 
 
 ## H2
 Start h2 console in seperate session
