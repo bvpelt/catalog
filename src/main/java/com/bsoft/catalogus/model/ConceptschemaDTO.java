@@ -6,6 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -22,18 +23,6 @@ public class ConceptschemaDTO implements Serializable {
 
     @Column(name = "URI")
     private String uri;
-
-//    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    //@ManyToMany
-    @JoinTable(name = "CONCEPTSCHEMAS_TYPES",
-            joinColumns = {
-                    @JoinColumn(name = "conceptschema_id", referencedColumnName = "id",
-                            nullable = false, updatable = false)},
-            inverseJoinColumns = {
-                    @JoinColumn(name = "conceptschematype_id", referencedColumnName = "id",
-                            nullable = false, updatable = false)})
-    private Set<ConceptschemaTypeDTO> types = new HashSet<>();
 
     @Column(name = "NAAM")
     private String naam;
@@ -52,6 +41,27 @@ public class ConceptschemaDTO implements Serializable {
 
     @Column(name = "METADATA")
     private String metadata;
+
+    //
+    // Relations
+    //
+
+    //    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    //@ManyToMany
+    @JoinTable(name = "CONCEPTSCHEMAS_TYPES",
+            joinColumns = {
+                    @JoinColumn(name = "conceptschema_id", referencedColumnName = "id",
+                            nullable = false, updatable = false)},
+            inverseJoinColumns = {
+                    @JoinColumn(name = "conceptschematype_id", referencedColumnName = "id",
+                            nullable = false, updatable = false)})
+    private Set<ConceptschemaTypeDTO> types = new HashSet<>();
+
+
+    @OneToMany(mappedBy = "conceptschema", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
+            CascadeType.REFRESH })
+    private List<ConceptDTO> concepten;
 
     @Override
     public boolean equals(Object o) {

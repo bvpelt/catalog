@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: 300
+      author: bart
+      dbms: PostgreSQL
+      comment: Create CONCEPT
+      changes:
+        - createTable:
+            schemaName: PUBLIC
+            tableName: CONCEPT
+            columns:
+              - column:
+                  name: ID
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: URI
+                  type: text
+              - column:
+                  name: TYPE
+                  type: text
+              - column:
+                  name: NAAM
+                  type: text
+              - column:
+                  name: TERM
+                  type: text
+              - column:
+                  name: UITLEG
+                  type: text
+              - column:
+                  name: DEFINITIE
+                  type: text
+              - column:
+                  name: EIGENAAR
+                  type: text
+              - column:
+                  name: BEGINDATUM
+                  type: varchar(10)
+              - column:
+                  name: EINDDATUM
+                  type: varchar(10)
+              - column:
+                  name: METADATA
+                  type: text
+              - column:
+                  name: CONCEPTSCHEMA_ID
+                  type: BIGINT
+
+        - rollback:
+            dropTable:
+              - tableName: CONCEPT
+
+
