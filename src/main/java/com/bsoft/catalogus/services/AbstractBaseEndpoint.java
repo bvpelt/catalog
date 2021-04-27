@@ -31,7 +31,7 @@ public class AbstractBaseEndpoint {
     public HttpHeaders buildGetRequestHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Accept", "*/*");
-        headers.add("Content-Type", "application/problem+json");
+        headers.add("Content-Type", "application/problem+json,application/json");
         headers.add("x-api-key", getApiKey());
         return headers;
     }

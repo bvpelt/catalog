@@ -38,15 +38,22 @@ public class ConceptSchemaLoader {
         procesResult.setMore(goOn);
         procesResult.setEntries(0);
         procesResult.setPages(0);
+        procesResult.setStatus(0);
 
-        while (goOn) {
-            log.info("page: {}", page);
-            procesResult = getPage(catalogService, procesResult, uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
+        try {
+            while (goOn) {
+                log.info("page: {}", page);
+                procesResult = getPage(catalogService, procesResult, uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
 
-            goOn = procesResult.isMore();
-            if (goOn) {
-                page++;
+                goOn = procesResult.isMore();
+                if (goOn) {
+                    page++;
+                }
             }
+        } catch (Exception ex) {
+            procesResult.setStatus(1);
+            procesResult.setMessage(ex.getMessage());
+            procesResult.setMore(false);
         }
 
         return OperationResult.success(procesResult);
