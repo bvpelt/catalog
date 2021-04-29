@@ -1,6 +1,7 @@
 package com.bsoft.catalogus.controller;
 
 import com.bsoft.catalogus.model.*;
+import com.bsoft.catalogus.repository.CollectieRepository;
 import com.bsoft.catalogus.repository.ConceptRepository;
 import com.bsoft.catalogus.repository.ConceptschemaRepository;
 import com.bsoft.catalogus.repository.ConceptschemaTypeRepository;
@@ -22,10 +23,14 @@ public class ConceptLoader {
 
     private ConceptRepository conceptRepository;
 
+    private CollectieRepository collectieRepository;
+
     public ConceptLoader(ConceptschemaRepository conceptschemaRepository,
-                         ConceptRepository conceptRepository) {
+                         ConceptRepository conceptRepository,
+                         CollectieRepository collectieRepository) {
         this.conceptschemaRepository = conceptschemaRepository;
         this.conceptRepository = conceptRepository;
+        this.collectieRepository = collectieRepository;
     }
 
     public OperationResult loadConcept(final CatalogService catalogService) {
@@ -62,6 +67,7 @@ public class ConceptLoader {
                     if (goOn) {
                         page++;
                     }
+                    procesResult.setPages(procesResult.getPages() + 1);
                 }
             }
         } catch (Exception ex) {
@@ -84,13 +90,13 @@ public class ConceptLoader {
                                  final Integer pageSize,
                                  final List<String> expandScope) {
 
-        OperationResult<InlineResponse200> result = null;
+        OperationResult result = null;
         boolean nextPage = false;
 
         result = catalogService.getConceptschemas(uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
 
         if (result.isSuccess()) {
-            InlineResponse200 inlineResponse200 = result.getSuccessResult();
+            InlineResponse200 inlineResponse200 = ((OperationResult<InlineResponse200>)result).getSuccessResult();
             InlineResponse200Embedded embedded = inlineResponse200.getEmbedded();
 
 
@@ -127,13 +133,39 @@ public class ConceptLoader {
                     } else {
                         log.info("ConceptLoader No concepten found for conceptschema with uri: {}", conceptschemaDTO.getUri());
                     }
+
+                    JsonNullable<List<Collectie>> collecties = conceptschema.getEmbedded().getCollecties();
+                    if (collecties.isPresent()) {
+                        for (Collectie collectie : collecties.get()) {
+                            Optional<CollectieDTO> collectieOptional = collectieRepository.findByUri(collectie.getUri());
+
+                            if (!((collectieOptional != null) && collectieOptional.isPresent())) {  // if not exists
+                                CollectieDTO collectieDTO = new CollectieDTO();
+                                collectieDTO.setUri(collectie.getUri());
+                                collectieDTO.setType(collectie.getType());
+                                collectieDTO.setTerm(collectie.getTerm());
+                                collectieDTO.setEigenaar(collectie.getEigenaar());
+                                collectieDTO.setConceptschema(conceptschemaDTO);
+                                collectieDTO.setBegindatumGeldigheid(collectie.getBegindatumGeldigheid());
+                                collectieDTO.setEinddatumGeldigheid(collectie.getEinddatumGeldigheid().isPresent() ? collectie.getEinddatumGeldigheid().get() : null);
+                                collectieDTO.setMetadata(collectie.getMetadata());
+
+                                collectieRepository.save(collectieDTO);
+                                procesResult.setEntries(procesResult.getEntries() + 1);
+                            } else {
+                                log.info("ConceptLoader concept with uri: {} already exists", collectie.getUri());
+                            }
+                        }
+                    } else {
+                        log.info("ConceptLoader No collecties found for conceptschema with uri: {}", conceptschemaDTO.getUri());
+                    }
                 }
             }
 
-            if (result.getSuccessResult().getLinks().getNext() != null) {
-                if (result.getSuccessResult().getLinks().getNext().getHref() != null) {
+            if (inlineResponse200.getLinks().getNext() != null) {
+                if (inlineResponse200.getLinks().getNext().getHref() != null) {
                     nextPage = true;
-                    log.info("ConceptLoader page: {} next: {}", page, result.getSuccessResult().getLinks().getNext().getHref());
+                    log.info("ConceptLoader page: {} next: {}", page, inlineResponse200.getLinks().getNext().getHref());
                 }
             }
             procesResult.setPages(page);

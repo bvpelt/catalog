@@ -34,19 +34,23 @@ public class CatalogusApplicationTests {
         String geldigOp = "2021-04-14";
         Integer page = 1;
         Integer pageSize = 50;
-        List<String> expandScope = Collections.singletonList("collecties");
+        List<String> expandScope = Arrays.asList("collecties", "concepten");
 
         OperationResult<InlineResponse200> result = catalogService.getConceptschemas(uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
-        Assert.notNull(result, "Result expected");
-        InlineResponse200 inlineResponse200 = result.getSuccessResult();
-        try {
-            log.info("Result as string: {}", result);
-            ObjectMapper mapper = new ObjectMapper();
-            //String jsonString = mapper.writeValueAsString(inlineResponse200);
-            String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(inlineResponse200);
-            log.info("Result as json: \n{}", jsonString);
-        } catch (JsonProcessingException ex) {
-            log.error("Error processing json: {}", ex);
+        Assert.notNull(result, "Result expected, null received");
+        if (result.isSuccess()) {
+            InlineResponse200 inlineResponse200 = result.getSuccessResult();
+            try {
+                log.info("Result as string: {}", result);
+                ObjectMapper mapper = new ObjectMapper();
+                //String jsonString = mapper.writeValueAsString(inlineResponse200);
+                String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(inlineResponse200);
+                log.info("Result as json: \n{}", jsonString);
+            } catch (JsonProcessingException ex) {
+                log.error("Error processing json: {}", ex);
+            }
+        } else {
+            log.error("Error during request, result: {}", result.getFailureResult());
         }
         log.info("End   test: CatalogusApplicationTests.testCatalogService_01");
     }

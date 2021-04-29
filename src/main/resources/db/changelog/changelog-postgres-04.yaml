@@ -1,13 +1,13 @@
 databaseChangeLog:
   - changeSet:
-      id: 300
+      id: 400
       author: bart
       dbms: PostgreSQL
-      comment: Create CONCEPT
+      comment: Create COLLECTIE
       changes:
         - createTable:
             schemaName: PUBLIC
-            tableName: CONCEPT
+            tableName: COLLECTIE
             columns:
               - column:
                   name: ID
@@ -23,16 +23,7 @@ databaseChangeLog:
                   name: TYPE
                   type: text
               - column:
-                  name: NAAM
-                  type: text
-              - column:
                   name: TERM
-                  type: text
-              - column:
-                  name: UITLEG
-                  type: text
-              - column:
-                  name: DEFINITIE
                   type: text
               - column:
                   name: EIGENAAR
@@ -52,13 +43,13 @@ databaseChangeLog:
 
         - rollback:
             dropTable:
-              - tableName: CONCEPT
+              - tableName: COLLECTIE
 
   - changeSet:
-      id:  310
+      id:  410
       author:  bart
       dbms: PostgreSQL
-      comment: Create CONCEPT uri index
+      comment: Create COLLECTIE uri index
       changes:
         - createIndex:
             clustered:  true
@@ -66,16 +57,16 @@ databaseChangeLog:
               - column:
                   descending:  true
                   name:  URI
-            indexName:  idx_concept_uri
+            indexName:  idx_collectie_uri
             schemaName:  public
-            tableName:  CONCEPT
+            tableName:  COLLECTIE
             unique:  true
 
   - changeSet:
-      id:  320
+      id:  420
       author:  bart
       dbms: PostgreSQL
-      comment: Create CONCEPT CONCEPTSCHEMA_ID index
+      comment: Create COLLECTIE CONCEPTSCHEMA_ID index
       changes:
         - createIndex:
             clustered:  true
@@ -83,7 +74,7 @@ databaseChangeLog:
               - column:
                   descending:  true
                   name:  CONCEPTSCHEMA_ID
-            indexName:  idx_concept_conceptschema_id
+            indexName:  idx_collectie_conceptschema_id
             schemaName:  public
-            tableName:  CONCEPT
+            tableName:  COLLECTIE
             unique:  false

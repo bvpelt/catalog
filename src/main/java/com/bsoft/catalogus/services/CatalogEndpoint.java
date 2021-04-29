@@ -48,7 +48,11 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
             } catch (Exception e) {
                 log.error("cannot convert object to json");
             }
-            return OperationResult.success(responseEntity.getBody());
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                return OperationResult.success(responseEntity.getBody());
+            } else {
+                return OperationResult.failure("Result failed, http status code: " + responseEntity.getStatusCode());
+            }
         } catch (HttpClientErrorException httpClientErrorException) {
             return OperationResult.failure(httpClientErrorException.getMessage());
         }
@@ -62,16 +66,6 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                                                                @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
                                                                @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
                                                                @Valid @RequestParam(value = "_expandScope", required = false) List<String> expandScope) {
-/*
-        String parameters = String.format("?uri=%s&gepubliceerdDoor=%s&geldigOp=%s&page=%d&pageSize=%d&_expandScope=%s",
-                    uri,
-                    gepubliceerdDoor,
-                    geldigOp,
-                    page,
-                    pageSize,
-                    String.join(",", expandScope));
-
- */
         String parameters = "";
         String andSign = "";
         if ((uri != null) && (uri.length() > 0)) {
@@ -113,7 +107,10 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
             if (parameters.length() == 0) {
                 parameters = "?";
             }
-            parameters = parameters + andSign + String.format("_expandScope=%s", String.join(",", expandScope));
+            //parameters = parameters + andSign + String.format("_expandScope=%s", String.join(",", expandScope));
+            for(int i = 0; i < expandScope.size(); i++) {
+                parameters = parameters + andSign + String.format("_expandScope=%s", expandScope.get(i));
+            }
         }
 
         log.info("-------------------------------------------" + System.lineSeparator() +

@@ -1,6 +1,7 @@
 package com.bsoft.catalogus.controller;
 
 import com.bsoft.catalogus.model.ProcesResult;
+import com.bsoft.catalogus.repository.CollectieRepository;
 import com.bsoft.catalogus.repository.ConceptRepository;
 import com.bsoft.catalogus.repository.ConceptschemaRepository;
 import com.bsoft.catalogus.repository.ConceptschemaTypeRepository;
@@ -20,18 +21,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConceptController {
 
     @Autowired
-    CatalogService catalogService;
+    private CatalogService catalogService;
 
     @Autowired
-    ConceptschemaRepository conceptschemaRepository;
+    private ConceptschemaRepository conceptschemaRepository;
 
     @Autowired
-    ConceptRepository conceptRepository;
+    private ConceptRepository conceptRepository;
+
+    @Autowired
+    private CollectieRepository collectieRepository;
 
     @RequestMapping(value = "/conceptschemas/concept")
     public ResponseEntity<ProcesResult> getConcepten() {
         log.info("getConcepten");
-        ConceptLoader conceptLoader = new ConceptLoader(conceptschemaRepository, conceptRepository);
+        ConceptLoader conceptLoader = new ConceptLoader(conceptschemaRepository, conceptRepository, collectieRepository);
         OperationResult<ProcesResult> result = conceptLoader.loadConcept(catalogService);
         if (result.isSuccess()) {
             ProcesResult procesResult = result.getSuccessResult();

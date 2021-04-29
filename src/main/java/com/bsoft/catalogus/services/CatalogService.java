@@ -12,7 +12,7 @@ public class CatalogService {
 
     private final CatalogEndpoint catalogEndpoint;
 
-    public OperationResult<InlineResponse200> getConceptschemas(String uri,
+    public OperationResult getConceptschemas(String uri,
                                                                 String gepubliceerdDoor,
                                                                 String geldigOp,
                                                                 Integer page,
