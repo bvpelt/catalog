@@ -39,4 +39,7 @@ See
 curl -H "Accept: */*" -H "Content-Type: application/problem+json,application/json" -H "x-api-key: 0af5cbf4-b6b1-405a-b7b2-53934f03af48" https://service.pre.omgevingswet.overheid.nl/publiek/catalogus/api/opvragen/v3/conceptschemas?uri=http%3A%2F%2Fregelgeving.omgevingswet.overheid.nl%2Fid%2Fconceptscheme%2FRegelgeving&gepubliceerdDoor=https%3A%2F%2Fstandaarden.overheid.nl%2Fowms%2Fterms%2FMinisterie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties&geldigOp=2021-04-14&page=1&pageSize=50&_expandScope=collecties&_expandScope=concepten
 
 curl -v -X GET -H "Accept: */*" -H "Content-Type: application/problem+json,application/json" -H "x-api-key: 0af5cbf4-b6b1-405a-b7b2-53934f03af48" https://service.pre.omgevingswet.overheid.nl/publiek/catalogus/api/opvragen/v3/conceptschemas?geldigOp="2021-04-14"&page="1"&pageSize="50"&_expandScope=collecties
+
+curl -v -H 'Accept: */*' -H 'Content-Type: application/problem+json,application/json' -H 'x-api-key: 0af5cbf4-b6b1-405a-b7b2-53934f03af48' 'https://service.pre.omgevingswet.overheid.nl/publiek/catalogus/api/opvragen/v3/conceptschemas?geldigOp=2021-04-14&page=1&pageSize=50&_expandScope=collecties&_expandScope=concepten'
+
 ```
