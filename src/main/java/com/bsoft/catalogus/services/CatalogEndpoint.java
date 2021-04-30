@@ -103,14 +103,19 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
             parameters = parameters + andSign + String.format("pageSize=%d", pageSize);
             andSign = "&";
         }
+        String expandScopeString = "";
+
         if ((expandScope != null) && (expandScope.size() > 0)) {
             if (parameters.length() == 0) {
                 parameters = "?";
             }
+            log.info("Expandscope length: {} - content: {}", expandScope.size(), String.join(",", expandScope));
             //parameters = parameters + andSign + String.format("_expandScope=%s", String.join(",", expandScope));
             for(int i = 0; i < expandScope.size(); i++) {
-                parameters = parameters + andSign + String.format("_expandScope=%s", expandScope.get(i));
+                //parameters = parameters + andSign + String.format("_expandScope=%s", expandScope.get(i));
+                expandScopeString = expandScopeString + andSign + String.format("_expandScope=%s", expandScope.get(i));
             }
+            parameters = parameters + expandScopeString;
         }
 
         log.info("-------------------------------------------" + System.lineSeparator() +
@@ -126,7 +131,7 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                 "geldigOp: " + (geldigOp == null ? "" : geldigOp) + System.lineSeparator() +
                 "page: " + page.toString() + System.lineSeparator() +
                 "pageSize: " + pageSize.toString() + System.lineSeparator() +
-                "_expandScope: " + (expandScope == null ? "": expandScope.get(0) )+ System.lineSeparator() +
+                "_expandScope: " + (expandScope == null ? "": expandScopeString )+ System.lineSeparator() +
                 "REQUEST PARAMETERS END" + System.lineSeparator() +
                 "-------------------------------------------" + System.lineSeparator() +
                 "PARAMETERS: " + parameters + System.lineSeparator() +
