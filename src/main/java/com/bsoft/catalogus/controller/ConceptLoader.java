@@ -40,7 +40,7 @@ public class ConceptLoader {
         String geldigOp = "2021-04-14";
         Integer page = 1;
         Integer pageSize = 10;
-        List<String> expandScope = Arrays.asList("concepten");
+        List<String> expandScope = Arrays.asList("concepten", "collecties");
         boolean goOn = true;
 
         ProcesResult procesResult = new ProcesResult();
@@ -52,15 +52,15 @@ public class ConceptLoader {
         int conceptschemanr = 0;
         try {
             List<ConceptschemaDTO> conceptschemaDTOS = conceptschemaRepository.findAll();
-            log.info("ConceptLoader found: {} conceptschemas", conceptschemaDTOS.size());
+            log.info("ConceptLoader loadConcept start found: {} conceptschemas", conceptschemaDTOS.size());
             for (ConceptschemaDTO conceptschemaDTO: conceptschemaDTOS) {
                 conceptschemanr++;
                 uri = conceptschemaDTO.getUri();
-                log.info("ConceptLoader nr: {} conceptschema uri: {}", conceptschemanr, uri);
+                log.info("ConceptLoader loadConcept nr: {} conceptschema uri: {}", conceptschemanr, uri);
                 goOn = true;
                 procesResult.setMore(goOn);
                 while (goOn) {
-                    log.info("ConceptLoader page: {}", page);
+                    log.info("ConceptLoader loadConcept page: {}", page);
                     procesResult = getPage(catalogService, conceptschemaDTO, procesResult, uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
 
                     goOn = procesResult.isMore();
@@ -70,7 +70,9 @@ public class ConceptLoader {
                     procesResult.setPages(procesResult.getPages() + 1);
                 }
             }
+            log.info("ConceptLoader loadConcept end  found: {} conceptschemas", conceptschemaDTOS.size());
         } catch (Exception ex) {
+            log.error("ConceptLoader loadConcept error loading concept: {}", ex);
             procesResult.setStatus(1);
             procesResult.setMessage(ex.getMessage());
             procesResult.setMore(false);
@@ -104,10 +106,11 @@ public class ConceptLoader {
 
             for (Conceptschema conceptschema: conceptschemas) {
                 if (!conceptschema.getUri().equals(conceptschemaDTO.getUri())) {
-                    log.error("ConceptLoader Unexpected conceptschema with uri: {}, expected uri: {}", conceptschema.getUri(), conceptschemaDTO.getUri());
+                    log.error("ConceptLoader getPage Unexpected conceptschema with uri: {}, expected uri: {}", conceptschema.getUri(), conceptschemaDTO.getUri());
                 } else {
                     JsonNullable<List<Concept>> concepten = conceptschema.getEmbedded().getConcepten();
-                    if (concepten.isPresent()) {
+                    if (concepten != null && concepten.isPresent() && concepten.get() != null) {
+                        log.debug("ConceptLoader getPage number of concepten: {}", concepten.get().size());
                         for (Concept concept: concepten.get()) {
                             Optional<ConceptDTO> conceptOptional = conceptRepository.findByUri(concept.getUri());
                             if (!((conceptOptional != null) && conceptOptional.isPresent())) {  // if not exists
@@ -127,15 +130,16 @@ public class ConceptLoader {
                                 conceptRepository.save(conceptDTO);
                                 procesResult.setEntries(procesResult.getEntries() + 1);
                             } else {
-                                log.info("ConceptLoader concept with uri: {} already exists", concept.getUri());
+                                log.debug("ConceptLoader getPage concept with uri: {} already exists", concept.getUri());
                             }
                         }
                     } else {
-                        log.info("ConceptLoader No concepten found for conceptschema with uri: {}", conceptschemaDTO.getUri());
+                        log.debug("ConceptLoader getPage no concepten found for conceptschema with uri: {}", conceptschemaDTO.getUri());
                     }
 
                     JsonNullable<List<Collectie>> collecties = conceptschema.getEmbedded().getCollecties();
-                    if (collecties.isPresent()) {
+                    if (collecties != null && collecties.isPresent() && collecties.get() != null) {
+                        log.debug("ConceptLoader getPage number of collecties: {}", collecties.get().size());
                         for (Collectie collectie : collecties.get()) {
                             Optional<CollectieDTO> collectieOptional = collectieRepository.findByUri(collectie.getUri());
 
@@ -153,11 +157,11 @@ public class ConceptLoader {
                                 collectieRepository.save(collectieDTO);
                                 procesResult.setEntries(procesResult.getEntries() + 1);
                             } else {
-                                log.info("ConceptLoader concept with uri: {} already exists", collectie.getUri());
+                                log.debug("ConceptLoader getPage concept with uri: {} already exists", collectie.getUri());
                             }
                         }
                     } else {
-                        log.info("ConceptLoader No collecties found for conceptschema with uri: {}", conceptschemaDTO.getUri());
+                        log.debug("ConceptLoader getPage no collecties found for conceptschema with uri: {}", conceptschemaDTO.getUri());
                     }
                 }
             }
@@ -165,7 +169,7 @@ public class ConceptLoader {
             if (inlineResponse200.getLinks().getNext() != null) {
                 if (inlineResponse200.getLinks().getNext().getHref() != null) {
                     nextPage = true;
-                    log.info("ConceptLoader page: {} next: {}", page, inlineResponse200.getLinks().getNext().getHref());
+                    log.debug("ConceptLoader getPage  page: {} next: {}", page, inlineResponse200.getLinks().getNext().getHref());
                 }
             }
             procesResult.setPages(page);

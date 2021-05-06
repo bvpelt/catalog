@@ -3,6 +3,7 @@ package com.bsoft.catalogus.services;
 import com.bsoft.catalogus.api.ConceptschemasApi;
 import com.bsoft.catalogus.model.InlineResponse200;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import liquibase.pro.packaged.S;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -68,10 +69,12 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                                                                @Valid @RequestParam(value = "_expandScope", required = false) List<String> expandScope) {
         String parameters = "";
         String andSign = "";
+
         if ((uri != null) && (uri.length() > 0)) {
             if (parameters.length() == 0) {
                 parameters = "?";
             }
+
             parameters = parameters + String.format("uri=%s", uri);
             andSign = "&";
         }

@@ -33,6 +33,7 @@ See
 - https://attacomsian.com/blog/spring-data-jpa-many-to-many-mapping
 - https://www.javaguides.net/2019/08/spring-boot-hibernate-many-to-many-example.html
 
+
 ## Requests
 
 ```shell
@@ -42,4 +43,24 @@ curl -v -X GET -H "Accept: */*" -H "Content-Type: application/problem+json,appli
 
 curl -v -H 'Accept: */*' -H 'Content-Type: application/problem+json,application/json' -H 'x-api-key: 0af5cbf4-b6b1-405a-b7b2-53934f03af48' 'https://service.pre.omgevingswet.overheid.nl/publiek/catalogus/api/opvragen/v3/conceptschemas?geldigOp=2021-04-14&page=1&pageSize=50&_expandScope=collecties&_expandScope=concepten'
 
+```
+
+## Checks
+
+```sql
+select count(*), cs.id as conceptschema_id, c.id as collectie_id from conceptschema cs, concept c where c.conceptschema_id = cs.id  group by cs.id, c.id order by cs.id, c.id;
+
+select 'collectie per conceptschema' as title, count(*), sub.conceptschema_id
+from
+    (select count(*), cs.id as conceptschema_id, c.id as collectie_id from conceptschema cs, collectie c where c.conceptschema_id = cs.id  group by cs.id, c.id order by cs.id, c.id) sub
+group by sub.conceptschema_id
+order by sub.conceptschema_id
+;
+
+select 'concept per conceptschema'  as title, count(*), sub.conceptschema_id
+from 
+    (select count(*), cs.id as conceptschema_id, c.id as collectie_id from conceptschema cs, concept c where c.conceptschema_id = cs.id  group by cs.id, c.id order by cs.id, c.id) sub
+group by sub.conceptschema_id
+order by sub.conceptschema_id
+;
 ```
