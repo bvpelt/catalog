@@ -1,0 +1,66 @@
+databaseChangeLog:
+  - changeSet:
+      id: 500
+      author: bart
+      dbms: PostgreSQL
+      comment: Create BRON
+      changes:
+        - createTable:
+            schemaName: PUBLIC
+            tableName: BRON
+            columns:
+              - column:
+                  name: ID
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: TITEL
+                  type: text
+              - column:
+                  name: METADATA
+                  type: text
+              - column:
+                  name: WEBPAGINA
+                  type: text
+              - column:
+                  name: RESOURCE
+                  type: text
+              - column:
+                  name: BEGINDATUM
+                  type: varchar(10)
+              - column:
+                  name: EINDDATUM
+                  type: varchar(10)
+              - column:
+                  name: TYPE
+                  type: text
+              - column:
+                  name: EIGENAAR
+                  type: text
+              - column:
+                  name: URI
+                  type: text
+
+        - rollback:
+            dropTable:
+              - tableName: BRON
+
+  - changeSet:
+      id:  510
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create BRON uri index
+      changes:
+        - createIndex:
+            clustered:  true
+            columns:
+              - column:
+                  descending:  true
+                  name:  URI
+            indexName:  idx_bron_uri
+            schemaName:  public
+            tableName:  BRON
+            unique:  true

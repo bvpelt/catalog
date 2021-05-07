@@ -4,7 +4,6 @@ import com.bsoft.catalogus.model.ProcesResult;
 import com.bsoft.catalogus.repository.CollectieRepository;
 import com.bsoft.catalogus.repository.ConceptRepository;
 import com.bsoft.catalogus.repository.ConceptschemaRepository;
-import com.bsoft.catalogus.repository.ConceptschemaTypeRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
 import lombok.NoArgsConstructor;

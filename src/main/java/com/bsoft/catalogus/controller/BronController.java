@@ -1,8 +1,7 @@
 package com.bsoft.catalogus.controller;
 
 import com.bsoft.catalogus.model.ProcesResult;
-import com.bsoft.catalogus.repository.ConceptschemaRepository;
-import com.bsoft.catalogus.repository.ConceptschemaTypeRepository;
+import com.bsoft.catalogus.repository.BronRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
 import lombok.NoArgsConstructor;
@@ -16,26 +15,25 @@ import org.springframework.web.bind.annotation.RestController;
 @NoArgsConstructor
 @Slf4j
 @RestController
-public class ConceptschemaController {
+public class BronController {
 
     @Autowired
-    CatalogService catalogService;
+    private CatalogService catalogService;
 
     @Autowired
-    ConceptschemaRepository conceptschemaRepository;
+    private BronRepository bronRepository;
 
-    @Autowired
-    ConceptschemaTypeRepository conceptschemaTypeRepository;
+    @RequestMapping(value = "/bron")
+    public ResponseEntity<ProcesResult> getBronnen() {
+        log.info("BronController getBronnen");
+        BronLoader bronLoader = new BronLoader(bronRepository);
 
-    @RequestMapping(value = "/conceptschemas")
-    public ResponseEntity<ProcesResult> getConceptschemas() {
-        log.info("getConceptschemas");
-        ConceptSchemaLoader conceptSchemaLoader = new ConceptSchemaLoader(conceptschemaRepository, conceptschemaTypeRepository);
-        OperationResult<ProcesResult> result = conceptSchemaLoader.loadConceptSchemas(catalogService);
+        OperationResult<ProcesResult> result = bronLoader.loadBron(catalogService);
         if (result.isSuccess()) {
             ProcesResult procesResult = result.getSuccessResult();
             return ResponseEntity.ok(procesResult);
         } else {
+            log.error("BronController getBronnen error: {}", result.getFailureResult().getMessage());
             String message = "error during proces";
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }

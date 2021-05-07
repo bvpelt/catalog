@@ -1,7 +1,6 @@
 package com.bsoft.catalogus.model;
 
 import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -15,8 +14,6 @@ import java.util.Set;
 @Data
 public class ConceptschemaDTO implements Serializable {
     @Id
-//    @GeneratedValue(generator = "increment")
-//    @GenericGenerator(name = "increment", strategy = "increment")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
@@ -59,8 +56,8 @@ public class ConceptschemaDTO implements Serializable {
     private Set<ConceptschemaTypeDTO> types = new HashSet<>();
 
 
-    @OneToMany(mappedBy = "conceptschema", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-            CascadeType.REFRESH })
+    @OneToMany(mappedBy = "conceptschema", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
+            CascadeType.REFRESH})
     private List<ConceptDTO> concepten;
 
     @Override

@@ -2,13 +2,11 @@ package com.bsoft.catalogus.services;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 
 @Getter
 @AllArgsConstructor

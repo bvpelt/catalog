@@ -4,16 +4,17 @@ import com.bsoft.catalogus.model.*;
 import com.bsoft.catalogus.repository.CollectieRepository;
 import com.bsoft.catalogus.repository.ConceptRepository;
 import com.bsoft.catalogus.repository.ConceptschemaRepository;
-import com.bsoft.catalogus.repository.ConceptschemaTypeRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
+import com.bsoft.catalogus.util.CatalogUtil;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openapitools.jackson.nullable.JsonNullable;
 
 import javax.transaction.Transactional;
-import javax.validation.Valid;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @NoArgsConstructor
@@ -37,7 +38,7 @@ public class ConceptLoader {
 
         String uri = null; //"http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
         String gepubliceerdDoor = null; //"https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
-        String geldigOp = "2021-04-14";
+        String geldigOp = new CatalogUtil().getCurrentDate();
         Integer page = 1;
         Integer pageSize = 10;
         List<String> expandScope = Arrays.asList("concepten", "collecties");
@@ -53,7 +54,7 @@ public class ConceptLoader {
         try {
             List<ConceptschemaDTO> conceptschemaDTOS = conceptschemaRepository.findAll();
             log.info("ConceptLoader loadConcept start found: {} conceptschemas", conceptschemaDTOS.size());
-            for (ConceptschemaDTO conceptschemaDTO: conceptschemaDTOS) {
+            for (ConceptschemaDTO conceptschemaDTO : conceptschemaDTOS) {
                 conceptschemanr++;
                 uri = conceptschemaDTO.getUri();
                 log.info("ConceptLoader loadConcept nr: {} conceptschema uri: {}", conceptschemanr, uri);
@@ -83,14 +84,14 @@ public class ConceptLoader {
 
     @Transactional
     public ProcesResult getPage(final CatalogService catalogService,
-                                 final ConceptschemaDTO conceptschemaDTO,
-                                 ProcesResult procesResult,
-                                 final String uri,
-                                 final String gepubliceerdDoor,
-                                 final String geldigOp,
-                                 final Integer page,
-                                 final Integer pageSize,
-                                 final List<String> expandScope) {
+                                final ConceptschemaDTO conceptschemaDTO,
+                                ProcesResult procesResult,
+                                final String uri,
+                                final String gepubliceerdDoor,
+                                final String geldigOp,
+                                final Integer page,
+                                final Integer pageSize,
+                                final List<String> expandScope) {
 
         OperationResult result = null;
         boolean nextPage = false;
@@ -98,20 +99,20 @@ public class ConceptLoader {
         result = catalogService.getConceptschemas(uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
 
         if (result.isSuccess()) {
-            InlineResponse200 inlineResponse200 = ((OperationResult<InlineResponse200>)result).getSuccessResult();
+            InlineResponse200 inlineResponse200 = ((OperationResult<InlineResponse200>) result).getSuccessResult();
             InlineResponse200Embedded embedded = inlineResponse200.getEmbedded();
 
 
             List<Conceptschema> conceptschemas = embedded.getConceptschemas();
 
-            for (Conceptschema conceptschema: conceptschemas) {
+            for (Conceptschema conceptschema : conceptschemas) {
                 if (!conceptschema.getUri().equals(conceptschemaDTO.getUri())) {
                     log.error("ConceptLoader getPage Unexpected conceptschema with uri: {}, expected uri: {}", conceptschema.getUri(), conceptschemaDTO.getUri());
                 } else {
                     JsonNullable<List<Concept>> concepten = conceptschema.getEmbedded().getConcepten();
                     if (concepten != null && concepten.isPresent() && concepten.get() != null) {
                         log.debug("ConceptLoader getPage number of concepten: {}", concepten.get().size());
-                        for (Concept concept: concepten.get()) {
+                        for (Concept concept : concepten.get()) {
                             Optional<ConceptDTO> conceptOptional = conceptRepository.findByUri(concept.getUri());
                             if (!((conceptOptional != null) && conceptOptional.isPresent())) {  // if not exists
                                 ConceptDTO conceptDTO = new ConceptDTO();

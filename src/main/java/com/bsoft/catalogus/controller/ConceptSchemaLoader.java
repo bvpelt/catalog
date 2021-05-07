@@ -5,6 +5,7 @@ import com.bsoft.catalogus.repository.ConceptschemaRepository;
 import com.bsoft.catalogus.repository.ConceptschemaTypeRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
+import com.bsoft.catalogus.util.CatalogUtil;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +30,7 @@ public class ConceptSchemaLoader {
 
         String uri = null; //"http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
         String gepubliceerdDoor = null; //"https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
-        String geldigOp = "2021-04-14";
+        String geldigOp = new CatalogUtil().getCurrentDate();
         Integer page = 1;
         Integer pageSize = 10;
         List<String> expandScope = null; // Arrays.asList("concepten");
@@ -152,7 +153,6 @@ public class ConceptSchemaLoader {
         return savedConceptschema;
     }
 
-    //@Transactional(propagation = Propagation.NESTED)
     private Set<ConceptschemaTypeDTO> findTypes(final List<String> conceptschemaType) {
         log.trace("ConceptSchemaLoader findTypes: found conceptschema: {}", String.join(", ", conceptschemaType));
         List<ConceptschemaTypeDTO> types = new ArrayList<>();

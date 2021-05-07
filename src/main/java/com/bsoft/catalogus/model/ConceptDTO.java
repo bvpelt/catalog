@@ -3,7 +3,6 @@ package com.bsoft.catalogus.model;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "ConceptDTO")
@@ -39,30 +38,30 @@ public class ConceptDTO {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "CONCEPTSCHEMA_ID")
     private ConceptschemaDTO conceptschema;
- //   private List<String> toelichtingen; //
- //   private List<String> rationales;
- //   private List<String> verbeeldingen;
- //   private List<String> codes;
+    //   private List<String> toelichtingen; //
+    //   private List<String> rationales;
+    //   private List<String> verbeeldingen;
+    //   private List<String> codes;
     @Column(name = "BEGINDATUM")
     private String begindatumGeldigheid;
 
     @Column(name = "EINDDATUM")
     private String einddatumGeldigheid;
- //   private List<String> verborgenZoektermen;
- //   private List<String> synoniemen;
- //   private List<String> bronnen;
- //   private List<String> heeftBetrekkingOp;
- //   private List<String> isOnderdeelVan;
- //   private List<String> bestaatUit;
- //   private List<String> isSpecialisatieVan;
- //   private List<String> isGeneralisatieVan;
- //   private List<String> isHetzelfdeAls;
- //   private List<String> isOngeveerHetzelfdeAls;
- //   private List<String> zieOok;
- //   private List<String> isBrederDan;
- //   private List<String> isEngerDan;
- //   private List<String> isGerelateerd;
- //   private List<String> isHarmonisatie;
+    //   private List<String> verborgenZoektermen;
+    //   private List<String> synoniemen;
+    //   private List<String> bronnen;
+    //   private List<String> heeftBetrekkingOp;
+    //   private List<String> isOnderdeelVan;
+    //   private List<String> bestaatUit;
+    //   private List<String> isSpecialisatieVan;
+    //   private List<String> isGeneralisatieVan;
+    //   private List<String> isHetzelfdeAls;
+    //   private List<String> isOngeveerHetzelfdeAls;
+    //   private List<String> zieOok;
+    //   private List<String> isBrederDan;
+    //   private List<String> isEngerDan;
+    //   private List<String> isGerelateerd;
+    //   private List<String> isHarmonisatie;
     @Column(name = "METADATA")
     private String metadata;
 
