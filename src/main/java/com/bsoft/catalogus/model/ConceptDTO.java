@@ -3,7 +3,9 @@ package com.bsoft.catalogus.model;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity(name = "ConceptDTO")
 @Table(name = "CONCEPT")
@@ -64,6 +66,9 @@ public class ConceptDTO {
     //   private List<String> isHarmonisatie;
     @Column(name = "METADATA")
     private String metadata;
+
+    @ManyToMany(mappedBy = "waarden", cascade = {CascadeType.ALL})
+    private Set<WaardelijstDTO> waardelijsten = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
