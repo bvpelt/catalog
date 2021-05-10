@@ -45,6 +45,12 @@ curl -v -H 'Accept: */*' -H 'Content-Type: application/problem+json,application/
 
 ```
 
+## Maven
+```shell 
+export JAVA_POST_PROCESS_FILE="/usr/local/bin/clang-format -i"
+mvn -Dopenapi.generator.maven.plugin.generateAliasAsModel=true clean test 
+```
+
 ## Checks
 
 ```sql
