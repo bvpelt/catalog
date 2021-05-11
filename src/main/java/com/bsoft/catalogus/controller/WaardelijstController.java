@@ -11,8 +11,10 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @NoArgsConstructor
@@ -32,7 +34,7 @@ public class WaardelijstController {
     @Autowired
     ConceptRepository conceptRepository;
 
-    @RequestMapping(value = "/waardelijsten")
+    @RequestMapping(value = "/waardelijsten", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProcesResult> getWaardelijsten() {
         log.info("WaardelijstController getWaardelijsten");
         WaardelijstLoader waardelijstLoader = new WaardelijstLoader(waardelijstRepository, conceptschemaRepository, conceptRepository);

@@ -10,8 +10,10 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @NoArgsConstructor
@@ -31,7 +33,7 @@ public class ConceptController {
     @Autowired
     private CollectieRepository collectieRepository;
 
-    @RequestMapping(value = "/conceptschemas/concept")
+    @RequestMapping(value = "/conceptschemas/concept", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProcesResult> getConcepten() {
         log.info("getConcepten");
         ConceptLoader conceptLoader = new ConceptLoader(conceptschemaRepository, conceptRepository, collectieRepository);
