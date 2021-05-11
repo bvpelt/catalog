@@ -1,0 +1,111 @@
+databaseChangeLog:
+  - changeSet:
+      id: 600
+      author: bart
+      dbms: PostgreSQL
+      comment: Create WAARDELIJST
+      changes:
+        - createTable:
+            schemaName: PUBLIC
+            tableName: WAARDELIJST
+            columns:
+              - column:
+                  name: ID
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: URI
+                  type: text
+              - column:
+                  name: NAAM
+                  type: text
+              - column:
+                  name: TITEL
+                  type: text
+              - column:
+                  name: BESCHRIJVING
+                  type: text
+              - column:
+                  name: VERSIE
+                  type: text
+              - column:
+                  name: VERSIENOTITIES
+                  type: text
+              - column:
+                  name: EIGENAAR
+                  type: text
+              - column:
+                  name: METADATA
+                  type: text
+
+        - rollback:
+            dropTable:
+              - tableName: WAARDELIJST
+
+  - changeSet:
+      id:  610
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create WAARDELIJST uri index
+      changes:
+        - createIndex:
+            clustered:  true
+            columns:
+              - column:
+                  descending:  true
+                  name:  URI
+            indexName:  idx_waardelijst_uri
+            schemaName:  public
+            tableName:  WAARDELIJST
+            unique:  true
+
+  - changeSet:
+      id: 620
+      author: bart
+      dbms: PostgreSQL
+      comment: Create WAARDELIJST_WAARDE
+      changes:
+        - createTable:
+            schemaName: PUBLIC
+            tableName: WAARDELIJST_WAARDE
+            columns:
+              - column:
+                  name: ID
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: WAARDELIJST_ID
+                  type: BIGINT
+              - column:
+                  name: CONCEPT_ID
+                  type: BIGINT
+
+        - rollback:
+            dropTable:
+              - tableName: WAARDELIJST_WAARDE
+
+  - changeSet:
+      id:  630
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create WAARDELIJST_WAARDE uri index
+      changes:
+        - createIndex:
+            clustered:  true
+            columns:
+              - column:
+                  descending:  true
+                  name:  WAARDELIJST_ID
+              - column:
+                  descending:  true
+                  name:  CONCEPT_ID
+            indexName:  idx_waardelijst_waarde
+            schemaName:  public
+            tableName:  WAARDELIJST_WAARDE
+            unique:  true

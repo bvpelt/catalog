@@ -8,8 +8,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Entity(name = "BronDTO")
-@Table(name = "BRON")
+@Entity(name = "WaardelijstDTO")
+@Table(name = "WAARDELIJST")
 @Data
 public class WaardelijstDTO implements Serializable {
     @Id
@@ -50,6 +50,19 @@ public class WaardelijstDTO implements Serializable {
                     @JoinColumn(name = "concept_id", referencedColumnName = "id",
                             nullable = false, updatable = false)})
     private Set<ConceptDTO> waarden = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof WaardelijstDTO)) return false;
+        WaardelijstDTO that = (WaardelijstDTO) o;
+        return Objects.equals(uri, that.uri) && Objects.equals(naam, that.naam) && Objects.equals(titel, that.titel) && Objects.equals(beschrijving, that.beschrijving) && Objects.equals(versie, that.versie) && Objects.equals(versienotitie, that.versienotitie) && Objects.equals(eigenaar, that.eigenaar) && Objects.equals(metadata, that.metadata);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uri, naam, titel, beschrijving, versie, versienotitie, eigenaar, metadata);
+    }
 }
 
 

@@ -1,8 +1,10 @@
 package com.bsoft.catalogus.controller;
 
 import com.bsoft.catalogus.model.ProcesResult;
+import com.bsoft.catalogus.repository.ConceptRepository;
 import com.bsoft.catalogus.repository.ConceptschemaRepository;
 import com.bsoft.catalogus.repository.ConceptschemaTypeRepository;
+import com.bsoft.catalogus.repository.WaardelijstRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
 import lombok.NoArgsConstructor;
@@ -16,27 +18,30 @@ import org.springframework.web.bind.annotation.RestController;
 @NoArgsConstructor
 @Slf4j
 @RestController
-public class ConceptschemaController {
+public class WaardelijstController {
 
     @Autowired
     CatalogService catalogService;
 
     @Autowired
+    WaardelijstRepository waardelijstRepository;
+
+    @Autowired
     ConceptschemaRepository conceptschemaRepository;
 
     @Autowired
-    ConceptschemaTypeRepository conceptschemaTypeRepository;
+    ConceptRepository conceptRepository;
 
-    @RequestMapping(value = "/conceptschemas")
-    public ResponseEntity<ProcesResult> getConceptschemas() {
-        log.info("ConceptschemaController getConceptschemas");
-        ConceptSchemaLoader conceptSchemaLoader = new ConceptSchemaLoader(conceptschemaRepository, conceptschemaTypeRepository);
-        OperationResult<ProcesResult> result = conceptSchemaLoader.loadConceptSchemas(catalogService);
+    @RequestMapping(value = "/waardelijsten")
+    public ResponseEntity<ProcesResult> getWaardelijsten() {
+        log.info("WaardelijstController getWaardelijsten");
+        WaardelijstLoader waardelijstLoader = new WaardelijstLoader(waardelijstRepository, conceptschemaRepository, conceptRepository);
+        OperationResult<ProcesResult> result = waardelijstLoader.loadWaardelijsten(catalogService);
         if (result.isSuccess()) {
             ProcesResult procesResult = result.getSuccessResult();
             return ResponseEntity.ok(procesResult);
         } else {
-            String message = "ConceptschemaController getConceptschemas error during proces";
+            String message = "WaardelijstController getWaardelijsten error during proces";
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }

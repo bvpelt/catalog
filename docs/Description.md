@@ -63,4 +63,9 @@ from
 group by sub.conceptschema_id
 order by sub.conceptschema_id
 ;
+
+-- waardelijsten
+select naam, titel, versie, eigenaar from waardelijst where versie = '1.0.9';
+select w.naam, w.titel, w.versie, c.naam from waardelijst w, waardelijst_waarde ww, concept c where w.versie = '1.0.9' and ww.waardelijst_id = w.id and ww.concept_id = c.id order by w.naam, c.naam;
+
 ```

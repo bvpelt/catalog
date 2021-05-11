@@ -28,4 +28,12 @@ public class CatalogService {
         return catalogEndpoint.getBron(uri, gepubliceerdDoor, geldigOp, page, pageSize);
     }
 
+    public OperationResult getWaardelijst(String uri,
+                                   String gepubliceerdDoor,
+                                   List<String> expandScope,
+                                   Integer page,
+                                   Integer pageSize) {
+        return catalogEndpoint.getWaardenlijst(uri, gepubliceerdDoor, expandScope, page, pageSize);
+    }
+
 }

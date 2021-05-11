@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/changelog-postgres-04.yaml
   - include:
       file: db/changelog/changelog-postgres-05.yaml
+  - include:
+      file: db/changelog/changelog-postgres-06.yaml
