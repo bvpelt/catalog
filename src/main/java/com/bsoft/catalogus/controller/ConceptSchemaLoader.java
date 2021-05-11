@@ -140,7 +140,7 @@ public class ConceptSchemaLoader {
                 x.getConceptschemas().add(savedConceptschema);
             }
 
-            conceptschemaDTO.setTypes(types);
+            //conceptschemaDTO.setTypes(types);
 
             savedConceptschema.getTypes().addAll(types);
 
