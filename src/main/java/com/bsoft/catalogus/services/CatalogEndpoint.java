@@ -7,7 +7,6 @@ import com.bsoft.catalogus.model.InlineResponse200;
 import com.bsoft.catalogus.model.InlineResponse2003;
 import com.bsoft.catalogus.model.InlineResponse2004;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -178,11 +177,10 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
 
     @Override
     public ResponseEntity<InlineResponse2003> bronnenGet(@Valid @RequestParam(value = "uri", required = false) String uri,
-               @Valid @RequestParam(value = "gepubliceerdDoor", required = false) String gepubliceerdDoor,
-               @Valid @RequestParam(value = "geldigOp", required = false) String geldigOp,
-               @Min(1)@Valid @RequestParam(value = "page", required = false, defaultValue="1") Integer page,
-               @Valid @RequestParam(value = "pageSize", required = false, defaultValue="10") Integer pageSize)
-    {
+                                                         @Valid @RequestParam(value = "gepubliceerdDoor", required = false) String gepubliceerdDoor,
+                                                         @Valid @RequestParam(value = "geldigOp", required = false) String geldigOp,
+                                                         @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+                                                         @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
         String parameters = "";
         String andSign = "";
 
@@ -249,10 +247,10 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
     }
 
     public OperationResult getWaardenlijst(String uri,
-                                   String gepubliceerdDoor,
-                                   List<String> expandScope,
-                                   Integer page,
-                                   Integer pageSize
+                                           String gepubliceerdDoor,
+                                           List<String> expandScope,
+                                           Integer page,
+                                           Integer pageSize
     ) {
         try {
             ResponseEntity<InlineResponse2004> responseEntity = waardelijstenGet(uri, gepubliceerdDoor, expandScope, page, pageSize);
@@ -275,10 +273,10 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
 
     @Override
     public ResponseEntity<InlineResponse2004> waardelijstenGet(@Valid @RequestParam(value = "uri", required = false) String uri,
-                                                        @Valid @RequestParam(value = "gepubliceerdDoor", required = false) String gepubliceerdDoor,
-                                                        @Valid @RequestParam(value = "_expandScope", required = false) List<String> expandScope,
-                                                        @Min(1)@Valid @RequestParam(value = "page", required = false, defaultValue="1") Integer page,
-                                                        @Valid @RequestParam(value = "pageSize", required = false, defaultValue="10") Integer pageSize) {
+                                                               @Valid @RequestParam(value = "gepubliceerdDoor", required = false) String gepubliceerdDoor,
+                                                               @Valid @RequestParam(value = "_expandScope", required = false) List<String> expandScope,
+                                                               @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+                                                               @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
 
         String parameters = "";
         String andSign = "";

@@ -32,14 +32,15 @@ public class ConceptschemaController {
     @RequestMapping(value = "/conceptschemas", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProcesResult> getConceptschemas() {
         log.info("ConceptschemaController getConceptschemas");
+        ProcesResult procesResult = null;
         ConceptSchemaLoader conceptSchemaLoader = new ConceptSchemaLoader(conceptschemaRepository, conceptschemaTypeRepository);
         OperationResult<ProcesResult> result = conceptSchemaLoader.loadConceptSchemas(catalogService);
         if (result.isSuccess()) {
-            ProcesResult procesResult = result.getSuccessResult();
+            procesResult = result.getSuccessResult();
             return ResponseEntity.ok(procesResult);
         } else {
-            String message = "ConceptschemaController getConceptschemas error during proces";
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            procesResult = result.getFailureResult();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(procesResult);
         }
     }
 }

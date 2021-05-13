@@ -3,11 +3,9 @@ package com.bsoft.catalogus.controller;
 import com.bsoft.catalogus.model.*;
 import com.bsoft.catalogus.repository.ConceptRepository;
 import com.bsoft.catalogus.repository.ConceptschemaRepository;
-import com.bsoft.catalogus.repository.ConceptschemaTypeRepository;
 import com.bsoft.catalogus.repository.WaardelijstRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
-import com.bsoft.catalogus.util.CatalogUtil;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

@@ -10,6 +10,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProcesResult {
+    public static final int SUCCESS = 0;
+    public static final int ERROR = 1;
+
     private int entries;
     private int pages;
     private int status;

@@ -24,19 +24,20 @@ public class BronLoader {
 
     public OperationResult loadBron(final CatalogService catalogService) {
 
-        String uri = null; //"http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
-        String gepubliceerdDoor = null; //"https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
+        String uri = null;              // "http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
+        String gepubliceerdDoor = null; // "https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
         String geldigOp = new CatalogUtil().getCurrentDate();
         Integer page = 1;
         Integer pageSize = 10;
 
         boolean goOn = true;
 
+        // Initialize proces result
         ProcesResult procesResult = new ProcesResult();
         procesResult.setMore(goOn);
         procesResult.setEntries(0);
         procesResult.setPages(0);
-        procesResult.setStatus(0);
+        procesResult.setStatus(ProcesResult.SUCCESS);
 
         try {
             while (goOn) {
@@ -50,7 +51,7 @@ public class BronLoader {
             }
         } catch (Exception ex) {
             log.error("BronLoader loadBron error loading concept: {}", ex);
-            procesResult.setStatus(1);
+            procesResult.setStatus(ProcesResult.ERROR);
             procesResult.setMessage(ex.getMessage());
             procesResult.setMore(false);
         }
@@ -76,39 +77,53 @@ public class BronLoader {
 
             InlineResponse2003Embedded embedded = inlineResponse2003.getEmbedded();
             List<Bron> bronnen = embedded.getBronnen();
-            persistBronnen(bronnen);
+            persistBronnen(bronnen, procesResult);
 
-            if (result.getSuccessResult().getLinks().getNext() != null) {
-                if (result.getSuccessResult().getLinks().getNext().getHref() != null) {
-                    nextPage = true;
-                    log.info("BronLoader getPage page: {} next: {}", page, result.getSuccessResult().getLinks().getNext().getHref());
+            if (procesResult.getStatus() == 0) {
+                if (result.getSuccessResult().getLinks().getNext() != null) {
+                    if (result.getSuccessResult().getLinks().getNext().getHref() != null) {
+                        nextPage = true;
+                        log.debug("BronLoader getPage page: {} next: {}", page, result.getSuccessResult().getLinks().getNext().getHref());
+                    }
                 }
+                procesResult.setPages(procesResult.getPages() + 1);
             }
-            procesResult.setPages(page);
-            procesResult.setEntries((page - 1) * pageSize + result.getSuccessResult().getEmbedded().getBronnen().size());
         } else {
-            log.info("BronLoader getPage : no result stop processing");
+            log.debug("BronLoader getPage : no result stop processing");
         }
         procesResult.setMore(nextPage);
         return procesResult;
     }
 
-    private void persistBronnen(final List<Bron> bronnen) {
-        log.info("BronLoader persistConceptSchemas number found: {}", bronnen.size());
+    private void persistBronnen(final List<Bron> bronnen, ProcesResult procesResult) {
+        int maxsize = bronnen.size();
+        log.info("BronLoader persistConceptSchemas number found: {}", maxsize);
 
-        for (int i = 0; i < bronnen.size(); i++) {
+        int i = 0;
+        boolean goOn = true;
+
+        while ((i < maxsize) && goOn) {
             log.debug("BronLoader persistConceptSchemas: begin found conceptschema: {}", bronnen.get(i).getUri());
-            BronDTO bronDTO = convertToBronDTO(bronnen.get(i));
+            BronDTO bronDTO = convertToBronDTO(bronnen.get(i), procesResult);
+            if (bronDTO == null) {
+                goOn = false;
+            }
             log.debug("BronLoader persistConceptSchemas: end   found conceptschema: {}", bronDTO == null ? "(null)" : bronDTO.getUri());
+            i++;
         }
     }
 
     @Transactional
-    public BronDTO convertToBronDTO(final Bron bron) {
-        log.info("BronLoader convertToBronDTO:: received uri: {}", bron.getUri());
+    public BronDTO convertToBronDTO(final Bron bron, ProcesResult procesResult) {
+        log.debug("BronLoader convertToBronDTO:: received uri: {}", bron.getUri());
         BronDTO savedBron = null;
         BronDTO bronDTO = new BronDTO();
 
+        // If bron with uri already exists
+        //   update bron
+        // else
+        //   create new bron
+        // fi
         Optional<BronDTO> optionalBronDTO = bronRepository.findByUri(bron.getUri());
         if (optionalBronDTO.isPresent()) {
             log.debug("BronLoader convertToBronDTO:: found uri: {} - updating", bron.getUri());
@@ -129,8 +144,12 @@ public class BronLoader {
             log.debug("BronLoader convertToBronDTO: before 01 save conceptschemaDTO");
             savedBron = bronRepository.save(bronDTO);
             log.debug("BronLoader convertToBronDTO: after 01 save conceptschemaDTO");
+            procesResult.setEntries(procesResult.getEntries() + 1);
         } catch (Exception e) {
             log.error("BronLoader convertToBronDTO error at processing: {}", e.getMessage());
+            procesResult.setStatus(ProcesResult.ERROR);
+            procesResult.setMore(false);
+            procesResult.setMessage(e.getMessage());
         }
         return savedBron;
     }

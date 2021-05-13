@@ -35,15 +35,17 @@ public class ConceptController {
 
     @RequestMapping(value = "/conceptschemas/concept", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProcesResult> getConcepten() {
-        log.info("getConcepten");
+        log.info("ConceptController getConcepten");
+        ProcesResult procesResult = null;
         ConceptLoader conceptLoader = new ConceptLoader(conceptschemaRepository, conceptRepository, collectieRepository);
         OperationResult<ProcesResult> result = conceptLoader.loadConcept(catalogService);
         if (result.isSuccess()) {
-            ProcesResult procesResult = result.getSuccessResult();
+            procesResult = result.getSuccessResult();
             return ResponseEntity.ok(procesResult);
         } else {
             String message = "error during proces";
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            procesResult = result.getFailureResult();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(procesResult);
         }
     }
 }

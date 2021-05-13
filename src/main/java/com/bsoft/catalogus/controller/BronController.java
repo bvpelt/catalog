@@ -29,15 +29,15 @@ public class BronController {
     public ResponseEntity<ProcesResult> getBronnen() {
         log.info("BronController getBronnen");
         BronLoader bronLoader = new BronLoader(bronRepository);
-
+        ProcesResult procesResult = null;
         OperationResult<ProcesResult> result = bronLoader.loadBron(catalogService);
         if (result.isSuccess()) {
-            ProcesResult procesResult = result.getSuccessResult();
+            procesResult = result.getSuccessResult();
             return ResponseEntity.ok(procesResult);
         } else {
             log.error("BronController getBronnen error: {}", result.getFailureResult().getMessage());
-            String message = "error during proces";
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            procesResult = result.getFailureResult();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(procesResult);
         }
     }
 }

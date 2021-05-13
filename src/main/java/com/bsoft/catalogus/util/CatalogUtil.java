@@ -9,8 +9,8 @@ public class CatalogUtil {
     public String getCurrentDate() {
         String date;
 
-        ZoneId zoneId= ZoneId.systemDefault();
-        LocalDate today = LocalDate.now( zoneId ) ;
+        ZoneId zoneId = ZoneId.systemDefault();
+        LocalDate today = LocalDate.now(zoneId);
 
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         date = dateFormatter.format(today);

@@ -3,7 +3,6 @@ package com.bsoft.catalogus.controller;
 import com.bsoft.catalogus.model.ProcesResult;
 import com.bsoft.catalogus.repository.ConceptRepository;
 import com.bsoft.catalogus.repository.ConceptschemaRepository;
-import com.bsoft.catalogus.repository.ConceptschemaTypeRepository;
 import com.bsoft.catalogus.repository.WaardelijstRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
@@ -37,14 +36,15 @@ public class WaardelijstController {
     @RequestMapping(value = "/waardelijsten", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProcesResult> getWaardelijsten() {
         log.info("WaardelijstController getWaardelijsten");
+        ProcesResult procesResult = null;
         WaardelijstLoader waardelijstLoader = new WaardelijstLoader(waardelijstRepository, conceptschemaRepository, conceptRepository);
         OperationResult<ProcesResult> result = waardelijstLoader.loadWaardelijsten(catalogService);
         if (result.isSuccess()) {
-            ProcesResult procesResult = result.getSuccessResult();
+            procesResult = result.getSuccessResult();
             return ResponseEntity.ok(procesResult);
         } else {
-            String message = "WaardelijstController getWaardelijsten error during proces";
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            procesResult = result.getFailureResult();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(procesResult);
         }
     }
 }
