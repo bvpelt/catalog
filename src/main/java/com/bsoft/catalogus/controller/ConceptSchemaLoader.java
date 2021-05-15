@@ -28,7 +28,7 @@ public class ConceptSchemaLoader {
 
     public OperationResult loadConceptSchemas(final CatalogService catalogService) {
 
-        String uri = null; //"http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
+        String uri = null;              //"http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
         String gepubliceerdDoor = null; //"https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
         String geldigOp = new CatalogUtil().getCurrentDate();
         Integer page = 1;
@@ -38,9 +38,11 @@ public class ConceptSchemaLoader {
 
         ProcesResult procesResult = new ProcesResult();
         procesResult.setMore(goOn);
-        procesResult.setEntries(0);
+        procesResult.setNewEntries(0);
+        procesResult.setUnchangedEntries(0);
+        procesResult.setUpdatedEntries(0);
         procesResult.setPages(0);
-        procesResult.setStatus(0);
+        procesResult.setStatus(ProcesResult.SUCCESS);
 
         try {
             while (goOn) {
@@ -54,7 +56,7 @@ public class ConceptSchemaLoader {
             }
         } catch (Exception ex) {
             log.error("ConceptSchemaLoader loadConceptSchemas error: {}", ex);
-            procesResult.setStatus(1);
+            procesResult.setStatus(ProcesResult.ERROR);
             procesResult.setMessage(ex.getMessage());
             procesResult.setMore(false);
         }
@@ -80,7 +82,7 @@ public class ConceptSchemaLoader {
             InlineResponse200 inlineResponse200 = result.getSuccessResult();
             InlineResponse200Embedded embedded = inlineResponse200.getEmbedded();
             List<Conceptschema> conceptschemas = embedded.getConceptschemas();
-            persistConceptSchemas(conceptschemas);
+            persistConceptSchemas(conceptschemas, procesResult);
 
             if (result.getSuccessResult().getLinks().getNext() != null) {
                 if (result.getSuccessResult().getLinks().getNext().getHref() != null) {
@@ -88,8 +90,7 @@ public class ConceptSchemaLoader {
                     log.info("ConceptSchemaLoader getPage page: {} next: {}", page, result.getSuccessResult().getLinks().getNext().getHref());
                 }
             }
-            procesResult.setPages(page);
-            procesResult.setEntries((page - 1) * pageSize + result.getSuccessResult().getEmbedded().getConceptschemas().size());
+            procesResult.setPages(procesResult.getPages() + 1);
         } else {
             log.info("ConceptSchemaLoader getPage : no result stop processing");
         }
@@ -97,18 +98,18 @@ public class ConceptSchemaLoader {
         return procesResult;
     }
 
-    private void persistConceptSchemas(final List<Conceptschema> conceptschemas) {
+    private void persistConceptSchemas(final List<Conceptschema> conceptschemas, ProcesResult procesResult) {
         log.info("persistConceptSchemas number found: {}", conceptschemas.size());
 
         for (int i = 0; i < conceptschemas.size(); i++) {
             log.debug("ConceptSchemaLoader persistConceptSchemas: begin found conceptschema: {}", conceptschemas.get(i).getNaam());
-            ConceptschemaDTO conceptschemaDTO = convertToConcepschemaDTO(conceptschemas.get(i));
+            ConceptschemaDTO conceptschemaDTO = convertToConcepschemaDTO(conceptschemas.get(i), procesResult);
             log.debug("ConceptSchemaLoader persistConceptSchemas: end   found conceptschema: {}", conceptschemaDTO == null ? "(null)" : conceptschemaDTO.getNaam());
         }
     }
 
     @Transactional
-    public ConceptschemaDTO convertToConcepschemaDTO(final Conceptschema conceptschema) {
+    public ConceptschemaDTO convertToConcepschemaDTO(final Conceptschema conceptschema, ProcesResult procesResult) {
         log.info("ConceptSchemaLoader convertToConcepschemaDTO:: received uri: {} conceptschema: {}", conceptschema.getUri(), conceptschema.getNaam());
         ConceptschemaDTO savedConceptschema = null;
         ConceptschemaDTO conceptschemaDTO = new ConceptschemaDTO();
@@ -140,15 +141,25 @@ public class ConceptSchemaLoader {
                 x.getConceptschemas().add(savedConceptschema);
             }
 
-            //conceptschemaDTO.setTypes(types);
-
             savedConceptschema.getTypes().addAll(types);
 
-            log.trace("ConceptSchemaLoader convertToConcepschemaDTO: before 02 save conceptschemaDTO");
-            conceptschemaRepository.save(savedConceptschema);
-            log.trace("ConceptSchemaLoader convertToConcepschemaDTO: after 02 save conceptschemaDTO");
+            if (!conceptschema.getUri().equals(conceptschemaDTO.getUri()) || !optionalConceptschemaDTO.equals(conceptschemaDTO)) { // new entry or updated entry
+                log.trace("ConceptSchemaLoader convertToConcepschemaDTO: before 02 save conceptschemaDTO");
+                conceptschemaRepository.save(savedConceptschema);
+                log.trace("ConceptSchemaLoader convertToConcepschemaDTO: after 02 save conceptschemaDTO");
+                if (!conceptschema.getUri().equals(conceptschemaDTO.getUri())) { // new entry
+                    procesResult.setNewEntries(procesResult.getNewEntries() + 1);
+                } else { // changed
+                    procesResult.setUpdatedEntries(procesResult.getUpdatedEntries() + 1);
+                }
+            } else { // unchanged
+                procesResult.setUnchangedEntries(procesResult.getUnchangedEntries() + 1);
+            }
         } catch (Exception e) {
             log.error("ConceptSchemaLoader convertToConcepschemaDTO error at processing: {}", e.getMessage());
+            procesResult.setStatus(ProcesResult.ERROR);
+            procesResult.setMore(false);
+            procesResult.setMessage(e.getMessage());
         }
         return savedConceptschema;
     }
@@ -169,7 +180,6 @@ public class ConceptSchemaLoader {
                 ConceptschemaTypeDTO newType = new ConceptschemaTypeDTO();
                 newType.setType(type);
                 log.trace("ConceptSchemaLoader findTypes: before save conceptschemaTypeDTO");
-                //ConceptschemaTypeDTO savedConceptschemaTypeDTO = conceptschemaTypeRepository.save(newType);
                 conceptschemaTypeRepository.save(newType);
                 log.trace("ConceptSchemaLoader findTypes: after save conceptschemaTypeDTO - id: {}, type: {}", newType.getId(), newType.getType());
                 types.add(newType);

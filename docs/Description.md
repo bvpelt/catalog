@@ -6,6 +6,9 @@
 # maven generate-resources
 ```
 
+## Spring boot scheduling
+- see https://www.javadevjournal.com/spring-boot/spring-boot-scheduler/
+
 ## Git
 ### Add existing project directory to github project
 ```shell

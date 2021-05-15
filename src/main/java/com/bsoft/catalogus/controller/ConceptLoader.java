@@ -36,7 +36,7 @@ public class ConceptLoader {
 
     public OperationResult loadConcept(final CatalogService catalogService) {
 
-        String uri = null; //"http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
+        String uri = null;              //"http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
         String gepubliceerdDoor = null; //"https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
         String geldigOp = new CatalogUtil().getCurrentDate();
         Integer page = 1;
@@ -46,9 +46,11 @@ public class ConceptLoader {
 
         ProcesResult procesResult = new ProcesResult();
         procesResult.setMore(goOn);
-        procesResult.setEntries(0);
+        procesResult.setNewEntries(0);
+        procesResult.setUnchangedEntries(0);
+        procesResult.setUpdatedEntries(0);
         procesResult.setPages(0);
-        procesResult.setStatus(0);
+        procesResult.setStatus(ProcesResult.SUCCESS);
 
         int conceptschemanr = 0;
         try {
@@ -57,7 +59,7 @@ public class ConceptLoader {
             for (ConceptschemaDTO conceptschemaDTO : conceptschemaDTOS) {
                 conceptschemanr++;
                 uri = conceptschemaDTO.getUri();
-                log.info("ConceptLoader loadConcept nr: {} conceptschema uri: {}", conceptschemanr, uri);
+                log.debug("ConceptLoader loadConcept nr: {} conceptschema uri: {}", conceptschemanr, uri);
                 goOn = true;
                 procesResult.setMore(goOn);
                 while (goOn) {
@@ -74,7 +76,7 @@ public class ConceptLoader {
             log.info("ConceptLoader loadConcept end  found: {} conceptschemas", conceptschemaDTOS.size());
         } catch (Exception ex) {
             log.error("ConceptLoader loadConcept error loading concept: {}", ex);
-            procesResult.setStatus(1);
+            procesResult.setStatus(ProcesResult.ERROR);
             procesResult.setMessage(ex.getMessage());
             procesResult.setMore(false);
         }
@@ -102,7 +104,6 @@ public class ConceptLoader {
             InlineResponse200 inlineResponse200 = ((OperationResult<InlineResponse200>) result).getSuccessResult();
             InlineResponse200Embedded embedded = inlineResponse200.getEmbedded();
 
-
             List<Conceptschema> conceptschemas = embedded.getConceptschemas();
 
             for (Conceptschema conceptschema : conceptschemas) {
@@ -116,22 +117,21 @@ public class ConceptLoader {
                             Optional<ConceptDTO> conceptOptional = conceptRepository.findByUri(concept.getUri());
                             if (!((conceptOptional != null) && conceptOptional.isPresent())) {  // if not exists
                                 ConceptDTO conceptDTO = new ConceptDTO();
-                                conceptDTO.setUri(concept.getUri());
-                                conceptDTO.setType(concept.getType());
-                                conceptDTO.setNaam(concept.getNaam());
-                                conceptDTO.setTerm(concept.getTerm());
-                                conceptDTO.setUitleg(concept.getUitleg().isPresent() ? concept.getUitleg().get() : null);
-                                conceptDTO.setDefinitie(concept.getDefinitie().isPresent() ? concept.getDefinitie().get() : null);
-                                conceptDTO.setEigenaar(concept.getEigenaar().isPresent() ? concept.getEigenaar().get() : null);
-                                conceptDTO.setConceptschema(conceptschemaDTO);
-                                conceptDTO.setBegindatumGeldigheid(concept.getBegindatumGeldigheid());
-                                conceptDTO.setEinddatumGeldigheid(concept.getEinddatumGeldigheid().isPresent() ? concept.getEinddatumGeldigheid().get() : null);
-                                conceptDTO.setMetadata(concept.getMetadata());
+                                saveUpdateConcept(conceptschemaDTO, concept, conceptDTO);
 
                                 conceptRepository.save(conceptDTO);
-                                procesResult.setEntries(procesResult.getEntries() + 1);
-                            } else {
-                                log.debug("ConceptLoader getPage concept with uri: {} already exists", concept.getUri());
+                                procesResult.setNewEntries(procesResult.getNewEntries() + 1);
+                            } else { // exists do update
+                                ConceptDTO conceptDTO = conceptOptional.get();
+                                saveUpdateConcept(conceptschemaDTO, concept, conceptDTO);
+
+                                if (conceptOptional.get().equals(conceptDTO)) {
+                                    procesResult.setUnchangedEntries(procesResult.getUnchangedEntries() + 1);
+                                } else {
+                                    conceptRepository.save(conceptDTO);
+                                    procesResult.setUpdatedEntries(procesResult.getUpdatedEntries() + 1);
+                                }
+                                log.debug("ConceptLoader getPage concept with uri: {} already exists, update", concept.getUri());
                             }
                         }
                     } else {
@@ -146,19 +146,21 @@ public class ConceptLoader {
 
                             if (!((collectieOptional != null) && collectieOptional.isPresent())) {  // if not exists
                                 CollectieDTO collectieDTO = new CollectieDTO();
-                                collectieDTO.setUri(collectie.getUri());
-                                collectieDTO.setType(collectie.getType());
-                                collectieDTO.setTerm(collectie.getTerm());
-                                collectieDTO.setEigenaar(collectie.getEigenaar());
-                                collectieDTO.setConceptschema(conceptschemaDTO);
-                                collectieDTO.setBegindatumGeldigheid(collectie.getBegindatumGeldigheid());
-                                collectieDTO.setEinddatumGeldigheid(collectie.getEinddatumGeldigheid().isPresent() ? collectie.getEinddatumGeldigheid().get() : null);
-                                collectieDTO.setMetadata(collectie.getMetadata());
+                                saveUpdateCollectie(conceptschemaDTO, collectie, collectieDTO);
 
                                 collectieRepository.save(collectieDTO);
-                                procesResult.setEntries(procesResult.getEntries() + 1);
-                            } else {
+                                procesResult.setNewEntries(procesResult.getNewEntries() + 1);
+                            } else { // exists do update
                                 log.debug("ConceptLoader getPage concept with uri: {} already exists", collectie.getUri());
+                                CollectieDTO collectieDTO = collectieOptional.get();
+                                saveUpdateCollectie(conceptschemaDTO, collectie, collectieDTO);
+
+                                if (collectieOptional.get().equals(collectieDTO)) {
+                                    procesResult.setUnchangedEntries(procesResult.getUnchangedEntries() + 1);
+                                } else {
+                                    collectieRepository.save(collectieDTO);
+                                    procesResult.setUpdatedEntries(procesResult.getUpdatedEntries() + 1);
+                                }
                             }
                         }
                     } else {
@@ -180,6 +182,31 @@ public class ConceptLoader {
         }
         procesResult.setMore(nextPage);
         return procesResult;
+    }
+
+    private void saveUpdateConcept(ConceptschemaDTO conceptschemaDTO, Concept concept, ConceptDTO conceptDTO) {
+        conceptDTO.setUri(concept.getUri());
+        conceptDTO.setType(concept.getType());
+        conceptDTO.setNaam(concept.getNaam());
+        conceptDTO.setTerm(concept.getTerm());
+        conceptDTO.setUitleg(concept.getUitleg().isPresent() ? concept.getUitleg().get() : null);
+        conceptDTO.setDefinitie(concept.getDefinitie().isPresent() ? concept.getDefinitie().get() : null);
+        conceptDTO.setEigenaar(concept.getEigenaar().isPresent() ? concept.getEigenaar().get() : null);
+        conceptDTO.setConceptschema(conceptschemaDTO);
+        conceptDTO.setBegindatumGeldigheid(concept.getBegindatumGeldigheid());
+        conceptDTO.setEinddatumGeldigheid(concept.getEinddatumGeldigheid().isPresent() ? concept.getEinddatumGeldigheid().get() : null);
+        conceptDTO.setMetadata(concept.getMetadata());
+    }
+
+    private void saveUpdateCollectie(ConceptschemaDTO conceptschemaDTO, Collectie collectie, CollectieDTO collectieDTO) {
+        collectieDTO.setUri(collectie.getUri());
+        collectieDTO.setType(collectie.getType());
+        collectieDTO.setTerm(collectie.getTerm());
+        collectieDTO.setEigenaar(collectie.getEigenaar());
+        collectieDTO.setConceptschema(conceptschemaDTO);
+        collectieDTO.setBegindatumGeldigheid(collectie.getBegindatumGeldigheid());
+        collectieDTO.setEinddatumGeldigheid(collectie.getEinddatumGeldigheid().isPresent() ? collectie.getEinddatumGeldigheid().get() : null);
+        collectieDTO.setMetadata(collectie.getMetadata());
     }
 
 }

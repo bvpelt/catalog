@@ -28,8 +28,9 @@ public class BronController {
     @RequestMapping(value = "/bron", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProcesResult> getBronnen() {
         log.info("BronController getBronnen");
-        BronLoader bronLoader = new BronLoader(bronRepository);
         ProcesResult procesResult = null;
+
+        BronLoader bronLoader = new BronLoader(bronRepository);
         OperationResult<ProcesResult> result = bronLoader.loadBron(catalogService);
         if (result.isSuccess()) {
             procesResult = result.getSuccessResult();

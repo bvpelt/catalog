@@ -43,7 +43,7 @@ public class ConceptController {
             procesResult = result.getSuccessResult();
             return ResponseEntity.ok(procesResult);
         } else {
-            String message = "error during proces";
+            log.error("ConceptController getBronnen error: {}", result.getFailureResult().getMessage());
             procesResult = result.getFailureResult();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(procesResult);
         }

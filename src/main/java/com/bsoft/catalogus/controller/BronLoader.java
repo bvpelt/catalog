@@ -35,7 +35,9 @@ public class BronLoader {
         // Initialize proces result
         ProcesResult procesResult = new ProcesResult();
         procesResult.setMore(goOn);
-        procesResult.setEntries(0);
+        procesResult.setNewEntries(0);
+        procesResult.setUnchangedEntries(0);
+        procesResult.setUpdatedEntries(0);
         procesResult.setPages(0);
         procesResult.setStatus(ProcesResult.SUCCESS);
 
@@ -141,10 +143,18 @@ public class BronLoader {
             bronDTO.setEigenaar(bron.getEigenaar().isPresent() ? bron.getEigenaar().get() : null);
             bronDTO.setUri(bron.getUri());
 
-            log.debug("BronLoader convertToBronDTO: before 01 save conceptschemaDTO");
-            savedBron = bronRepository.save(bronDTO);
-            log.debug("BronLoader convertToBronDTO: after 01 save conceptschemaDTO");
-            procesResult.setEntries(procesResult.getEntries() + 1);
+            if (!bron.getUri().equals(bronDTO.getUri()) || !optionalBronDTO.equals(bronDTO)) { // new entry or updated entry
+                log.debug("BronLoader convertToBronDTO: before 01 save conceptschemaDTO");
+                savedBron = bronRepository.save(bronDTO);
+                log.debug("BronLoader convertToBronDTO: after 01 save conceptschemaDTO");
+                if (!bron.getUri().equals(bronDTO.getUri())) { // new entry
+                    procesResult.setNewEntries(procesResult.getNewEntries() + 1);
+                } else { // changed
+                    procesResult.setUpdatedEntries(procesResult.getUpdatedEntries() + 1);
+                }
+            } else { // unchanged
+                procesResult.setUnchangedEntries(procesResult.getUnchangedEntries() + 1);
+            }
         } catch (Exception e) {
             log.error("BronLoader convertToBronDTO error at processing: {}", e.getMessage());
             procesResult.setStatus(ProcesResult.ERROR);
