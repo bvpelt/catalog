@@ -1,0 +1,212 @@
+package com.bsoft.catalogus.controller;
+
+import com.bsoft.catalogus.model.*;
+import com.bsoft.catalogus.repository.CollectieRepository;
+import com.bsoft.catalogus.repository.ConceptRepository;
+import com.bsoft.catalogus.repository.ConceptschemaRepository;
+import com.bsoft.catalogus.services.CatalogService;
+import com.bsoft.catalogus.services.OperationResult;
+import com.bsoft.catalogus.util.CatalogUtil;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.openapitools.jackson.nullable.JsonNullable;
+
+import javax.transaction.Transactional;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+@Slf4j
+@NoArgsConstructor
+public class CollectieLoader {
+
+    private ConceptschemaRepository conceptschemaRepository;
+
+    private ConceptRepository conceptRepository;
+
+    private CollectieRepository collectieRepository;
+
+    public CollectieLoader(ConceptschemaRepository conceptschemaRepository,
+                           ConceptRepository conceptRepository,
+                           CollectieRepository collectieRepository) {
+        this.conceptschemaRepository = conceptschemaRepository;
+        this.conceptRepository = conceptRepository;
+        this.collectieRepository = collectieRepository;
+    }
+
+    public OperationResult loadConcept(final CatalogService catalogService) {
+
+        String uri = null;              //"http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
+        String gepubliceerdDoor = null; //"https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
+        String geldigOp = new CatalogUtil().getCurrentDate();
+        Integer page = 1;
+        Integer pageSize = 10;
+        List<String> expandScope = Arrays.asList("concepten", "collecties");
+        boolean goOn = true;
+
+        ProcesResult procesResult = new ProcesResult();
+        procesResult.setMore(goOn);
+        procesResult.setNewEntries(0);
+        procesResult.setUnchangedEntries(0);
+        procesResult.setUpdatedEntries(0);
+        procesResult.setPages(0);
+        procesResult.setStatus(ProcesResult.SUCCESS);
+
+        int conceptschemanr = 0;
+        try {
+            List<ConceptschemaDTO> conceptschemaDTOS = conceptschemaRepository.findAll();
+            log.info("ConceptLoader loadConcept start found: {} conceptschemas", conceptschemaDTOS.size());
+            for (ConceptschemaDTO conceptschemaDTO : conceptschemaDTOS) {
+                conceptschemanr++;
+                uri = conceptschemaDTO.getUri();
+                log.debug("ConceptLoader loadConcept nr: {} conceptschema uri: {}", conceptschemanr, uri);
+                goOn = true;
+                procesResult.setMore(goOn);
+                while (goOn) {
+                    log.info("ConceptLoader loadConcept page: {}", page);
+                    procesResult = getPage(catalogService, conceptschemaDTO, procesResult, uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
+
+                    goOn = procesResult.isMore();
+                    if (goOn) {
+                        page++;
+                    }
+                    procesResult.setPages(procesResult.getPages() + 1);
+                }
+            }
+            log.info("ConceptLoader loadConcept end  found: {} conceptschemas", conceptschemaDTOS.size());
+        } catch (Exception ex) {
+            log.error("ConceptLoader loadConcept error loading concept: {}", ex);
+            procesResult.setStatus(ProcesResult.ERROR);
+            procesResult.setMessage(ex.getMessage());
+            procesResult.setMore(false);
+        }
+
+        return OperationResult.success(procesResult);
+    }
+
+    @Transactional
+    public ProcesResult getPage(final CatalogService catalogService,
+                                final ConceptschemaDTO conceptschemaDTO,
+                                ProcesResult procesResult,
+                                final String uri,
+                                final String gepubliceerdDoor,
+                                final String geldigOp,
+                                final Integer page,
+                                final Integer pageSize,
+                                final List<String> expandScope) {
+
+        OperationResult result = null;
+        boolean nextPage = false;
+
+        result = catalogService.getConceptschemas(uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
+
+        if (result.isSuccess()) {
+            InlineResponse200 inlineResponse200 = ((OperationResult<InlineResponse200>) result).getSuccessResult();
+            InlineResponse200Embedded embedded = inlineResponse200.getEmbedded();
+
+            List<Conceptschema> conceptschemas = embedded.getConceptschemas();
+
+            for (Conceptschema conceptschema : conceptschemas) {
+                if (!conceptschema.getUri().equals(conceptschemaDTO.getUri())) {
+                    log.error("ConceptLoader getPage Unexpected conceptschema with uri: {}, expected uri: {}", conceptschema.getUri(), conceptschemaDTO.getUri());
+                } else {
+                    JsonNullable<List<Concept>> concepten = conceptschema.getEmbedded().getConcepten();
+                    if (concepten != null && concepten.isPresent() && concepten.get() != null) {
+                        log.debug("ConceptLoader getPage number of concepten: {}", concepten.get().size());
+                        for (Concept concept : concepten.get()) {
+                            Optional<ConceptDTO> conceptOptional = conceptRepository.findByUri(concept.getUri());
+                            if (!((conceptOptional != null) && conceptOptional.isPresent())) {  // if not exists
+                                ConceptDTO conceptDTO = new ConceptDTO();
+                                saveUpdateConcept(conceptschemaDTO, concept, conceptDTO);
+
+                                conceptRepository.save(conceptDTO);
+                                procesResult.setNewEntries(procesResult.getNewEntries() + 1);
+                            } else { // exists do update
+                                ConceptDTO conceptDTO = conceptOptional.get();
+                                saveUpdateConcept(conceptschemaDTO, concept, conceptDTO);
+
+                                if (conceptOptional.get().equals(conceptDTO)) {
+                                    procesResult.setUnchangedEntries(procesResult.getUnchangedEntries() + 1);
+                                } else {
+                                    conceptRepository.save(conceptDTO);
+                                    procesResult.setUpdatedEntries(procesResult.getUpdatedEntries() + 1);
+                                }
+                                log.debug("ConceptLoader getPage concept with uri: {} already exists, update", concept.getUri());
+                            }
+                        }
+                    } else {
+                        log.debug("ConceptLoader getPage no concepten found for conceptschema with uri: {}", conceptschemaDTO.getUri());
+                    }
+
+                    JsonNullable<List<Collectie>> collecties = conceptschema.getEmbedded().getCollecties();
+                    if (collecties != null && collecties.isPresent() && collecties.get() != null) {
+                        log.debug("ConceptLoader getPage number of collecties: {}", collecties.get().size());
+                        for (Collectie collectie : collecties.get()) {
+                            Optional<CollectieDTO> collectieOptional = collectieRepository.findByUri(collectie.getUri());
+
+                            if (!((collectieOptional != null) && collectieOptional.isPresent())) {  // if not exists
+                                CollectieDTO collectieDTO = new CollectieDTO();
+                                saveUpdateCollectie(conceptschemaDTO, collectie, collectieDTO);
+
+                                collectieRepository.save(collectieDTO);
+                                procesResult.setNewEntries(procesResult.getNewEntries() + 1);
+                            } else { // exists do update
+                                log.debug("ConceptLoader getPage concept with uri: {} already exists", collectie.getUri());
+                                CollectieDTO collectieDTO = collectieOptional.get();
+                                saveUpdateCollectie(conceptschemaDTO, collectie, collectieDTO);
+
+                                if (collectieOptional.get().equals(collectieDTO)) {
+                                    procesResult.setUnchangedEntries(procesResult.getUnchangedEntries() + 1);
+                                } else {
+                                    collectieRepository.save(collectieDTO);
+                                    procesResult.setUpdatedEntries(procesResult.getUpdatedEntries() + 1);
+                                }
+                            }
+                        }
+                    } else {
+                        log.debug("ConceptLoader getPage no collecties found for conceptschema with uri: {}", conceptschemaDTO.getUri());
+                    }
+                }
+            }
+
+            if (inlineResponse200.getLinks().getNext() != null) {
+                if (inlineResponse200.getLinks().getNext().getHref() != null) {
+                    nextPage = true;
+                    log.debug("ConceptLoader getPage  page: {} next: {}", page, inlineResponse200.getLinks().getNext().getHref());
+                }
+            }
+            procesResult.setPages(page);
+
+        } else {
+            log.info("ConceptLoader getPage: no result stop processing");
+        }
+        procesResult.setMore(nextPage);
+        return procesResult;
+    }
+
+    private void saveUpdateConcept(ConceptschemaDTO conceptschemaDTO, Concept concept, ConceptDTO conceptDTO) {
+        conceptDTO.setUri(concept.getUri());
+        conceptDTO.setType(concept.getType());
+        conceptDTO.setNaam(concept.getNaam());
+        conceptDTO.setTerm(concept.getTerm());
+        conceptDTO.setUitleg(concept.getUitleg().isPresent() ? concept.getUitleg().get() : null);
+        conceptDTO.setDefinitie(concept.getDefinitie().isPresent() ? concept.getDefinitie().get() : null);
+        conceptDTO.setEigenaar(concept.getEigenaar().isPresent() ? concept.getEigenaar().get() : null);
+        conceptDTO.setConceptschema(conceptschemaDTO);
+        conceptDTO.setBegindatumGeldigheid(concept.getBegindatumGeldigheid());
+        conceptDTO.setEinddatumGeldigheid(concept.getEinddatumGeldigheid().isPresent() ? concept.getEinddatumGeldigheid().get() : null);
+        conceptDTO.setMetadata(concept.getMetadata());
+    }
+
+    private void saveUpdateCollectie(ConceptschemaDTO conceptschemaDTO, Collectie collectie, CollectieDTO collectieDTO) {
+        collectieDTO.setUri(collectie.getUri());
+        collectieDTO.setType(collectie.getType());
+        collectieDTO.setTerm(collectie.getTerm());
+        collectieDTO.setEigenaar(collectie.getEigenaar());
+        collectieDTO.setConceptschema(conceptschemaDTO);
+        collectieDTO.setBegindatumGeldigheid(collectie.getBegindatumGeldigheid());
+        collectieDTO.setEinddatumGeldigheid(collectie.getEinddatumGeldigheid().isPresent() ? collectie.getEinddatumGeldigheid().get() : null);
+        collectieDTO.setMetadata(collectie.getMetadata());
+    }
+
+}
