@@ -5,7 +5,6 @@ import com.bsoft.catalogus.repository.ConceptschemaRepository;
 import com.bsoft.catalogus.repository.ConceptschemaTypeRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
-import com.bsoft.catalogus.util.CatalogUtil;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +29,7 @@ public class ConceptSchemaLoader {
 
         String uri = null;              //"http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
         String gepubliceerdDoor = null; //"https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
-        String geldigOp = new CatalogUtil().getCurrentDate();
+        String geldigOp = null;         //new CatalogUtil().getCurrentDate();
         Integer page = 1;
         Integer pageSize = 10;
         List<String> expandScope = null; // Arrays.asList("concepten");

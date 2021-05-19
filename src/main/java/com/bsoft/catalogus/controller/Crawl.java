@@ -27,18 +27,14 @@ public class Crawl {
 
     @Autowired
     ConceptschemaTypeRepository conceptschemaTypeRepository;
-
-    @Autowired
-    private ConceptRepository conceptRepository;
-
-    @Autowired
-    private CollectieRepository collectieRepository;
-
-    @Autowired
-    private BronRepository bronRepository;
-
     @Autowired
     WaardelijstRepository waardelijstRepository;
+    @Autowired
+    private ConceptRepository conceptRepository;
+    @Autowired
+    private CollectieRepository collectieRepository;
+    @Autowired
+    private BronRepository bronRepository;
 
     @RequestMapping(value = "/crawl", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProcesResult> doCrawl() {

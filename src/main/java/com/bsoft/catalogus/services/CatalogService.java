@@ -20,6 +20,16 @@ public class CatalogService {
         return catalogEndpoint.getConceptschemas(uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
     }
 
+    public OperationResult getCollecties(String uri,
+                                             String gepubliceerdDoor,
+                                             String geldigOp,
+                                             String conceptschema,
+                                             Integer page,
+                                             Integer pageSize,
+                                             List<String> expandScope) {
+        return catalogEndpoint.getCollecties(uri, gepubliceerdDoor, geldigOp, conceptschema, page, pageSize, expandScope);
+    }
+
     public OperationResult getBron(String uri,
                                    String gepubliceerdDoor,
                                    String geldigOp,

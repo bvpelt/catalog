@@ -33,17 +33,17 @@ public class CollectieController {
     @Autowired
     private CollectieRepository collectieRepository;
 
-    @RequestMapping(value = "/conceptschemas/concept", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ProcesResult> getConcepten() {
-        log.info("ConceptController getConcepten");
+    @RequestMapping(value = "/collecties", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ProcesResult> getCollecties() {
+        log.info("CollectieController getCollecties");
         ProcesResult procesResult = null;
-        ConceptLoader conceptLoader = new ConceptLoader(conceptschemaRepository, conceptRepository, collectieRepository);
-        OperationResult<ProcesResult> result = conceptLoader.loadConcept(catalogService);
+        CollectieLoader collectieLoader = new CollectieLoader(conceptschemaRepository, conceptRepository, collectieRepository);
+        OperationResult<ProcesResult> result = collectieLoader.loadCollectie(catalogService);
         if (result.isSuccess()) {
             procesResult = result.getSuccessResult();
             return ResponseEntity.ok(procesResult);
         } else {
-            log.error("ConceptController getBronnen error: {}", result.getFailureResult().getMessage());
+            log.error("CollectieController getCollecties error: {}", result.getFailureResult().getMessage());
             procesResult = result.getFailureResult();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(procesResult);
         }

@@ -8,7 +8,6 @@ import com.bsoft.catalogus.model.InlineResponse2001;
 import com.bsoft.catalogus.model.InlineResponse2003;
 import com.bsoft.catalogus.model.InlineResponse2004;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -71,78 +70,9 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                                                                @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
                                                                @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
                                                                @Valid @RequestParam(value = "_expandScope", required = false) List<String> expandScope) {
-        String parameters = "";
-        String andSign = "";
+        logGetRequest(CONCEPT_SCHEMA_PREFIX);
 
-        if ((uri != null) && (uri.length() > 0)) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-
-            parameters = parameters + String.format("uri=%s", uri);
-            andSign = "&";
-        }
-        if ((gepubliceerdDoor != null) && (gepubliceerdDoor.length() > 0)) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-            parameters = parameters + andSign + String.format("gepubliceerdDoor=%s", gepubliceerdDoor);
-            andSign = "&";
-        }
-        if ((geldigOp != null) && (geldigOp.length() > 0)) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-            parameters = parameters + andSign + String.format("geldigOp=%s", geldigOp);
-            andSign = "&";
-        }
-        if (page != null) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-            parameters = parameters + andSign + String.format("page=%d", page);
-            andSign = "&";
-        }
-        if (pageSize != null) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-            parameters = parameters + andSign + String.format("pageSize=%d", pageSize);
-            andSign = "&";
-        }
-        String expandScopeString = "";
-
-        if ((expandScope != null) && (expandScope.size() > 0)) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-            log.debug("CatalogEndpoint conceptschemasGet expandscope length: {} - content: {}", expandScope.size(), String.join(",", expandScope));
-
-            for (int i = 0; i < expandScope.size(); i++) {
-                expandScopeString = expandScopeString + andSign + String.format("_expandScope=%s", expandScope.get(i));
-            }
-            parameters = parameters + expandScopeString;
-        }
-
-        log.info("CatalogEndpoint conceptschemasGet -------------------------------------------" + System.lineSeparator() +
-                "REQUEST PARAMETERS START" + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "Request url: " + getBaseUrl() + CONCEPT_SCHEMA_PREFIX + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "Used headers: " + buildGetRequestHeaders().toString() + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "REQUEST PARAMETERS BEGIN" + System.lineSeparator() +
-                "uri: " + (uri == null ? "" : uri) + System.lineSeparator() +
-                "gepubliceerdDoor: " + (gepubliceerdDoor == null ? "" : gepubliceerdDoor) + System.lineSeparator() +
-                "geldigOp: " + (geldigOp == null ? "" : geldigOp) + System.lineSeparator() +
-                "page: " + page.toString() + System.lineSeparator() +
-                "pageSize: " + pageSize.toString() + System.lineSeparator() +
-                "_expandScope: " + (expandScope == null ? "" : expandScopeString) + System.lineSeparator() +
-                "REQUEST PARAMETERS END" + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "PARAMETERS: " + parameters + System.lineSeparator() +
-                "-------------------------------------------");
-
+        String parameters = getParameters(uri, gepubliceerdDoor, geldigOp, null, page, pageSize, expandScope);
 
         return getRestTemplate().exchange(
                 getBaseUrl() + CONCEPT_SCHEMA_PREFIX + parameters,
@@ -153,12 +83,12 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
     }
 
     public OperationResult getCollecties(String uri,
-                                             String gepubliceerdDoor,
-                                             String geldigOp,
-                                             String conceptschema,
-                                             Integer page,
-                                             Integer pageSize,
-                                             List<String> expandScope) {
+                                         String gepubliceerdDoor,
+                                         String geldigOp,
+                                         String conceptschema,
+                                         Integer page,
+                                         Integer pageSize,
+                                         List<String> expandScope) {
         try {
             ResponseEntity<InlineResponse2001> responseEntity = collectiesGet(uri, gepubliceerdDoor, geldigOp, conceptschema, page, pageSize, expandScope);
             try {
@@ -182,80 +112,12 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                                                             @Valid @RequestParam(value = "gepubliceerdDoor", required = false) String gepubliceerdDoor,
                                                             @Valid @RequestParam(value = "geldigOp", required = false) String geldigOp,
                                                             @Valid @RequestParam(value = "conceptschema", required = false) String conceptschema,
-                                                            @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue="1") Integer page,
-                                                            @Valid @RequestParam(value = "pageSize", required = false, defaultValue="10") Integer pageSize,
+                                                            @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+                                                            @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
                                                             @Valid @RequestParam(value = "_expandScope", required = false) List<String> expandScope) {
-        String parameters = "";
-        String andSign = "";
+        logGetRequest(COLLECTIES_PREFIX);
 
-        if ((uri != null) && (uri.length() > 0)) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-
-            parameters = parameters + String.format("uri=%s", uri);
-            andSign = "&";
-        }
-        if ((gepubliceerdDoor != null) && (gepubliceerdDoor.length() > 0)) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-            parameters = parameters + andSign + String.format("gepubliceerdDoor=%s", gepubliceerdDoor);
-            andSign = "&";
-        }
-        if ((geldigOp != null) && (geldigOp.length() > 0)) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-            parameters = parameters + andSign + String.format("geldigOp=%s", geldigOp);
-            andSign = "&";
-        }
-        if (page != null) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-            parameters = parameters + andSign + String.format("page=%d", page);
-            andSign = "&";
-        }
-        if (pageSize != null) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-            parameters = parameters + andSign + String.format("pageSize=%d", pageSize);
-            andSign = "&";
-        }
-        String expandScopeString = "";
-
-        if ((expandScope != null) && (expandScope.size() > 0)) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-            log.debug("CatalogEndpoint conceptschemasGet expandscope length: {} - content: {}", expandScope.size(), String.join(",", expandScope));
-
-            for (int i = 0; i < expandScope.size(); i++) {
-                expandScopeString = expandScopeString + andSign + String.format("_expandScope=%s", expandScope.get(i));
-            }
-            parameters = parameters + expandScopeString;
-        }
-
-        log.info("CatalogEndpoint collectiesGet -------------------------------------------" + System.lineSeparator() +
-                "REQUEST PARAMETERS START" + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "Request url: " + getBaseUrl() + BRONNEN_PREFIX + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "Used headers: " + buildGetRequestHeaders().toString() + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "REQUEST PARAMETERS BEGIN" + System.lineSeparator() +
-                "uri: " + (uri == null ? "" : uri) + System.lineSeparator() +
-                "gepubliceerdDoor: " + (gepubliceerdDoor == null ? "" : gepubliceerdDoor) + System.lineSeparator() +
-                "geldigOp: " + (geldigOp == null ? "" : geldigOp) + System.lineSeparator() +
-                "page: " + page.toString() + System.lineSeparator() +
-                "pageSize: " + pageSize.toString() + System.lineSeparator() +
-                "_expandScope: " + (expandScope == null ? "" : expandScopeString) + System.lineSeparator() +
-                "REQUEST PARAMETERS END" + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "PARAMETERS: " + parameters + System.lineSeparator() +
-                "-------------------------------------------");
+        String parameters = getParameters(uri, gepubliceerdDoor, geldigOp, conceptschema, page, pageSize, expandScope);
 
         return getRestTemplate().exchange(
                 getBaseUrl() + COLLECTIES_PREFIX + parameters,
@@ -263,7 +125,6 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                 new HttpEntity<>(buildGetRequestHeaders()),
                 InlineResponse2001.class);
     }
-
 
     public OperationResult getBron(String uri,
                                    String gepubliceerdDoor,
@@ -296,63 +157,11 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                                                          @Valid @RequestParam(value = "geldigOp", required = false) String geldigOp,
                                                          @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
                                                          @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
-        String parameters = "";
-        String andSign = "";
 
-        if ((uri != null) && (uri.length() > 0)) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
 
-            parameters = parameters + String.format("uri=%s", uri);
-            andSign = "&";
-        }
-        if ((gepubliceerdDoor != null) && (gepubliceerdDoor.length() > 0)) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-            parameters = parameters + andSign + String.format("gepubliceerdDoor=%s", gepubliceerdDoor);
-            andSign = "&";
-        }
-        if ((geldigOp != null) && (geldigOp.length() > 0)) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-            parameters = parameters + andSign + String.format("geldigOp=%s", geldigOp);
-            andSign = "&";
-        }
-        if (page != null) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-            parameters = parameters + andSign + String.format("page=%d", page);
-            andSign = "&";
-        }
-        if (pageSize != null) {
-            if (parameters.length() == 0) {
-                parameters = "?";
-            }
-            parameters = parameters + andSign + String.format("pageSize=%d", pageSize);
-            andSign = "&";
-        }
+        logGetRequest(BRONNEN_PREFIX);
 
-        log.info("CatalogEndpoint bronnenGet -------------------------------------------" + System.lineSeparator() +
-                "REQUEST PARAMETERS START" + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "Request url: " + getBaseUrl() + BRONNEN_PREFIX + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "Used headers: " + buildGetRequestHeaders().toString() + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "REQUEST PARAMETERS BEGIN" + System.lineSeparator() +
-                "uri: " + (uri == null ? "" : uri) + System.lineSeparator() +
-                "gepubliceerdDoor: " + (gepubliceerdDoor == null ? "" : gepubliceerdDoor) + System.lineSeparator() +
-                "geldigOp: " + (geldigOp == null ? "" : geldigOp) + System.lineSeparator() +
-                "page: " + page.toString() + System.lineSeparator() +
-                "pageSize: " + pageSize.toString() + System.lineSeparator() +
-                "REQUEST PARAMETERS END" + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "PARAMETERS: " + parameters + System.lineSeparator() +
-                "-------------------------------------------");
+        String parameters = getParameters(uri, gepubliceerdDoor, geldigOp, null, page, pageSize, null);
 
         return getRestTemplate().exchange(
                 getBaseUrl() + BRONNEN_PREFIX + parameters,
@@ -393,6 +202,48 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                                                                @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
                                                                @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
 
+        logGetRequest(WAARDELIJSTEN_PREFIX);
+
+        String parameters = getParameters(uri, gepubliceerdDoor,  null, null, page, pageSize, expandScope);
+
+        return getRestTemplate().exchange(
+                getBaseUrl() + WAARDELIJSTEN_PREFIX + parameters,
+                HttpMethod.GET,
+                new HttpEntity<>(buildGetRequestHeaders()),
+                InlineResponse2004.class);
+    }
+
+    private void logGetRequest(final String prefix) {
+        log.info("CatalogEndpoint waardelijstenGet -------------------------------------------" + System.lineSeparator() +
+                "REQUEST START" + System.lineSeparator() +
+                "-------------------------------------------" + System.lineSeparator() +
+                "Request url: " + getBaseUrl() + prefix + System.lineSeparator() +
+                "-------------------------------------------" + System.lineSeparator() +
+                "Used headers: " + buildGetRequestHeaders().toString() + System.lineSeparator() +
+                "-------------------------------------------" + System.lineSeparator());
+    }
+
+    private String getExpandScope(List<String> expandScope, String andSign) {
+        String expandScopeString = "";
+        if ((expandScope != null) && (expandScope.size() > 0)) {
+
+            log.debug("CatalogEndpoint conceptschemasGet expandscope length: {} - content: {}", expandScope.size(), String.join(",", expandScope));
+
+            for (int i = 0; i < expandScope.size(); i++) {
+                expandScopeString = expandScopeString + andSign + String.format("_expandScope=%s", expandScope.get(i));
+            }
+        }
+
+        return expandScopeString;
+    }
+
+    private String getParameters(String uri,
+                                 String gepubliceerdDoor,
+                                 String geldigOp,
+                                 String conceptschema,
+                                 Integer page,
+                                 Integer pageSize,
+                                 List<String> expandScope) {
         String parameters = "";
         String andSign = "";
 
@@ -411,21 +262,20 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
             parameters = parameters + andSign + String.format("gepubliceerdDoor=%s", gepubliceerdDoor);
             andSign = "&";
         }
-        String expandScopeString = "";
-
-        if ((expandScope != null) && (expandScope.size() > 0)) {
+        if ((geldigOp != null) && (geldigOp.length() > 0)) {
             if (parameters.length() == 0) {
                 parameters = "?";
             }
-            log.debug("CatalogEndpoint conceptschemasGet expandscope length: {} - content: {}", expandScope.size(), String.join(",", expandScope));
-
-            for (int i = 0; i < expandScope.size(); i++) {
-                expandScopeString = expandScopeString + andSign + String.format("_expandScope=%s", expandScope.get(i));
-                andSign = "&";
-            }
-            parameters = parameters + expandScopeString;
+            parameters = parameters + andSign + String.format("geldigOp=%s", geldigOp);
+            andSign = "&";
         }
-
+        if ((conceptschema != null) && (conceptschema.length() > 0)) {
+            if (parameters.length() == 0) {
+                parameters = "?";
+            }
+            parameters = parameters + andSign + String.format("conceptschema=%s", conceptschema);
+            andSign = "&";
+        }
         if (page != null) {
             if (parameters.length() == 0) {
                 parameters = "?";
@@ -440,29 +290,29 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
             parameters = parameters + andSign + String.format("pageSize=%d", pageSize);
             andSign = "&";
         }
+        String expandScopeString = getExpandScope(expandScope, andSign);
+        if (expandScopeString.length() > 0) {
+            if (parameters.length() == 0) {
+                parameters = "?";
+            }
+            log.debug("CatalogEndpoint getParameters expandscope length: {} - content: {}", expandScope.size(), String.join(",", expandScope));
 
-        log.info("CatalogEndpoint bronnenGet -------------------------------------------" + System.lineSeparator() +
-                "REQUEST PARAMETERS START" + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "Request url: " + getBaseUrl() + WAARDELIJSTEN_PREFIX + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "Used headers: " + buildGetRequestHeaders().toString() + System.lineSeparator() +
-                "-------------------------------------------" + System.lineSeparator() +
-                "REQUEST PARAMETERS BEGIN" + System.lineSeparator() +
+            parameters = parameters + expandScopeString;
+        }
+
+        log.info("CatalogEndpoint getParameters Parameters-------------------------------------------" + System.lineSeparator() +
+                 "REQUEST PARAMETERS BEGIN" + System.lineSeparator() +
                 "uri: " + (uri == null ? "" : uri) + System.lineSeparator() +
                 "gepubliceerdDoor: " + (gepubliceerdDoor == null ? "" : gepubliceerdDoor) + System.lineSeparator() +
-                "expandScope: " + expandScopeString + System.lineSeparator() +
+                "geldigOp: " + (geldigOp == null ? "" : geldigOp) + System.lineSeparator() +
+                "conceptschema: " + (conceptschema == null ? "" : conceptschema) + System.lineSeparator() +
                 "page: " + page.toString() + System.lineSeparator() +
                 "pageSize: " + pageSize.toString() + System.lineSeparator() +
+                "expandScope: " + expandScopeString + System.lineSeparator() +
                 "REQUEST PARAMETERS END" + System.lineSeparator() +
                 "-------------------------------------------" + System.lineSeparator() +
                 "PARAMETERS: " + parameters + System.lineSeparator() +
                 "-------------------------------------------");
-        return getRestTemplate().exchange(
-                getBaseUrl() + WAARDELIJSTEN_PREFIX + parameters,
-                HttpMethod.GET,
-                new HttpEntity<>(buildGetRequestHeaders()),
-                InlineResponse2004.class);
+        return parameters;
     }
-
 }
