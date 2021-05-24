@@ -2,7 +2,6 @@ package com.bsoft.catalogus.controller;
 
 import com.bsoft.catalogus.model.ProcesResult;
 import com.bsoft.catalogus.repository.CollectieRepository;
-import com.bsoft.catalogus.repository.ConceptRepository;
 import com.bsoft.catalogus.repository.ConceptschemaRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
@@ -28,16 +27,14 @@ public class CollectieController {
     private ConceptschemaRepository conceptschemaRepository;
 
     @Autowired
-    private ConceptRepository conceptRepository;
-
-    @Autowired
     private CollectieRepository collectieRepository;
 
     @RequestMapping(value = "/collecties", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProcesResult> getCollecties() {
         log.info("CollectieController getCollecties");
         ProcesResult procesResult = null;
-        CollectieLoader collectieLoader = new CollectieLoader(conceptschemaRepository, conceptRepository, collectieRepository);
+
+        CollectieLoader collectieLoader = new CollectieLoader(conceptschemaRepository, collectieRepository);
         OperationResult<ProcesResult> result = collectieLoader.loadCollectie(catalogService);
         if (result.isSuccess()) {
             procesResult = result.getSuccessResult();

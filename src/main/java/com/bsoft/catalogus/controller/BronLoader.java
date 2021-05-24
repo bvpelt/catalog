@@ -4,7 +4,6 @@ import com.bsoft.catalogus.model.*;
 import com.bsoft.catalogus.repository.BronRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
-import com.bsoft.catalogus.util.CatalogUtil;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,10 +25,9 @@ public class BronLoader {
 
         String uri = null;              // "http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
         String gepubliceerdDoor = null; // "https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
-        String geldigOp = new CatalogUtil().getCurrentDate();
+        String geldigOp = null;         // new CatalogUtil().getCurrentDate();
         Integer page = 1;
         Integer pageSize = 10;
-
         boolean goOn = true;
 
         // Initialize proces result
@@ -44,7 +42,7 @@ public class BronLoader {
         try {
             while (goOn) {
                 log.info("BronLoader loadBron page: {}", page);
-                procesResult = getPage(catalogService, procesResult, uri, gepubliceerdDoor, geldigOp, page, pageSize);
+                getPage(catalogService, procesResult, uri, gepubliceerdDoor, geldigOp, page, pageSize);
 
                 goOn = procesResult.isMore();
                 if (goOn) {
@@ -61,13 +59,13 @@ public class BronLoader {
         return OperationResult.success(procesResult);
     }
 
-    private ProcesResult getPage(final CatalogService catalogService,
-                                 ProcesResult procesResult,
-                                 final String uri,
-                                 final String gepubliceerdDoor,
-                                 final String geldigOp,
-                                 final Integer page,
-                                 final Integer pageSize) {
+    private void getPage(final CatalogService catalogService,
+                         final ProcesResult procesResult,
+                         final String uri,
+                         final String gepubliceerdDoor,
+                         final String geldigOp,
+                         final Integer page,
+                         final Integer pageSize) {
 
         OperationResult<InlineResponse2003> result = null;
         boolean nextPage = false;
@@ -91,27 +89,23 @@ public class BronLoader {
                 procesResult.setPages(procesResult.getPages() + 1);
             }
         } else {
+            procesResult.setStatus(ProcesResult.ERROR);
+            procesResult.setMessage(result.getFailureResult().toString());
             log.debug("BronLoader getPage : no result stop processing");
         }
         procesResult.setMore(nextPage);
-        return procesResult;
     }
 
-    private void persistBronnen(final List<Bron> bronnen, ProcesResult procesResult) {
+    private void persistBronnen(final List<Bron> bronnen, final ProcesResult procesResult) {
         int maxsize = bronnen.size();
         log.info("BronLoader persistConceptSchemas number found: {}", maxsize);
 
-        int i = 0;
         boolean goOn = true;
 
-        while ((i < maxsize) && goOn) {
-            log.debug("BronLoader persistConceptSchemas: begin found conceptschema: {}", bronnen.get(i).getUri());
+        for (int i = 0; i < maxsize; i++) {
+            log.debug("CollectieLoader persistCollecties: begin found collectie: {}", bronnen.get(i).getUri());
             BronDTO bronDTO = convertToBronDTO(bronnen.get(i), procesResult);
-            if (bronDTO == null) {
-                goOn = false;
-            }
-            log.debug("BronLoader persistConceptSchemas: end   found conceptschema: {}", bronDTO == null ? "(null)" : bronDTO.getUri());
-            i++;
+            log.debug("CollectieLoader persistCollecties: end   found collectie: {}", bronDTO == null ? "(null)" : bronDTO.getUri());
         }
     }
 
@@ -120,6 +114,7 @@ public class BronLoader {
         log.debug("BronLoader convertToBronDTO:: received uri: {}", bron.getUri());
         BronDTO savedBron = null;
         BronDTO bronDTO = new BronDTO();
+        boolean newEntry = false;
 
         // If bron with uri already exists
         //   update bron
@@ -130,7 +125,11 @@ public class BronLoader {
         if (optionalBronDTO.isPresent()) {
             log.debug("BronLoader convertToBronDTO:: found uri: {} - updating", bron.getUri());
             bronDTO = optionalBronDTO.get();
+        } else {
+            bronDTO = new BronDTO();
+            newEntry = true;
         }
+
 
         try {
             bronDTO.setTitel(bron.getTitel());
@@ -143,11 +142,11 @@ public class BronLoader {
             bronDTO.setEigenaar(bron.getEigenaar().isPresent() ? bron.getEigenaar().get() : null);
             bronDTO.setUri(bron.getUri());
 
-            if (!bron.getUri().equals(bronDTO.getUri()) || !optionalBronDTO.equals(bronDTO)) { // new entry or updated entry
+            if (newEntry || (optionalBronDTO.isPresent() && !optionalBronDTO.get().equals(bronDTO))) { // new entry or updated entry
                 log.debug("BronLoader convertToBronDTO: before 01 save conceptschemaDTO");
                 savedBron = bronRepository.save(bronDTO);
                 log.debug("BronLoader convertToBronDTO: after 01 save conceptschemaDTO");
-                if (!bron.getUri().equals(bronDTO.getUri())) { // new entry
+                if (newEntry) { // new entry
                     procesResult.setNewEntries(procesResult.getNewEntries() + 1);
                 } else { // changed
                     procesResult.setUpdatedEntries(procesResult.getUpdatedEntries() + 1);

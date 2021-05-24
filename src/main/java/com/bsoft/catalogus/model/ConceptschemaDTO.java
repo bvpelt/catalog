@@ -65,12 +65,12 @@ public class ConceptschemaDTO implements Serializable {
         if (this == o) return true;
         if (!(o instanceof ConceptschemaDTO)) return false;
         ConceptschemaDTO that = (ConceptschemaDTO) o;
-        return Objects.equals(id, that.id) && Objects.equals(uri, that.uri) && Objects.equals(naam, that.naam) && Objects.equals(uitleg, that.uitleg) && Objects.equals(eigenaar, that.eigenaar) && Objects.equals(begindatumGeldigheid, that.begindatumGeldigheid) && Objects.equals(einddatumGeldigheid, that.einddatumGeldigheid) && Objects.equals(metadata, that.metadata);
+        return uri.equals(that.uri) && Objects.equals(naam, that.naam) && Objects.equals(uitleg, that.uitleg) && Objects.equals(eigenaar, that.eigenaar) && Objects.equals(begindatumGeldigheid, that.begindatumGeldigheid) && Objects.equals(einddatumGeldigheid, that.einddatumGeldigheid) && Objects.equals(metadata, that.metadata) && Objects.equals(types, that.types) && Objects.equals(concepten, that.concepten);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, uri, naam, uitleg, eigenaar, begindatumGeldigheid, einddatumGeldigheid, metadata);
+        return Objects.hash(uri, naam, uitleg, eigenaar, begindatumGeldigheid, einddatumGeldigheid, metadata, types, concepten);
     }
 }
 

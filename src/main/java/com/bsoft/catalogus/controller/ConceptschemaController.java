@@ -33,6 +33,7 @@ public class ConceptschemaController {
     public ResponseEntity<ProcesResult> getConceptschemas() {
         log.info("ConceptschemaController getConceptschemas");
         ProcesResult procesResult = null;
+
         ConceptSchemaLoader conceptSchemaLoader = new ConceptSchemaLoader(conceptschemaRepository, conceptschemaTypeRepository);
         OperationResult<ProcesResult> result = conceptSchemaLoader.loadConceptSchemas(catalogService);
         if (result.isSuccess()) {

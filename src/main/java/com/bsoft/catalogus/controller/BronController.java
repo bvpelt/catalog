@@ -25,7 +25,7 @@ public class BronController {
     @Autowired
     private BronRepository bronRepository;
 
-    @RequestMapping(value = "/bron", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/bronnen", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProcesResult> getBronnen() {
         log.info("BronController getBronnen");
         ProcesResult procesResult = null;

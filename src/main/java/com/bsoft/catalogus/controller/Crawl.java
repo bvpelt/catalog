@@ -56,8 +56,18 @@ public class Crawl {
             crawlResult.setNewEntries(crawlResult.getNewEntries() + result.getSuccessResult().getNewEntries());
             crawlResult.setPages(crawlResult.getPages() + result.getSuccessResult().getPages());
 
-            ConceptLoader conceptLoader = new ConceptLoader(conceptschemaRepository, conceptRepository, collectieRepository);
+            ConceptLoader conceptLoader = new ConceptLoader(conceptschemaRepository, conceptRepository);
             result = conceptLoader.loadConcept(catalogService);
+        }
+
+        if (result.isSuccess()) {
+            crawlResult.setUpdatedEntries(crawlResult.getUpdatedEntries() + result.getSuccessResult().getUpdatedEntries());
+            crawlResult.setUnchangedEntries(crawlResult.getUnchangedEntries() + result.getSuccessResult().getUnchangedEntries());
+            crawlResult.setNewEntries(crawlResult.getNewEntries() + result.getSuccessResult().getNewEntries());
+            crawlResult.setPages(crawlResult.getPages() + result.getSuccessResult().getPages());
+
+            CollectieLoader collectieLoader = new CollectieLoader(conceptschemaRepository, collectieRepository);
+            result = collectieLoader.loadCollectie(catalogService);
         }
 
         if (result.isSuccess()) {

@@ -37,12 +37,14 @@ public class WaardelijstController {
     public ResponseEntity<ProcesResult> getWaardelijsten() {
         log.info("WaardelijstController getWaardelijsten");
         ProcesResult procesResult = null;
+
         WaardelijstLoader waardelijstLoader = new WaardelijstLoader(waardelijstRepository, conceptschemaRepository, conceptRepository);
         OperationResult<ProcesResult> result = waardelijstLoader.loadWaardelijsten(catalogService);
         if (result.isSuccess()) {
             procesResult = result.getSuccessResult();
             return ResponseEntity.ok(procesResult);
         } else {
+            log.error("WaardelijstController getWaardelijsten error: {}", result.getFailureResult().getMessage());
             procesResult = result.getFailureResult();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(procesResult);
         }

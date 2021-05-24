@@ -21,13 +21,24 @@ public class CatalogService {
     }
 
     public OperationResult getCollecties(String uri,
-                                             String gepubliceerdDoor,
-                                             String geldigOp,
-                                             String conceptschema,
-                                             Integer page,
-                                             Integer pageSize,
-                                             List<String> expandScope) {
+                                         String gepubliceerdDoor,
+                                         String geldigOp,
+                                         String conceptschema,
+                                         Integer page,
+                                         Integer pageSize,
+                                         List<String> expandScope) {
         return catalogEndpoint.getCollecties(uri, gepubliceerdDoor, geldigOp, conceptschema, page, pageSize, expandScope);
+    }
+
+    public OperationResult getConcepten(String uri,
+                                        String gepubliceerdDoor,
+                                        String geldigOp,
+                                        String conceptschema,
+                                        String collectie,
+                                        String waardelijst,
+                                        Integer page,
+                                        Integer pageSize) {
+        return catalogEndpoint.getConcepten(uri, gepubliceerdDoor, geldigOp, conceptschema, collectie, waardelijst, page, pageSize);
     }
 
     public OperationResult getBron(String uri,
