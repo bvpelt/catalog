@@ -31,11 +31,12 @@ public class CatalogusApplicationTests {
         String uri = "http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
         String gepubliceerdDoor = "https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
         String geldigOp = "2021-04-14";
+        String zoekTerm = null;
         Integer page = 1;
         Integer pageSize = 50;
         List<String> expandScope = Arrays.asList("collecties", "concepten");
 
-        OperationResult<InlineResponse200> result = catalogService.getConceptschemas(uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
+        OperationResult<InlineResponse200> result = catalogService.getConceptschemas(uri, gepubliceerdDoor, geldigOp, zoekTerm, page, pageSize, expandScope);
         Assert.notNull(result, "Result expected, null received");
         if (result.isSuccess()) {
             InlineResponse200 inlineResponse200 = result.getSuccessResult();

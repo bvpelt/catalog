@@ -5,6 +5,7 @@ import com.bsoft.catalogus.api.ConceptschemasApi;
 import com.bsoft.catalogus.api.WaardelijstenApi;
 import com.bsoft.catalogus.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -36,14 +37,15 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
 
     }
 
-    public OperationResult getConceptschemas(String uri,
-                                             String gepubliceerdDoor,
-                                             String geldigOp,
-                                             Integer page,
-                                             Integer pageSize,
-                                             List<String> expandScope) {
+    public OperationResult getConceptschemas(final String uri,
+                                             final String gepubliceerdDoor,
+                                             final String geldigOp,
+                                             final String zoekTerm,
+                                             final Integer page,
+                                             final Integer pageSize,
+                                             final List<String> expandScope) {
         try {
-            ResponseEntity<InlineResponse200> responseEntity = conceptschemasGet(uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
+            ResponseEntity<InlineResponse200> responseEntity = conceptschemasGet(uri, gepubliceerdDoor, geldigOp, zoekTerm, page, pageSize, expandScope);
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseEntity.getBody());
@@ -61,16 +63,17 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
         }
     }
 
-    @Override
     public ResponseEntity<InlineResponse200> conceptschemasGet(@Valid @RequestParam(value = "uri", required = false) String uri,
                                                                @Valid @RequestParam(value = "gepubliceerdDoor", required = false) String gepubliceerdDoor,
                                                                @Valid @RequestParam(value = "geldigOp", required = false) String geldigOp,
-                                                               @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-                                                               @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
+                                                               @Valid @RequestParam(value = "zoekTerm", required = false) String zoekTerm,
+                                                               @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue="1") Integer page,
+                                                               @Valid @RequestParam(value = "pageSize", required = false, defaultValue="10") Integer pageSize,
                                                                @Valid @RequestParam(value = "_expandScope", required = false) List<String> expandScope) {
+
         logGetRequest(CONCEPT_SCHEMA_PREFIX);
 
-        String parameters = getParameters(uri, gepubliceerdDoor, geldigOp, null, null, null, page, pageSize, expandScope);
+        String parameters = getParameters(uri, gepubliceerdDoor, geldigOp, zoekTerm, null, null, null, page, pageSize, expandScope);
 
         return getRestTemplate().exchange(
                 getBaseUrl() + CONCEPT_SCHEMA_PREFIX + parameters,
@@ -79,16 +82,16 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                 InlineResponse200.class
         );
     }
-
-    public OperationResult getCollecties(String uri,
-                                         String gepubliceerdDoor,
-                                         String geldigOp,
-                                         String conceptschema,
-                                         Integer page,
-                                         Integer pageSize,
-                                         List<String> expandScope) {
+    public OperationResult getCollecties(final String uri,
+                                         final String gepubliceerdDoor,
+                                         final String geldigOp,
+                                         final String zoekTerm,
+                                         final String conceptschema,
+                                         final Integer page,
+                                         final Integer pageSize,
+                                         final List<String> expandScope) {
         try {
-            ResponseEntity<InlineResponse2001> responseEntity = collectiesGet(uri, gepubliceerdDoor, geldigOp, conceptschema, page, pageSize, expandScope);
+            ResponseEntity<InlineResponse2001> responseEntity = collectiesGet(uri, gepubliceerdDoor, geldigOp, zoekTerm, conceptschema, page, pageSize, expandScope);
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseEntity.getBody());
@@ -109,13 +112,15 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
     public ResponseEntity<InlineResponse2001> collectiesGet(@Valid @RequestParam(value = "uri", required = false) String uri,
                                                             @Valid @RequestParam(value = "gepubliceerdDoor", required = false) String gepubliceerdDoor,
                                                             @Valid @RequestParam(value = "geldigOp", required = false) String geldigOp,
+                                                            @Valid @RequestParam(value = "zoekTerm", required = false) String zoekTerm,
                                                             @Valid @RequestParam(value = "conceptschema", required = false) String conceptschema,
-                                                            @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-                                                            @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
+                                                            @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue="1") Integer page,
+                                                            @Valid @RequestParam(value = "pageSize", required = false, defaultValue="10") Integer pageSize,
                                                             @Valid @RequestParam(value = "_expandScope", required = false) List<String> expandScope) {
+
         logGetRequest(COLLECTIES_PREFIX);
 
-        String parameters = getParameters(uri, gepubliceerdDoor, geldigOp, conceptschema, null, null, page, pageSize, expandScope);
+        String parameters = getParameters(uri, gepubliceerdDoor, geldigOp, zoekTerm, conceptschema, null, null, page, pageSize, expandScope);
 
         return getRestTemplate().exchange(
                 getBaseUrl() + COLLECTIES_PREFIX + parameters,
@@ -124,9 +129,17 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                 InlineResponse2001.class);
     }
 
-    public OperationResult getConcepten(final String uri, final String gepubliceerdDoor, final String geldigOp, final String conceptschema, final String collectie, final String waardelijst, final Integer page, final Integer pageSize) {
+    public OperationResult getConcepten(final String uri,
+                                        final String gepubliceerdDoor,
+                                        final String geldigOp,
+                                        final String zoekTerm,
+                                        final String conceptschema,
+                                        final String collectie,
+                                        final String waardelijst,
+                                        final Integer page,
+                                        final Integer pageSize) {
         try {
-            ResponseEntity<InlineResponse2002> responseEntity = conceptenGet(uri, gepubliceerdDoor, geldigOp, conceptschema, collectie, waardelijst, page, pageSize);
+            ResponseEntity<InlineResponse2002> responseEntity = conceptenGet(uri, gepubliceerdDoor, geldigOp, zoekTerm, conceptschema, collectie, waardelijst, page, pageSize);
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseEntity.getBody());
@@ -147,6 +160,7 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
     public ResponseEntity<InlineResponse2002> conceptenGet(@Valid @RequestParam(value = "uri", required = false) String uri,
                                                            @Valid @RequestParam(value = "gepubliceerdDoor", required = false) String gepubliceerdDoor,
                                                            @Valid @RequestParam(value = "geldigOp", required = false) String geldigOp,
+                                                           @Valid @RequestParam(value = "zoekTerm", required = false) String zoekTerm,
                                                            @Valid @RequestParam(value = "conceptschema", required = false) String conceptschema,
                                                            @Valid @RequestParam(value = "collectie", required = false) String collectie,
                                                            @Valid @RequestParam(value = "waardelijst", required = false) String waardelijst,
@@ -155,7 +169,7 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
 
         logGetRequest(CONCEPTEN_PREFIX);
 
-        String parameters = getParameters(uri, gepubliceerdDoor, geldigOp, conceptschema, collectie, waardelijst, page, pageSize, null);
+        String parameters = getParameters(uri, gepubliceerdDoor, geldigOp, zoekTerm, conceptschema, collectie, waardelijst, page, pageSize, null);
 
         return getRestTemplate().exchange(
                 getBaseUrl() + CONCEPTEN_PREFIX + parameters,
@@ -165,14 +179,14 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
     }
 
 
-    public OperationResult getBron(String uri,
-                                   String gepubliceerdDoor,
-                                   String geldigOp,
-                                   Integer page,
-                                   Integer pageSize
-    ) {
+    public OperationResult getBron(final String uri,
+                                   final String gepubliceerdDoor,
+                                   final String geldigOp,
+                                   final String zoekTerm,
+                                   final Integer page,
+                                   final Integer pageSize) {
         try {
-            ResponseEntity<InlineResponse2003> responseEntity = bronnenGet(uri, gepubliceerdDoor, geldigOp, page, pageSize);
+            ResponseEntity<InlineResponse2003> responseEntity = bronnenGet(uri, gepubliceerdDoor, geldigOp, zoekTerm, page, pageSize);
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseEntity.getBody());
@@ -190,17 +204,17 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
         }
     }
 
-    @Override
-    public ResponseEntity<InlineResponse2003> bronnenGet(@Valid @RequestParam(value = "uri", required = false) String uri,
-                                                         @Valid @RequestParam(value = "gepubliceerdDoor", required = false) String gepubliceerdDoor,
-                                                         @Valid @RequestParam(value = "geldigOp", required = false) String geldigOp,
-                                                         @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-                                                         @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
 
+    public  ResponseEntity<InlineResponse2003> bronnenGet(@Valid @RequestParam(value = "uri", required = false) String uri,
+                                                          @Valid @RequestParam(value = "gepubliceerdDoor", required = false) String gepubliceerdDoor,
+                                                          @Valid @RequestParam(value = "geldigOp", required = false) String geldigOp,
+                                                          @Valid @RequestParam(value = "zoekTerm", required = false) String zoekTerm,
+                                                          @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue="1") Integer page,
+                                                          @Valid @RequestParam(value = "pageSize", required = false, defaultValue="10") Integer pageSize) {
 
         logGetRequest(BRONNEN_PREFIX);
 
-        String parameters = getParameters(uri, gepubliceerdDoor, geldigOp, null, null, null, page, pageSize, null);
+        String parameters = getParameters(uri, gepubliceerdDoor, geldigOp, zoekTerm,null, null, null, page, pageSize, null);
 
         return getRestTemplate().exchange(
                 getBaseUrl() + BRONNEN_PREFIX + parameters,
@@ -211,12 +225,13 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
 
     public OperationResult getWaardenlijst(String uri,
                                            String gepubliceerdDoor,
+                                           String zoekTerm,
                                            List<String> expandScope,
                                            Integer page,
                                            Integer pageSize
     ) {
         try {
-            ResponseEntity<InlineResponse2004> responseEntity = waardelijstenGet(uri, gepubliceerdDoor, expandScope, page, pageSize);
+            ResponseEntity<InlineResponse2004> responseEntity = waardelijstenGet(uri, gepubliceerdDoor, expandScope, zoekTerm, page, pageSize);
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseEntity.getBody());
@@ -234,16 +249,16 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
         }
     }
 
-    @Override
     public ResponseEntity<InlineResponse2004> waardelijstenGet(@Valid @RequestParam(value = "uri", required = false) String uri,
                                                                @Valid @RequestParam(value = "gepubliceerdDoor", required = false) String gepubliceerdDoor,
                                                                @Valid @RequestParam(value = "_expandScope", required = false) List<String> expandScope,
-                                                               @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-                                                               @Valid @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize) {
+                                                               @Valid @RequestParam(value = "zoekTerm", required = false) String zoekTerm,
+                                                               @Min(1) @Valid @RequestParam(value = "page", required = false, defaultValue="1") Integer page,
+                                                               @Valid @RequestParam(value = "pageSize", required = false, defaultValue="10") Integer pageSize) {
 
         logGetRequest(WAARDELIJSTEN_PREFIX);
 
-        String parameters = getParameters(uri, gepubliceerdDoor, null, null, null, null, page, pageSize, expandScope);
+        String parameters = getParameters(uri, gepubliceerdDoor, null, zoekTerm,null, null, null, page, pageSize, null);
 
         return getRestTemplate().exchange(
                 getBaseUrl() + WAARDELIJSTEN_PREFIX + parameters,
@@ -262,7 +277,7 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                 "-------------------------------------------" + System.lineSeparator());
     }
 
-    private String getExpandScope(List<String> expandScope, String andSign) {
+    private String getExpandScope(final List<String> expandScope, final String andSign) {
         String expandScopeString = "";
         if ((expandScope != null) && (expandScope.size() > 0)) {
 
@@ -276,15 +291,17 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
         return expandScopeString;
     }
 
-    private String getParameters(String uri,
-                                 String gepubliceerdDoor,
-                                 String geldigOp,
-                                 String conceptschema,
-                                 String collectie,
-                                 String waardelijst,
-                                 Integer page,
-                                 Integer pageSize,
-                                 List<String> expandScope) {
+
+    private String getParameters(final String uri,
+                                 final String gepubliceerdDoor,
+                                 final String geldigOp,
+                                 final String zoekTerm,
+                                 final String conceptschema,
+                                 final String collectie,
+                                 final String waardelijst,
+                                 final Integer page,
+                                 final Integer pageSize,
+                                 final List<String> expandScope) {
         String parameters = "";
         String andSign = "";
 
@@ -308,6 +325,13 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                 parameters = "?";
             }
             parameters = parameters + andSign + String.format("geldigOp=%s", geldigOp);
+            andSign = "&";
+        }
+        if ((zoekTerm != null) && (zoekTerm.length() > 0)) {
+            if (parameters.length() == 0) {
+                parameters = "?";
+            }
+            parameters = parameters + andSign + String.format("zoekTerm=%s", zoekTerm);
             andSign = "&";
         }
         if ((conceptschema != null) && (conceptschema.length() > 0)) {
@@ -360,6 +384,7 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                 "uri: " + (uri == null ? "" : uri) + System.lineSeparator() +
                 "gepubliceerdDoor: " + (gepubliceerdDoor == null ? "" : gepubliceerdDoor) + System.lineSeparator() +
                 "geldigOp: " + (geldigOp == null ? "" : geldigOp) + System.lineSeparator() +
+                "zoekTerm: " + (zoekTerm == null ? "" : zoekTerm) + System.lineSeparator() +
                 "conceptschema: " + (conceptschema == null ? "" : conceptschema) + System.lineSeparator() +
                 "collectie: " + (collectie == null ? "" : collectie) + System.lineSeparator() +
                 "waardelijst: " + (waardelijst == null ? "" : waardelijst) + System.lineSeparator() +

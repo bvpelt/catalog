@@ -31,6 +31,7 @@ public class CollectieLoader {
         String uri = null;              //"http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
         String gepubliceerdDoor = null; //"https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
         String geldigOp = null;         //new CatalogUtil().getCurrentDate();
+        String zoekTerm = null;
         Integer page = 1;
         Integer pageSize = 10;
         List<String> expandScope = null; // Arrays.asList("concepten", "collecties");
@@ -48,7 +49,7 @@ public class CollectieLoader {
             while (goOn) {
                 log.info("CollectieLoader loadCollectie page: {}", page);
 
-                getPage(catalogService, procesResult, uri, gepubliceerdDoor, geldigOp, page, pageSize, expandScope);
+                getPage(catalogService, procesResult, uri, gepubliceerdDoor, geldigOp, zoekTerm, page, pageSize, expandScope);
                 goOn = procesResult.isMore();
                 if (goOn) {
                     page++;
@@ -69,6 +70,7 @@ public class CollectieLoader {
                          final String uri,
                          final String gepubliceerdDoor,
                          final String geldigOp,
+                         final String zoekTerm,
                          final Integer page,
                          final Integer pageSize,
                          final List<String> expandScope) {
@@ -76,7 +78,7 @@ public class CollectieLoader {
         OperationResult<InlineResponse2001> result = null;
         boolean nextPage = false;
 
-        result = catalogService.getCollecties(uri, gepubliceerdDoor, geldigOp, null, page, pageSize, expandScope);
+        result = catalogService.getCollecties(uri, gepubliceerdDoor, geldigOp, zoekTerm,null, page, pageSize, expandScope);
 
         if (result.isSuccess()) {
             InlineResponse2001 inlineResponse2001 = result.getSuccessResult();
@@ -85,13 +87,15 @@ public class CollectieLoader {
 
             persistCollecties(collecties, procesResult);
 
-            if (result.getSuccessResult().getLinks().getNext() != null) {
-                if (result.getSuccessResult().getLinks().getNext().getHref() != null) {
-                    nextPage = true;
-                    log.info("CollectieLoader getPage page: {} next: {}", page, result.getSuccessResult().getLinks().getNext().getHref());
+            if (procesResult.getStatus() == ProcesResult.SUCCESS) {
+                if (result.getSuccessResult().getLinks().getNext() != null) {
+                    if (!((result.getSuccessResult().getLinks().getNext().getHref().isPresent() && (result.getSuccessResult().getLinks().getNext().getHref().get() == null)) || (!result.getSuccessResult().getLinks().getNext().getHref().isPresent()))) {
+                        nextPage = true;
+                        log.info("CollectieLoader getPage page: {} next: {}", page, result.getSuccessResult().getLinks().getNext().getHref());
+                    }
                 }
+                procesResult.setPages(procesResult.getPages() + 1);
             }
-            procesResult.setPages(procesResult.getPages() + 1);
         } else {
             procesResult.setStatus(ProcesResult.ERROR);
             procesResult.setMessage(result.getFailureResult().toString());

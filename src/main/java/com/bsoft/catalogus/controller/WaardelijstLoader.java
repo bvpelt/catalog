@@ -34,6 +34,7 @@ public class WaardelijstLoader {
 
         String uri = null;              //"http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
         String gepubliceerdDoor = null; //"https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";/;
+        String zoekTerm = null;
         Integer page = 1;
         Integer pageSize = 10;
         List<String> expandScope = Arrays.asList("waarden");
@@ -50,7 +51,7 @@ public class WaardelijstLoader {
         try {
             while (goOn) {
                 log.info("WaardelijstLoader loadWaardelijsten page: {}", page);
-                getPage(catalogService, procesResult, uri, gepubliceerdDoor, page, pageSize, expandScope);
+                getPage(catalogService, procesResult, uri, gepubliceerdDoor, zoekTerm, page, pageSize, expandScope);
 
                 goOn = procesResult.isMore();
                 if (goOn) {
@@ -71,6 +72,7 @@ public class WaardelijstLoader {
                          final ProcesResult procesResult,
                          final String uri,
                          final String gepubliceerdDoor,
+                         final String zoekTerm,
                          final Integer page,
                          final Integer pageSize,
                          final List<String> expandScope) {
@@ -78,7 +80,7 @@ public class WaardelijstLoader {
         OperationResult<InlineResponse2004> result = null;
         boolean nextPage = false;
 
-        result = catalogService.getWaardelijst(uri, gepubliceerdDoor, expandScope, page, pageSize);
+        result = catalogService.getWaardelijst(uri, gepubliceerdDoor, zoekTerm, expandScope, page, pageSize);
 
         if (result.isSuccess()) {
             InlineResponse2004 inlineResponse2004 = result.getSuccessResult();
@@ -87,13 +89,15 @@ public class WaardelijstLoader {
 
             persistWaardelijsten(waardelijsts, procesResult);
 
-            if (result.getSuccessResult().getLinks().getNext() != null) {
-                if (result.getSuccessResult().getLinks().getNext().getHref() != null) {
-                    nextPage = true;
-                    log.info("WaardelijstLoader getPage page: {} next: {}", page, result.getSuccessResult().getLinks().getNext().getHref());
+            if (procesResult.getStatus() == ProcesResult.SUCCESS) {
+                if (result.getSuccessResult().getLinks().getNext() != null) {
+                    if (!((result.getSuccessResult().getLinks().getNext().getHref().isPresent() && (result.getSuccessResult().getLinks().getNext().getHref().get() == null)) || (!result.getSuccessResult().getLinks().getNext().getHref().isPresent()))) {
+                        nextPage = true;
+                        log.info("WaardelijstLoader getPage page: {} next: {}", page, result.getSuccessResult().getLinks().getNext().getHref());
+                    }
                 }
+                procesResult.setPages(page);
             }
-            procesResult.setPages(page);
         } else {
             procesResult.setStatus(ProcesResult.ERROR);
             procesResult.setMessage(result.getFailureResult().toString());

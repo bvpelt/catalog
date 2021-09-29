@@ -1,5 +1,6 @@
 package com.bsoft.catalogus.controller;
 
+import com.bsoft.catalogus.model.CrawlResult;
 import com.bsoft.catalogus.model.ProcesResult;
 import com.bsoft.catalogus.repository.*;
 import com.bsoft.catalogus.services.CatalogService;
@@ -37,76 +38,60 @@ public class Crawl {
     private BronRepository bronRepository;
 
     @RequestMapping(value = "/crawl", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ProcesResult> doCrawl() {
+    public ResponseEntity<CrawlResult> doCrawl() {
         log.info("ConceptschemaController getConceptschemas");
+        CrawlResult crawlResult = new CrawlResult();
         ProcesResult procesResult = null;
 
         OperationResult<ProcesResult> result = null;
-        ProcesResult crawlResult = new ProcesResult();
         // get conceptschema's
-        // get all concepts and collections
+        // get all concepts
+        // get all collections
         // get all bronnen
         // get all waardelijsten
         ConceptSchemaLoader conceptSchemaLoader = new ConceptSchemaLoader(conceptschemaRepository, conceptschemaTypeRepository);
         result = conceptSchemaLoader.loadConceptSchemas(catalogService);
 
         if (result.isSuccess()) {
-            crawlResult.setUpdatedEntries(crawlResult.getUpdatedEntries() + result.getSuccessResult().getUpdatedEntries());
-            crawlResult.setUnchangedEntries(crawlResult.getUnchangedEntries() + result.getSuccessResult().getUnchangedEntries());
-            crawlResult.setNewEntries(crawlResult.getNewEntries() + result.getSuccessResult().getNewEntries());
-            crawlResult.setPages(crawlResult.getPages() + result.getSuccessResult().getPages());
+            crawlResult.setConceptSchema(result.getSuccessResult());
 
             ConceptLoader conceptLoader = new ConceptLoader(conceptschemaRepository, conceptRepository);
             result = conceptLoader.loadConcept(catalogService);
         }
 
         if (result.isSuccess()) {
-            crawlResult.setUpdatedEntries(crawlResult.getUpdatedEntries() + result.getSuccessResult().getUpdatedEntries());
-            crawlResult.setUnchangedEntries(crawlResult.getUnchangedEntries() + result.getSuccessResult().getUnchangedEntries());
-            crawlResult.setNewEntries(crawlResult.getNewEntries() + result.getSuccessResult().getNewEntries());
-            crawlResult.setPages(crawlResult.getPages() + result.getSuccessResult().getPages());
+            crawlResult.setConcepten(result.getSuccessResult());
 
             CollectieLoader collectieLoader = new CollectieLoader(conceptschemaRepository, collectieRepository);
             result = collectieLoader.loadCollectie(catalogService);
         }
 
         if (result.isSuccess()) {
-            crawlResult.setUpdatedEntries(crawlResult.getUpdatedEntries() + result.getSuccessResult().getUpdatedEntries());
-            crawlResult.setUnchangedEntries(crawlResult.getUnchangedEntries() + result.getSuccessResult().getUnchangedEntries());
-            crawlResult.setNewEntries(crawlResult.getNewEntries() + result.getSuccessResult().getNewEntries());
-            crawlResult.setPages(crawlResult.getPages() + result.getSuccessResult().getPages());
+            crawlResult.setCollecties(result.getSuccessResult());
 
             BronLoader bronLoader = new BronLoader(bronRepository);
             result = bronLoader.loadBron(catalogService);
         }
 
         if (result.isSuccess()) {
-            crawlResult.setUpdatedEntries(crawlResult.getUpdatedEntries() + result.getSuccessResult().getUpdatedEntries());
-            crawlResult.setUnchangedEntries(crawlResult.getUnchangedEntries() + result.getSuccessResult().getUnchangedEntries());
-            crawlResult.setNewEntries(crawlResult.getNewEntries() + result.getSuccessResult().getNewEntries());
-            crawlResult.setPages(crawlResult.getPages() + result.getSuccessResult().getPages());
+            crawlResult.setBronnen(result.getSuccessResult());
 
             WaardelijstLoader waardelijstLoader = new WaardelijstLoader(waardelijstRepository, conceptschemaRepository, conceptRepository);
             result = waardelijstLoader.loadWaardelijsten(catalogService);
         }
 
-        crawlResult.setUpdatedEntries(crawlResult.getUpdatedEntries() + result.getSuccessResult().getUpdatedEntries());
-        crawlResult.setUnchangedEntries(crawlResult.getUnchangedEntries() + result.getSuccessResult().getUnchangedEntries());
-        crawlResult.setNewEntries(crawlResult.getNewEntries() + result.getSuccessResult().getNewEntries());
-        crawlResult.setPages(crawlResult.getPages() + result.getSuccessResult().getPages());
-
-        if (!result.isSuccess()) {
+        if (result.isSuccess()) {
+            crawlResult.setWaarden(result.getSuccessResult());
+        } else {
             crawlResult.setMessage(result.getFailureResult().getMessage());
+            crawlResult.setStatus(ProcesResult.ERROR);
         }
 
-        result = OperationResult.success(crawlResult);
 
-        if (result.isSuccess()) {
-            procesResult = result.getSuccessResult();
-            return ResponseEntity.ok(procesResult);
+        if (crawlResult.getStatus() == 0) {
+            return ResponseEntity.ok(crawlResult);
         } else {
-            procesResult = result.getFailureResult();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(procesResult);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(crawlResult);
         }
     }
 }

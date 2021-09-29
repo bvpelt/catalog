@@ -26,6 +26,7 @@ public class BronLoader {
         String uri = null;              // "http://regelgeving.omgevingswet.overheid.nl/id/conceptscheme/Regelgeving";
         String gepubliceerdDoor = null; // "https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
         String geldigOp = null;         // new CatalogUtil().getCurrentDate();
+        String zoekTerm = null;
         Integer page = 1;
         Integer pageSize = 10;
         boolean goOn = true;
@@ -42,7 +43,7 @@ public class BronLoader {
         try {
             while (goOn) {
                 log.info("BronLoader loadBron page: {}", page);
-                getPage(catalogService, procesResult, uri, gepubliceerdDoor, geldigOp, page, pageSize);
+                getPage(catalogService, procesResult, uri, gepubliceerdDoor, geldigOp, zoekTerm, page, pageSize);
 
                 goOn = procesResult.isMore();
                 if (goOn) {
@@ -64,13 +65,14 @@ public class BronLoader {
                          final String uri,
                          final String gepubliceerdDoor,
                          final String geldigOp,
+                         final String zoekTerm,
                          final Integer page,
                          final Integer pageSize) {
 
         OperationResult<InlineResponse2003> result = null;
         boolean nextPage = false;
 
-        result = catalogService.getBron(uri, gepubliceerdDoor, geldigOp, page, pageSize);
+        result = catalogService.getBron(uri, gepubliceerdDoor, geldigOp, zoekTerm, page, pageSize);
 
         if (result.isSuccess()) {
             InlineResponse2003 inlineResponse2003 = result.getSuccessResult();
@@ -79,9 +81,9 @@ public class BronLoader {
             List<Bron> bronnen = embedded.getBronnen();
             persistBronnen(bronnen, procesResult);
 
-            if (procesResult.getStatus() == 0) {
+            if (procesResult.getStatus() == ProcesResult.SUCCESS) {
                 if (result.getSuccessResult().getLinks().getNext() != null) {
-                    if (result.getSuccessResult().getLinks().getNext().getHref() != null) {
+                    if (!((result.getSuccessResult().getLinks().getNext().getHref().isPresent() && (result.getSuccessResult().getLinks().getNext().getHref().get() == null)) || (!result.getSuccessResult().getLinks().getNext().getHref().isPresent()))) {
                         nextPage = true;
                         log.debug("BronLoader getPage page: {} next: {}", page, result.getSuccessResult().getLinks().getNext().getHref());
                     }
