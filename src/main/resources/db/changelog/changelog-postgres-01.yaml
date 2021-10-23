@@ -42,7 +42,24 @@ databaseChangeLog:
               - tableName: CONCEPTSCHEMA
 
   - changeSet:
-      id: 110
+      id:  110
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create CONCEPTSCHEMA uri index
+      changes:
+        - createIndex:
+            clustered:  true
+            columns:
+              - column:
+                  descending:  true
+                  name:  URI
+            indexName:  idx_uri
+            schemaName:  public
+            tableName:  CONCEPTSCHEMA
+            unique:  true
+
+  - changeSet:
+      id: 120
       author: bart
       dbms: PostgreSQL
       comment: Create CONCEPTSCHEMATYPE
@@ -66,7 +83,24 @@ databaseChangeLog:
               - tableName: CONCEPTSCHEMATYPE
 
   - changeSet:
-      id: 120
+      id:  130
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create CONCEPTSCHEMATYPE type index
+      changes:
+        - createIndex:
+            clustered:  true
+            columns:
+              - column:
+                  descending:  true
+                  name:  TYPE
+            indexName:  idx_type
+            schemaName:  public
+            tableName:  CONCEPTSCHEMATYPE
+            unique:  false
+
+  - changeSet:
+      id: 140
       author: bart
       dbms: PostgreSQL
       comment: Create CONCEPTSCHEMAS_TYPES

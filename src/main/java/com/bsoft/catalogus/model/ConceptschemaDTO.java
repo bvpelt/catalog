@@ -4,10 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity(name = "ConceptschemaDTO")
 @Table(name = "CONCEPTSCHEMA")
@@ -20,6 +17,18 @@ public class ConceptschemaDTO implements Serializable {
 
     @Column(name = "URI")
     private String uri;
+
+
+    //@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @JoinTable(name = "CONCEPTSCHEMAS_TYPES",
+            joinColumns = {
+                    @JoinColumn(name = "CONCEPTSCHEMA_ID", referencedColumnName = "id",
+                            nullable = false, updatable = false)},
+            inverseJoinColumns = {
+                    @JoinColumn(name = "CONCEPTSCHEMATYPE_ID", referencedColumnName = "id",
+                            nullable = false, updatable = false)})
+    private Set<ConceptschemaTypeDTO> types = new HashSet<>();
 
     @Column(name = "NAAM")
     private String naam;
@@ -39,38 +48,25 @@ public class ConceptschemaDTO implements Serializable {
     @Column(name = "METADATA")
     private String metadata;
 
-    //
-    // Relations
-    //
 
-    //    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    //@ManyToMany
-    @JoinTable(name = "CONCEPTSCHEMAS_TYPES",
-            joinColumns = {
-                    @JoinColumn(name = "conceptschema_id", referencedColumnName = "id",
-                            nullable = false, updatable = false)},
-            inverseJoinColumns = {
-                    @JoinColumn(name = "conceptschematype_id", referencedColumnName = "id",
-                            nullable = false, updatable = false)})
-    private Set<ConceptschemaTypeDTO> types = new HashSet<>();
-
-
-    @OneToMany(mappedBy = "conceptschema", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
-            CascadeType.REFRESH})
+//    @OneToMany(mappedBy = "conceptschema", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH,
+//            CascadeType.REFRESH})
+/*
+    @OneToMany(mappedBy = "conceptschema", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ConceptDTO> concepten;
+*/
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ConceptschemaDTO)) return false;
         ConceptschemaDTO that = (ConceptschemaDTO) o;
-        return uri.equals(that.uri) && Objects.equals(naam, that.naam) && Objects.equals(uitleg, that.uitleg) && Objects.equals(eigenaar, that.eigenaar) && Objects.equals(begindatumGeldigheid, that.begindatumGeldigheid) && Objects.equals(einddatumGeldigheid, that.einddatumGeldigheid) && Objects.equals(metadata, that.metadata) && Objects.equals(types, that.types) && Objects.equals(concepten, that.concepten);
+        return uri.equals(that.uri) && Objects.equals(naam, that.naam) && Objects.equals(uitleg, that.uitleg) && Objects.equals(eigenaar, that.eigenaar) && begindatumGeldigheid.equals(that.begindatumGeldigheid) && Objects.equals(einddatumGeldigheid, that.einddatumGeldigheid) && Objects.equals(metadata, that.metadata);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri, naam, uitleg, eigenaar, begindatumGeldigheid, einddatumGeldigheid, metadata, types, concepten);
+        return Objects.hash(uri, naam, uitleg, eigenaar, begindatumGeldigheid, einddatumGeldigheid, metadata);
     }
 }
 

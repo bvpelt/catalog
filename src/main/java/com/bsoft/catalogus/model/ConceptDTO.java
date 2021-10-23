@@ -3,14 +3,16 @@ package com.bsoft.catalogus.model;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 @Entity(name = "ConceptDTO")
 @Table(name = "CONCEPT")
 @Data
-public class ConceptDTO {
+public class ConceptDTO implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
@@ -34,12 +36,18 @@ public class ConceptDTO {
     @Column(name = "DEFINITIE")
     private String definitie;
 
+    @OneToMany(mappedBy = "concept", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<TrefwoordDTO> trefwoorden;
+
     @Column(name = "EIGENAAR")
     private String eigenaar;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "CONCEPTSCHEMA_ID")
+ //   @ManyToOne(cascade = CascadeType.ALL)
+ //   @JoinColumn(name = "CONCEPTSCHEMA_ID")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "conceptschema_id", nullable = false)
     private ConceptschemaDTO conceptschema;
+
     //   private List<String> toelichtingen; //
     //   private List<String> rationales;
     //   private List<String> verbeeldingen;
@@ -67,7 +75,8 @@ public class ConceptDTO {
     @Column(name = "METADATA")
     private String metadata;
 
-    @ManyToMany(mappedBy = "waarden", cascade = {CascadeType.ALL})
+    //@ManyToMany(mappedBy = "waarden", cascade = {CascadeType.ALL})
+    @ManyToMany(mappedBy = "waarden", fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     private Set<WaardelijstDTO> waardelijsten = new HashSet<>();
 
     @Override

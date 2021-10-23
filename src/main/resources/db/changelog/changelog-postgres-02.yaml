@@ -1,37 +1,4 @@
 databaseChangeLog:
-  - changeSet:
-      id:  200
-      author:  bart
-      dbms: PostgreSQL
-      comment: Create CONCEPTSCHEMA uri index
-      changes:
-        - createIndex:
-            clustered:  true
-            columns:
-              - column:
-                  descending:  true
-                  name:  URI
-            indexName:  idx_uri
-            schemaName:  public
-            tableName:  CONCEPTSCHEMA
-            unique:  true
-
-  - changeSet:
-        id:  210
-        author:  bart
-        dbms: PostgreSQL
-        comment: Create CONCEPTSCHEMATYPE type index
-        changes:
-            - createIndex:
-                  clustered:  true
-                  columns:
-                      - column:
-                            descending:  true
-                            name:  TYPE
-                  indexName:  idx_type
-                  schemaName:  public
-                  tableName:  CONCEPTSCHEMATYPE
-                  unique:  true
 
   - changeSet:
       id:  220
@@ -57,7 +24,7 @@ databaseChangeLog:
       comment: Create CONCEPTSCHEMAS_TYPES CONCEPTSCHEMATYPE_ID index
       changes:
         - createIndex:
-            clustered:  true
+            clustered:  false
             columns:
               - column:
                   descending:  true

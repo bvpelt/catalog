@@ -34,7 +34,7 @@ public class ConceptLoader {
         String geldigOp = null;          //new CatalogUtil().getCurrentDate();
         String zoekTerm = null;
         Integer page = 1;
-        Integer pageSize = 10;
+        Integer pageSize = 10; // 10,20,40
         List<String> expandScope = null; //Arrays.asList("concepten", "collecties");
         boolean goOn = true;
 

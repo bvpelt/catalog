@@ -5,9 +5,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity(name = "ConceptschemaTypeDTO")
 @Table(name = "CONCEPTSCHEMATYPE")
@@ -21,10 +19,8 @@ public class ConceptschemaTypeDTO implements Serializable {
     @Column(name = "TYPE")
     private String type;
 
-    //@ManyToMany(mappedBy = "types", fetch = FetchType.LAZY)
-    @ManyToMany(mappedBy = "types", cascade = {CascadeType.ALL})
-    //@ManyToMany(mappedBy = "types")
-    private Set<ConceptschemaDTO> conceptschemas = new HashSet<>();
+    @ManyToMany(mappedBy = "types", fetch = FetchType.LAZY)
+    private Set<ConceptschemaDTO> conceptschema = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {

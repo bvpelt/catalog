@@ -5,6 +5,7 @@ import com.bsoft.catalogus.repository.ConceptschemaRepository;
 import com.bsoft.catalogus.repository.ConceptschemaTypeRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
+import com.bsoft.catalogus.util.SetUtils;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -74,7 +75,7 @@ public class ConceptSchemaLoader {
                          final Integer pageSize,
                          final List<String> expandScope) {
 
-        OperationResult<InlineResponse200> result = null;
+        OperationResult<InlineResponse200> result;
         boolean nextPage = false;
 
         result = catalogService.getConceptschemas(uri, gepubliceerdDoor, geldigOp, zoekTerm, page, pageSize, expandScope);
@@ -82,18 +83,23 @@ public class ConceptSchemaLoader {
         if (result.isSuccess()) {
             InlineResponse200 inlineResponse200 = result.getSuccessResult();
             InlineResponse200Embedded embedded = inlineResponse200.getEmbedded();
-            List<Conceptschema> conceptschemas = embedded.getConceptschemas();
+            List<Conceptschema> conceptschemas;
 
-            persistConceptSchemas(conceptschemas, procesResult);
+            if (embedded != null) {
+                conceptschemas = embedded.getConceptschemas();
 
-            if (procesResult.getStatus() == ProcesResult.SUCCESS) {
-                if (result.getSuccessResult().getLinks().getNext() != null) {
-                    if (!((result.getSuccessResult().getLinks().getNext().getHref().isPresent() && (result.getSuccessResult().getLinks().getNext().getHref().get() == null)) || (!result.getSuccessResult().getLinks().getNext().getHref().isPresent()))) {
-                        nextPage = true;
-                        log.info("ConceptSchemaLoader getPage page: {} next: {}", page, result.getSuccessResult().getLinks().getNext().getHref());
+
+                persistConceptSchemas(conceptschemas, procesResult);
+
+                if (procesResult.getStatus() == ProcesResult.SUCCESS) {
+                    if (result.getSuccessResult().getLinks().getNext() != null) {
+                        if (!((result.getSuccessResult().getLinks().getNext().getHref().isPresent() && (result.getSuccessResult().getLinks().getNext().getHref().get() == null)) || (!result.getSuccessResult().getLinks().getNext().getHref().isPresent()))) {
+                            nextPage = true;
+                            log.info("ConceptSchemaLoader getPage page: {} next: {}", page, result.getSuccessResult().getLinks().getNext().getHref());
+                        }
                     }
+                    procesResult.setPages(procesResult.getPages() + 1);
                 }
-                procesResult.setPages(procesResult.getPages() + 1);
             }
         } else {
             procesResult.setStatus(ProcesResult.ERROR);
@@ -103,13 +109,14 @@ public class ConceptSchemaLoader {
         procesResult.setMore(nextPage);
     }
 
-    private void persistConceptSchemas(final List<Conceptschema> conceptschemas, final ProcesResult procesResult) {
+
+    public void persistConceptSchemas(final List<Conceptschema> conceptschemas, final ProcesResult procesResult) {
         int maxsize = conceptschemas.size();
         log.info("persistConceptSchemas number found: {}", maxsize);
 
-        for (int i = 0; i < maxsize; i++) {
-            log.debug("ConceptSchemaLoader persistConceptSchemas: begin found conceptschema: {}", conceptschemas.get(i).getNaam());
-            ConceptschemaDTO conceptschemaDTO = convertToConcepschemaDTO(conceptschemas.get(i), procesResult);
+        for (Conceptschema conceptschema : conceptschemas) {
+            log.debug("ConceptSchemaLoader persistConceptSchemas: begin found conceptschema: {}", conceptschema.getNaam());
+            ConceptschemaDTO conceptschemaDTO = convertToConcepschemaDTO(conceptschema, procesResult);
             log.debug("ConceptSchemaLoader persistConceptSchemas: end   found conceptschema: {}", conceptschemaDTO == null ? "(null)" : conceptschemaDTO.getNaam());
         }
     }
@@ -118,7 +125,7 @@ public class ConceptSchemaLoader {
     public ConceptschemaDTO convertToConcepschemaDTO(final Conceptschema conceptschema, final ProcesResult procesResult) {
         log.info("ConceptSchemaLoader convertToConcepschemaDTO:: received uri: {} conceptschema: {}", conceptschema.getUri(), conceptschema.getNaam());
         ConceptschemaDTO savedConceptschema = null;
-        ConceptschemaDTO conceptschemaDTO = null;
+        ConceptschemaDTO conceptschemaDTO;
         boolean newEntry = false;
 
         Optional<ConceptschemaDTO> optionalConceptschemaDTO = conceptschemaRepository.findByUri(conceptschema.getUri());
@@ -131,47 +138,83 @@ public class ConceptSchemaLoader {
         }
 
         try {
-            conceptschemaDTO.setUri(conceptschema.getUri());
-            conceptschemaDTO.setNaam(conceptschema.getNaam());
-            conceptschemaDTO.setUitleg(conceptschema.getUitleg().get());
-            conceptschemaDTO.setEigenaar(conceptschema.getEigenaar());
-            conceptschemaDTO.setBegindatumGeldigheid(conceptschema.getBegindatumGeldigheid());
-            conceptschemaDTO.setEinddatumGeldigheid(conceptschema.getEinddatumGeldigheid().get());
-            conceptschemaDTO.setMetadata(conceptschema.getMetadata());
+            boolean attributesChanged = true; // always true for new entry
+            boolean relationTypesChanged = true;  // always true for new entry
 
-            boolean conceptschemaTypeChanged = false;
-            conceptschemaTypeChanged = changedConceptSchemaType(optionalConceptschemaDTO.get(), conceptschema);
+            if (!newEntry) {
+                attributesChanged = changedAttributes(conceptschema, conceptschemaDTO);
+                relationTypesChanged = changedTypeRelations(conceptschema, conceptschemaDTO);
+            }
 
-            if (newEntry || conceptschemaTypeChanged || (optionalConceptschemaDTO.isPresent() && !optionalConceptschemaDTO.get().equals(conceptschemaDTO))) {
-                log.debug("ConceptSchemaLoader convertToConcepschemaDTO: before 01 save conceptschemaDTO");
+            log.debug("ConceptSchemaLoader convertToConcepschemaDTO newEntry             : {}", newEntry);
+            log.debug("ConceptSchemaLoader convertToConcepschemaDTO attributesChanged    : {}", attributesChanged);
+            log.debug("ConceptSchemaLoader convertToConcepschemaDTO relationTypesChanged : {}", relationTypesChanged);
+
+            if (attributesChanged || newEntry) {
+                log.info("ConceptSchemaLoader convertToConcepschemaDTO new or changed attributes");
+                //
+                // for new all attributes and for existing some attributes
+                //
+                conceptschemaDTO.setUri(conceptschema.getUri());
+                conceptschemaDTO.setNaam(conceptschema.getNaam());
+                conceptschemaDTO.setUitleg(conceptschema.getUitleg().get());
+                conceptschemaDTO.setEigenaar(conceptschema.getEigenaar());
+                conceptschemaDTO.setBegindatumGeldigheid(conceptschema.getBegindatumGeldigheid());
+                conceptschemaDTO.setEinddatumGeldigheid(conceptschema.getEinddatumGeldigheid().get());
+                conceptschemaDTO.setMetadata(conceptschema.getMetadata());
                 savedConceptschema = conceptschemaRepository.save(conceptschemaDTO);
-                log.debug("ConceptSchemaLoader convertToConcepschemaDTO: after 01 save conceptschemaDTO");
+            } else {
+                log.debug("ConceptSchemaLoader convertToConcepschemaDTO existing, not new or changed attributes");
+                savedConceptschema = conceptschemaDTO;
+            }
 
-                List<String> conceptschemaType = conceptschema.getType();
-                Set<ConceptschemaTypeDTO> types = findTypes(conceptschemaType);
+            if (relationTypesChanged) {
+                log.debug("ConceptSchemaLoader convertToConcepschemaDTO relations changed, remove all relations");
+                savedConceptschema.getTypes().removeAll(savedConceptschema.getTypes());
+            }
 
-                for (ConceptschemaTypeDTO x : types) {
-                    log.trace("ConceptSchemaLoader convertToConcepschemaDTO findTypes: used id: {} conceptschematype: {}", x.getId(), x.getType());
-                    x.getConceptschemas().add(savedConceptschema);
+            if (newEntry || relationTypesChanged) {
+                log.debug("ConceptSchemaLoader convertToConcepschemaDTO new or relations changed, add all relations");
+                Set<ConceptschemaTypeDTO> types = new HashSet<>();
+                Set<ConceptschemaDTO> conceptschemas = new HashSet<>();
+                conceptschemas.add(savedConceptschema);
+
+                for (int i = 0; i < conceptschema.getType().size(); i++) {
+                    String type = conceptschema.getType().get(i);
+                    ConceptschemaTypeDTO savedType;
+
+                    log.trace("ConceptSchemaLoader findTypes: checking [{}] conceptschematype: {}", i, type);
+                    Optional<ConceptschemaTypeDTO> conceptschemaTypeDTOOptional = conceptschemaTypeRepository.findByType(type);
+
+                    if (conceptschemaTypeDTOOptional.isPresent()) {  // existing conceptschema type
+                        ConceptschemaTypeDTO conceptschemaTypeDTOold = conceptschemaTypeDTOOptional.get();
+                        log.trace("ConceptSchemaLoader findTypes: found conceptschematype - id: {} type: {}", conceptschemaTypeDTOold.getId(), conceptschemaTypeDTOold.getType());
+                        conceptschemaTypeDTOold.setConceptschema(conceptschemas);
+                        savedType = conceptschemaTypeRepository.save(conceptschemaTypeDTOold);
+                        types.add(savedType);
+                    } else {                                          // new conceptschema
+                        ConceptschemaTypeDTO newType = new ConceptschemaTypeDTO();
+                        newType.setType(type);
+                        newType.setConceptschema(conceptschemas);
+                        log.trace("ConceptSchemaLoader findTypes: before save conceptschemaTypeDTO");
+                        savedType = conceptschemaTypeRepository.save(newType);
+                        log.trace("ConceptSchemaLoader findTypes: after save conceptschemaTypeDTO - id: {}, type: {}", newType.getId(), newType.getType());
+                        types.add(savedType);
+                    }
                 }
-
                 savedConceptschema.getTypes().addAll(types);
-
-                log.trace("ConceptSchemaLoader convertToConcepschemaDTO: before 02 save conceptschemaDTO");
                 conceptschemaRepository.save(savedConceptschema);
-                log.trace("ConceptSchemaLoader convertToConcepschemaDTO: after 02 save conceptschemaDTO");
+            }
 
-                if (newEntry) { // new entry
-                    procesResult.setNewEntries(procesResult.getNewEntries() + 1);
-                } else { // changed
-                    procesResult.setUpdatedEntries(procesResult.getUpdatedEntries() + 1);
-                }
+            if (newEntry) { // new entry
+                procesResult.setNewEntries(procesResult.getNewEntries() + 1);
+            } else if (attributesChanged || relationTypesChanged) { // changed
+                procesResult.setUpdatedEntries(procesResult.getUpdatedEntries() + 1);
             } else { // unchanged
                 procesResult.setUnchangedEntries(procesResult.getUnchangedEntries() + 1);
             }
-
         } catch (Exception e) {
-            log.error("ConceptSchemaLoader convertToConcepschemaDTO error at processing: {}", e.getMessage());
+            log.error("ConceptSchemaLoader convertToConcepschemaDTO error at processing: {}", e);
             procesResult.setStatus(ProcesResult.ERROR);
             procesResult.setMore(false);
             procesResult.setMessage(e.getMessage());
@@ -179,75 +222,68 @@ public class ConceptSchemaLoader {
         return savedConceptschema;
     }
 
-    private boolean inConceptSchema(final String cttype, final Conceptschema conceptschema) {
-        boolean inList = false;
-        List<String> cs = conceptschema.getType();
+    private boolean changedAttributes(final Conceptschema conceptschema, final ConceptschemaDTO conceptschemaDTO) {
+        boolean changed = false;
 
-        for (String test : cs) {
-            inList = inList || test.equals(cttype);
+
+        changed = !conceptschema.getUri().equals(conceptschemaDTO.getUri());
+
+
+        if (!changed) {
+            changed = !conceptschema.getNaam().equals(conceptschemaDTO.getNaam());
         }
-        return inList;
-    }
 
-    private boolean changedConceptSchemaType(final ConceptschemaDTO conceptschemaDTO, final Conceptschema conceptschema) {
-        boolean changed = true;
-
-        if (conceptschemaDTO != null) {
-            Set<ConceptschemaTypeDTO> conceptschemaTypeDTOS = conceptschemaDTO.getTypes();
-            List<String> conceptschemaType = conceptschema.getType();
-
-            if (conceptschemaTypeDTOS.size() == conceptschemaType.size()) {
-                Iterator<ConceptschemaTypeDTO> conceptschemaTypeDTOIterator = conceptschemaTypeDTOS.iterator();
-
-                changed = true; // assume lists contain all values
-                // check if each element in Set<ConceptschemaTypeDTO> also occurs in List<String>
-                while (conceptschemaTypeDTOIterator.hasNext()) {
-                    ConceptschemaTypeDTO ct = conceptschemaTypeDTOIterator.next();
-                    String cttype = ct.getType();
-                    boolean ctin = inConceptSchema(cttype, conceptschema);
-                    changed = changed || ctin;
+        if (!changed) {
+            if (conceptschema.getUitleg().isPresent() && (conceptschema.getUitleg().get() != null)) {
+                changed = !conceptschema.getUitleg().get().equals(conceptschemaDTO.getUitleg());
+            } else { // uitleg not present == null
+                if (conceptschemaDTO.getUitleg() != null) {
+                    changed = conceptschemaDTO.getUitleg().length() > 0;
                 }
-            } else {
-                changed = true;
-            }
-        } else {
-            if (conceptschema.getType().size() == 0) {
-                changed = false;
             }
         }
+
+        if (!changed) {
+            changed = !conceptschema.getEigenaar().equals(conceptschemaDTO.getEigenaar());
+        }
+
+        if (!changed) {
+            changed = !conceptschema.getBegindatumGeldigheid().equals(conceptschemaDTO.getBegindatumGeldigheid());
+        }
+
+        if (!changed) {
+            if (conceptschema.getEinddatumGeldigheid().isPresent() && (conceptschema.getEinddatumGeldigheid().get() != null)) {
+                changed = !conceptschema.getEinddatumGeldigheid().get().equals(conceptschemaDTO.getEinddatumGeldigheid());
+            } else { // einddatum not present == null
+                if (conceptschemaDTO.getEinddatumGeldigheid() != null) {
+                    changed = conceptschemaDTO.getEinddatumGeldigheid().length() > 0;
+                }
+            }
+        }
+
+        if (!changed) {
+            changed = !conceptschema.getMetadata().equals(conceptschemaDTO.getMetadata());
+        }
+
 
         return changed;
     }
 
-    private Set<ConceptschemaTypeDTO> findTypes(final List<String> conceptschemaType) {
-        log.trace("ConceptSchemaLoader findTypes: found conceptschema: {}", String.join(", ", conceptschemaType));
-        List<ConceptschemaTypeDTO> types = new ArrayList<>();
+    /**
+     * Determine if any releation from conceptschema to type
+     *
+     * @param conceptschema The input conceptschema with related types
+     * @param conceptschemaDTO The saved conceptschema with related types
+     * @return false if type sets are not equal
+     */
+    private boolean changedTypeRelations(final Conceptschema conceptschema, final ConceptschemaDTO conceptschemaDTO) {
+        boolean changed = false;
 
-        for (int i = 0; i < conceptschemaType.size(); i++) {
-            String type = conceptschemaType.get(i);
-            log.trace("ConceptSchemaLoader findTypes: checking [{}] conceptschematype: {}", i, type);
-            Optional<ConceptschemaTypeDTO> conceptschemaTypeDTOOptional = conceptschemaTypeRepository.findByType(type);
-            if (conceptschemaTypeDTOOptional.isPresent()) {
-                ConceptschemaTypeDTO conceptschemaTypeDTOold = conceptschemaTypeDTOOptional.get();
-                log.trace("ConceptSchemaLoader findTypes: found conceptschematype - id: {} type: {}", conceptschemaTypeDTOold.getId(), conceptschemaTypeDTOold.getType());
-                types.add(conceptschemaTypeDTOold);
-            } else {
-                ConceptschemaTypeDTO newType = new ConceptschemaTypeDTO();
-                newType.setType(type);
-                log.trace("ConceptSchemaLoader findTypes: before save conceptschemaTypeDTO");
-                conceptschemaTypeRepository.save(newType);
-                log.trace("ConceptSchemaLoader findTypes: after save conceptschemaTypeDTO - id: {}, type: {}", newType.getId(), newType.getType());
-                types.add(newType);
-            }
-        }
+        Set<String> typeSet = new HashSet<>(conceptschema.getType());
 
-        Set<ConceptschemaTypeDTO> typesSet = new HashSet<>();
-        for (ConceptschemaTypeDTO x : types) {
-            log.info("findTypes: used id: {} conceptschematype: {}", x.getId(), x.getType());
-            typesSet.add(x);
-        }
+        changed = SetUtils.equals(typeSet, conceptschemaDTO.getTypes());
 
-        return typesSet;
+        return changed;
     }
 
 }

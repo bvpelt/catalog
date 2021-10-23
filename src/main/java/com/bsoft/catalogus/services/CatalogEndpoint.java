@@ -258,7 +258,7 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
 
         logGetRequest(WAARDELIJSTEN_PREFIX);
 
-        String parameters = getParameters(uri, gepubliceerdDoor, null, zoekTerm,null, null, null, page, pageSize, null);
+        String parameters = getParameters(uri, gepubliceerdDoor, null, zoekTerm,null, null, null, page, pageSize, expandScope);
 
         return getRestTemplate().exchange(
                 getBaseUrl() + WAARDELIJSTEN_PREFIX + parameters,

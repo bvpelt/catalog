@@ -41,7 +41,8 @@ public class WaardelijstDTO implements Serializable {
     @Column(name = "METADATA")
     private String metadata;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL)
+    //@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "WAARDELIJST_WAARDE",
             joinColumns = {
                     @JoinColumn(name = "waardelijst_id", referencedColumnName = "id",

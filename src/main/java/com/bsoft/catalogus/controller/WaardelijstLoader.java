@@ -106,23 +106,25 @@ public class WaardelijstLoader {
         procesResult.setMore(nextPage);
     }
 
-    private void persistWaardelijsten(final List<Waardelijst> waardelijsts, ProcesResult procesResult) {
+    @Transactional
+    public void persistWaardelijsten(final List<Waardelijst> waardelijsts, ProcesResult procesResult) {
         int maxsize = waardelijsts.size();
         log.info("WaardelijstLoader persistWaardelijsten number found: {}", maxsize);
 
         for (int i = 0; i < maxsize; i++) {
-            log.debug("WaardelijstLoader persistWaardelijsten: begin found conceptschema: {}", waardelijsts.get(i).getNaam());
+            log.debug("WaardelijstLoader persistWaardelijsten: begin found conceptschema: {}", waardelijsts.get(i).getNaam().isPresent() ? waardelijsts.get(i).getNaam().get() : "");
             WaardelijstDTO waardelijstDTO = convertToWaardelijstDTO(waardelijsts.get(i), procesResult);
             log.debug("WaardelijstLoader persistWaardelijsten: end   found conceptschema: {}", waardelijstDTO == null ? "(null)" : waardelijstDTO.getNaam());
         }
     }
 
-    @Transactional
+
     public WaardelijstDTO convertToWaardelijstDTO(final Waardelijst waardelijst, ProcesResult procesResult) {
         log.info("WaardelijstLoader convertToWaardelijstDTO:: received uri: {} ", waardelijst.getUri());
         WaardelijstDTO savedWaardelijst = null;
         WaardelijstDTO waardelijstDTO = null;
         boolean newEntry = false;
+
 
         Optional<WaardelijstDTO> optionalWaardelijstDTO = waardelijstRepository.findByUri(waardelijst.getUri());
         if (optionalWaardelijstDTO.isPresent()) {
@@ -133,7 +135,21 @@ public class WaardelijstLoader {
             waardelijstDTO = new WaardelijstDTO();
             newEntry = true;
         }
+        /*
 
+
+        List<WaardelijstDTO> waardelijstDTOS = waardelijstRepository.findWaardelijstUrl(waardelijst.getUri());
+        if (waardelijstDTOS.size() == 1) {
+            log.debug("WaardelijstLoader convertToWaardelijstDTO found uri (updating): {}", waardelijst.getUri());
+            waardelijstDTO = waardelijstDTOS.get(0);
+        } else if (waardelijstDTOS.size() == 0) {
+            log.debug("WaardelijstLoader convertToWaardelijstDTO found uri (new): {} - new", waardelijst.getUri());
+            waardelijstDTO = new WaardelijstDTO();
+            newEntry = true;
+        } else {
+            log.error("Unexpected number of entries: {} 0 or 1 expected", waardelijstDTOS.size());
+        }
+*/
         try {
             waardelijstDTO.setEigenaar(waardelijst.getEigenaar());
             waardelijstDTO.setMetadata(waardelijst.getMetadata());
@@ -146,32 +162,36 @@ public class WaardelijstLoader {
 
             boolean waardenChanged = false;
             if (!newEntry) {
-                waardenChanged = changedWaarden(optionalWaardelijstDTO.get(), waardelijst);
+                waardenChanged = changedWaarden(waardelijstDTO, waardelijst);
             }
 
-            if (newEntry || waardenChanged || (optionalWaardelijstDTO.isPresent() && !optionalWaardelijstDTO.get().equals(waardelijstDTO))) {
+            // if (newEntry || waardenChanged || (optionalWaardelijstDTO.isPresent() && !optionalWaardelijstDTO.get().equals(waardelijstDTO))) {
+            if (newEntry || waardenChanged || (waardelijstDTO.getId() > 0)) {
                 log.debug("WaardelijstLoader convertToWaardelijstDTO: before 01 save conceptschemaDTO");
                 savedWaardelijst = waardelijstRepository.save(waardelijstDTO);
                 log.debug("WaardelijstLoader convertToWaardelijstDTO: after 01 save conceptschemaDTO");
 
                 List<Concept> concepten = null;
 
-                if ((waardelijst.getEmbedded().getWaarden() != null) && waardelijst.getEmbedded().getWaarden().isPresent()) {
-                    concepten = waardelijst.getEmbedded().getWaarden().get();
-                    Set<ConceptDTO> types = findConcepten(concepten);
+                if (waardelijst.getEmbedded() != null) {
+                    if ((waardelijst.getEmbedded().getWaarden() != null) && waardelijst.getEmbedded().getWaarden().isPresent()) {
+                        concepten = waardelijst.getEmbedded().getWaarden().get();
+                        Set<ConceptDTO> types = findConcepten(concepten);
 
-                    for (ConceptDTO x : types) {
-                        log.trace("WaardelijstLoader convertToWaardelijstDTO findTypes: used id: {} conceptschematype: {}", x.getId(), x.getType());
-                        x.getWaardelijsten().add(savedWaardelijst);
+                        for (ConceptDTO x : types) {
+                            log.trace("WaardelijstLoader convertToWaardelijstDTO findTypes: used id: {} conceptschematype before change: {}", x.getId(), x.getType());
+                            x.getWaardelijsten().add(savedWaardelijst);
+                            conceptRepository.save(x);
+                            log.trace("WaardelijstLoader convertToWaardelijstDTO findTypes: used id: {} conceptschematype after change: {}", x.getId(), x.getType());
+                        }
+
+                        savedWaardelijst.getWaarden().addAll(types);
+
+                        log.trace("WaardelijstLoader convertToWaardelijstDTO: before 02 save conceptschemaDTO");
+                        waardelijstRepository.save(savedWaardelijst);
+                        log.trace("WaardelijstLoader convertToWaardelijstDTO: after 02 save conceptschemaDTO");
                     }
-
-                    savedWaardelijst.getWaarden().addAll(types);
-
-                    log.trace("WaardelijstLoader convertToWaardelijstDTO: before 02 save conceptschemaDTO");
-                    waardelijstRepository.save(savedWaardelijst);
-                    log.trace("WaardelijstLoader convertToWaardelijstDTO: after 02 save conceptschemaDTO");
                 }
-
                 if (newEntry) { // new entry
                     procesResult.setNewEntries(procesResult.getNewEntries() + 1);
                 } else { // changed
@@ -181,7 +201,7 @@ public class WaardelijstLoader {
                 procesResult.setUnchangedEntries(procesResult.getUnchangedEntries() + 1);
             }
         } catch (Exception e) {
-            log.error("WaardelijstLoader convertToWaardelijstDTO error at processing: {}", e.getMessage());
+            log.error("WaardelijstLoader convertToWaardelijstDTO error at processing: {}", e);
             procesResult.setStatus(ProcesResult.ERROR);
             procesResult.setMore(false);
             procesResult.setMessage(e.getMessage());
@@ -205,8 +225,10 @@ public class WaardelijstLoader {
             Set<ConceptDTO> waardelijstDTOS = waardelijstDTO.getWaarden();
             List<Concept> concepten = new ArrayList<Concept>();
 
-            if (waardelijst.getEmbedded().getWaarden().isPresent()) {
-                concepten = waardelijst.getEmbedded().getWaarden().get();
+            if (waardelijst.getEmbedded() != null) {
+                if (waardelijst.getEmbedded().getWaarden().isPresent()) {
+                    concepten = waardelijst.getEmbedded().getWaarden().get();
+                }
             }
 
             if (waardelijstDTOS.size() == concepten.size()) {

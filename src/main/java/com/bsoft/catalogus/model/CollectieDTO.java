@@ -3,12 +3,13 @@ package com.bsoft.catalogus.model;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Objects;
 
 @Entity(name = "CollectieDTO")
 @Table(name = "COLLECTIE")
 @Data
-public class CollectieDTO {
+public class CollectieDTO implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")

@@ -66,7 +66,7 @@ public class StorageTests {
 
         ConceptschemaTypeDTO conceptschemaTypeDTO = new ConceptschemaTypeDTO();
         conceptschemaTypeDTO.setType("een");
-        conceptschemaTypeDTO.getConceptschemas().add(conceptschemaDTO);
+        //conceptschemaTypeDTO.getConceptschemas().add(conceptschemaDTO);
 
         conceptschemaTypeRepository.save(conceptschemaTypeDTO);
 
