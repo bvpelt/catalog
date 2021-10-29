@@ -25,7 +25,6 @@ public class AbstractBaseEndpoint {
         return restTemplate;
     }
 
-
     public HttpHeaders buildGetRequestHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Accept", "*/*");

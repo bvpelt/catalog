@@ -28,6 +28,13 @@ public class Crawl {
 
     @Autowired
     ConceptschemaTypeRepository conceptschemaTypeRepository;
+
+    @Autowired
+    TrefwoordRepository trefwoordRepository;
+
+    @Autowired
+    ToelichtingRepository toelichtingRepository;
+
     @Autowired
     WaardelijstRepository waardelijstRepository;
     @Autowired
@@ -55,7 +62,7 @@ public class Crawl {
         if (result.isSuccess()) {
             crawlResult.setConceptSchema(result.getSuccessResult());
 
-            ConceptLoader conceptLoader = new ConceptLoader(conceptschemaRepository, conceptRepository);
+            ConceptLoader conceptLoader = new ConceptLoader(trefwoordRepository, toelichtingRepository, conceptRepository);
             result = conceptLoader.loadConcept(catalogService);
         }
 

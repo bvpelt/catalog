@@ -38,6 +38,9 @@ databaseChangeLog:
                   name: EIGENAAR
                   type: text
               - column:
+                  name: CONCEPTSCHEMA
+                  type: text
+              - column:
                   name: BEGINDATUM
                   type: varchar(10)
               - column:
@@ -46,9 +49,6 @@ databaseChangeLog:
               - column:
                   name: METADATA
                   type: text
-              - column:
-                  name: CONCEPTSCHEMA_ID
-                  type: BIGINT
 
         - rollback:
             dropTable:
@@ -75,15 +75,221 @@ databaseChangeLog:
       id:  320
       author:  bart
       dbms: PostgreSQL
-      comment: Create CONCEPT CONCEPTSCHEMA_ID index
+      comment: Create CONCEPT CONCEPTSCHEMA index
       changes:
         - createIndex:
             clustered:  true
             columns:
               - column:
                   descending:  true
-                  name:  CONCEPTSCHEMA_ID
-            indexName:  idx_concept_conceptschema_id
+                  name:  CONCEPTSCHEMA
+            indexName:  idx_concept_conceptschema
             schemaName:  public
             tableName:  CONCEPT
+            unique:  false
+
+
+  - changeSet:
+      id: 330
+      author: bart
+      dbms: PostgreSQL
+      comment: Create CONCEPT_TREFWOORD
+      changes:
+        - createTable:
+            schemaName: PUBLIC
+            tableName: CONCEPT_TREFWOORD
+            columns:
+              - column:
+                  name: ID
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: CONCEPT_ID
+                  type: BIGINT
+              - column:
+                  name: TREFWOORD_ID
+                  type: BIGINT
+        - rollback:
+            dropTable:
+              - tableName: CONCEPT_TREFWOORD
+
+  - changeSet:
+      id:  340
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create CONCEPT_TREFWOORD CONCEPT_ID index
+      changes:
+        - createIndex:
+            clustered:  true
+            columns:
+              - column:
+                  descending:  true
+                  name:  CONCEPT_ID
+            indexName:  idx_concept_id
+            schemaName:  public
+            tableName:  CONCEPT_TREFWOORD
+            unique:  false
+
+  - changeSet:
+      id:  350
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create CONCEPT_TREFWOORD TREFWOORD_ID index
+      changes:
+        - createIndex:
+            clustered:  false
+            columns:
+              - column:
+                  descending:  true
+                  name:  TREFWOORD_ID
+            indexName:  idx_trefwoord_id
+            schemaName:  public
+            tableName:  CONCEPT_TREFWOORD
+            unique:  false
+
+  - changeSet:
+      id: 360
+      author: bart
+      dbms: PostgreSQL
+      comment: Create TREFWOORD
+      changes:
+        - createTable:
+            schemaName: PUBLIC
+            tableName: TREFWOORD
+            columns:
+              - column:
+                  name: ID
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: TREFWOORD
+                  type: text
+        - rollback:
+            dropTable:
+              - tableName: TREFWOORD
+
+  - changeSet:
+      id:  370
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create TREFWOORD TREFWOORD index
+      changes:
+        - createIndex:
+            clustered:  false
+            columns:
+              - column:
+                  descending:  true
+                  name:  TREFWOORD
+            indexName:  idx_trefwoord
+            schemaName:  public
+            tableName:  TREFWOORD
+            unique:  true
+
+  - changeSet:
+      id: 380
+      author: bart
+      dbms: PostgreSQL
+      comment: Create TOELICHTING
+      changes:
+        - createTable:
+            schemaName: PUBLIC
+            tableName: TOELICHTING
+            columns:
+              - column:
+                  name: ID
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: TOELICHTING
+                  type: text
+        - rollback:
+            dropTable:
+              - tableName: TOELICHTING
+
+  - changeSet:
+      id:  385
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create TOELICHTING TOELICHTING index
+      changes:
+        - createIndex:
+            clustered:  false
+            columns:
+              - column:
+                  descending:  true
+                  name:  TOELICHTING
+            indexName:  idx_toelichting
+            schemaName:  public
+            tableName:  TOELICHTING
+            unique:  true
+
+
+  - changeSet:
+      id: 390
+      author: bart
+      dbms: PostgreSQL
+      comment: Create CONCEPT_TOELICHTING
+      changes:
+        - createTable:
+            schemaName: PUBLIC
+            tableName: CONCEPT_TOELICHTING
+            columns:
+              - column:
+                  name: ID
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: CONCEPT_ID
+                  type: BIGINT
+              - column:
+                  name: TOELICHTING_ID
+                  type: BIGINT
+        - rollback:
+            dropTable:
+              - tableName: CONCEPT_TOELICHTING
+
+  - changeSet:
+      id:  395
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create CONCEPT_TOELICHTING CONCEPT_ID index
+      changes:
+        - createIndex:
+            clustered:  true
+            columns:
+              - column:
+                  descending:  true
+                  name:  CONCEPT_ID
+            indexName:  idx_concept_toelichting_id
+            schemaName:  public
+            tableName:  CONCEPT_TOELICHTING
+            unique:  false
+
+  - changeSet:
+      id:  397
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create CONCEPT_TOELICHTING TOELICHTING_ID index
+      changes:
+        - createIndex:
+            clustered:  false
+            columns:
+              - column:
+                  descending:  true
+                  name:  TOELICHTING_ID
+            indexName:  idx_toelichting_id
+            schemaName:  public
+            tableName:  CONCEPT_TOELICHTING
             unique:  false

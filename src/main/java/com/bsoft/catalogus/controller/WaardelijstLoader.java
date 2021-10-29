@@ -178,13 +178,14 @@ public class WaardelijstLoader {
                         concepten = waardelijst.getEmbedded().getWaarden().get();
                         Set<ConceptDTO> types = findConcepten(concepten);
 
+                        /*
                         for (ConceptDTO x : types) {
                             log.trace("WaardelijstLoader convertToWaardelijstDTO findTypes: used id: {} conceptschematype before change: {}", x.getId(), x.getType());
                             x.getWaardelijsten().add(savedWaardelijst);
                             conceptRepository.save(x);
                             log.trace("WaardelijstLoader convertToWaardelijstDTO findTypes: used id: {} conceptschematype after change: {}", x.getId(), x.getType());
                         }
-
+*/
                         savedWaardelijst.getWaarden().addAll(types);
 
                         log.trace("WaardelijstLoader convertToWaardelijstDTO: before 02 save conceptschemaDTO");
@@ -282,10 +283,13 @@ public class WaardelijstLoader {
                 newType.setEigenaar(type.getEigenaar().isPresent() ? type.getEigenaar().get() : null);
                 newType.setBegindatumGeldigheid(type.getBegindatumGeldigheid());
 
+                /*
                 Optional<ConceptschemaDTO> conceptschemaDTO = conceptschemaRepository.findByUri(type.getConceptschema());
                 if (conceptschemaDTO.isPresent()) {
                     newType.setConceptschema(conceptschemaDTO.get());
                 }
+
+                 */
                 log.trace("WaardelijstLoader findConcepten: before save conceptschemaTypeDTO");
                 //ConceptschemaTypeDTO savedConceptschemaTypeDTO = conceptschemaTypeRepository.save(newType);
                 conceptRepository.save(newType);

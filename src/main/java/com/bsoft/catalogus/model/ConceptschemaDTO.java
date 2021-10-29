@@ -18,8 +18,6 @@ public class ConceptschemaDTO implements Serializable {
     @Column(name = "URI")
     private String uri;
 
-
-    //@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(name = "CONCEPTSCHEMAS_TYPES",
             joinColumns = {

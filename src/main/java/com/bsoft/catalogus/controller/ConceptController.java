@@ -3,6 +3,8 @@ package com.bsoft.catalogus.controller;
 import com.bsoft.catalogus.model.ProcesResult;
 import com.bsoft.catalogus.repository.ConceptRepository;
 import com.bsoft.catalogus.repository.ConceptschemaRepository;
+import com.bsoft.catalogus.repository.ToelichtingRepository;
+import com.bsoft.catalogus.repository.TrefwoordRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
 import lombok.NoArgsConstructor;
@@ -24,7 +26,10 @@ public class ConceptController {
     private CatalogService catalogService;
 
     @Autowired
-    private ConceptschemaRepository conceptschemaRepository;
+    private TrefwoordRepository trefwoordRepository;
+
+    @Autowired
+    private ToelichtingRepository toelichtingRepository;
 
     @Autowired
     private ConceptRepository conceptRepository;
@@ -34,7 +39,7 @@ public class ConceptController {
         log.info("ConceptController getConcepten");
         ProcesResult procesResult = null;
 
-        ConceptLoader conceptLoader = new ConceptLoader(conceptschemaRepository, conceptRepository);
+        ConceptLoader conceptLoader = new ConceptLoader(trefwoordRepository, toelichtingRepository, conceptRepository);
         OperationResult<ProcesResult> result = conceptLoader.loadConcept(catalogService);
         if (result.isSuccess()) {
             procesResult = result.getSuccessResult();

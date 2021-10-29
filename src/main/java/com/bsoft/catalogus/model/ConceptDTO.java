@@ -36,19 +36,32 @@ public class ConceptDTO implements Serializable {
     @Column(name = "DEFINITIE")
     private String definitie;
 
-    @OneToMany(mappedBy = "concept", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<TrefwoordDTO> trefwoorden;
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @JoinTable(name = "CONCEPT_TREFWOORD",
+            joinColumns = {
+                    @JoinColumn(name = "CONCEPT_ID", referencedColumnName = "id",
+                            nullable = false, updatable = false)},
+            inverseJoinColumns = {
+                    @JoinColumn(name = "TREFWOORD_ID", referencedColumnName = "id",
+                            nullable = false, updatable = false)})
+    private Set<TrefwoordDTO> trefwoorden = new HashSet<>();
 
     @Column(name = "EIGENAAR")
     private String eigenaar;
 
- //   @ManyToOne(cascade = CascadeType.ALL)
- //   @JoinColumn(name = "CONCEPTSCHEMA_ID")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "conceptschema_id", nullable = false)
-    private ConceptschemaDTO conceptschema;
+    private String conceptschema;
 
     //   private List<String> toelichtingen; //
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @JoinTable(name = "CONCEPT_TOELICHTING",
+            joinColumns = {
+                    @JoinColumn(name = "CONCEPT_ID", referencedColumnName = "id",
+                            nullable = false, updatable = false)},
+            inverseJoinColumns = {
+                    @JoinColumn(name = "TOELICHTING_ID", referencedColumnName = "id",
+                            nullable = false, updatable = false)})
+    private Set<ToelichtingDTO> toelichtingen = new HashSet<>();
+
     //   private List<String> rationales;
     //   private List<String> verbeeldingen;
     //   private List<String> codes;
@@ -75,9 +88,11 @@ public class ConceptDTO implements Serializable {
     @Column(name = "METADATA")
     private String metadata;
 
+    /*
     //@ManyToMany(mappedBy = "waarden", cascade = {CascadeType.ALL})
     @ManyToMany(mappedBy = "waarden", fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     private Set<WaardelijstDTO> waardelijsten = new HashSet<>();
+*/
 
     @Override
     public boolean equals(Object o) {

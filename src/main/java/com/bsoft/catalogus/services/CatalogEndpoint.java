@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
@@ -139,21 +140,29 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
                                         final Integer page,
                                         final Integer pageSize) {
         try {
-            ResponseEntity<InlineResponse2002> responseEntity = conceptenGet(uri, gepubliceerdDoor, geldigOp, zoekTerm, conceptschema, collectie, waardelijst, page, pageSize);
+            ResponseEntity<InlineResponse2002> responseEntity =  conceptenGet(uri, gepubliceerdDoor, geldigOp, zoekTerm, conceptschema, collectie, waardelijst, page, pageSize);;
+
             try {
-                ObjectMapper mapper = new ObjectMapper();
-                String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseEntity.getBody());
-                log.info("CatalogEndpoint getConcepten:: result: {}", jsonString);
+                if (responseEntity != null) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(responseEntity.getBody());
+                    log.info("CatalogEndpoint getConcepten: result: {}", jsonString);
+                } else {
+                    log.error("CatalogEndpoint getConcepten, no result");
+                    return OperationResult.failure("CatalogEndpoint getConcepten no results");
+                }
             } catch (Exception e) {
-                log.error("CatalogEndpoint getConcepten cannot convert object to json");
+                log.error("CatalogEndpoint getConcepten cannot convert object to json: {}", e);
             }
-            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+
+            if ((responseEntity != null) && responseEntity.getStatusCode().is2xxSuccessful()) {
                 return OperationResult.success(responseEntity.getBody());
             } else {
-                return OperationResult.failure("CatalogEndpoint getConcepten result failed, http status code: " + responseEntity.getStatusCode());
+                return OperationResult.failure("CatalogEndpoint getConcepten result failed, http status code: " + ((responseEntity == null)? "unknown" : responseEntity.getStatusCode()));
             }
-        } catch (HttpClientErrorException httpClientErrorException) {
-            return OperationResult.failure(httpClientErrorException.getMessage());
+        } catch (Exception e) {
+            log.error("CatalogEndpoint getConcepten: {}", e);
+            return OperationResult.failure(e.getMessage());
         }
     }
 
@@ -171,11 +180,19 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
 
         String parameters = getParameters(uri, gepubliceerdDoor, geldigOp, zoekTerm, conceptschema, collectie, waardelijst, page, pageSize, null);
 
-        return getRestTemplate().exchange(
-                getBaseUrl() + CONCEPTEN_PREFIX + parameters,
-                HttpMethod.GET,
-                new HttpEntity<>(buildGetRequestHeaders()),
-                InlineResponse2002.class);
+        ResponseEntity<InlineResponse2002> response = null;
+
+        try {
+            response = getRestTemplate().exchange(
+                    getBaseUrl() + CONCEPTEN_PREFIX + parameters,
+                    HttpMethod.GET,
+                    new HttpEntity<>(buildGetRequestHeaders()),
+                    InlineResponse2002.class);
+        } catch (RestClientException e) {
+            log.error("CatalogEndpoint conceptenGet: {}", e.fillInStackTrace());
+            throw e;
+        }
+        return response;
     }
 
 
@@ -268,7 +285,7 @@ public class CatalogEndpoint extends AbstractBaseEndpoint implements Conceptsche
     }
 
     private void logGetRequest(final String prefix) {
-        log.info("CatalogEndpoint waardelijstenGet -------------------------------------------" + System.lineSeparator() +
+        log.info("CatalogEndpoint " + prefix + " -------------------------------------------" + System.lineSeparator() +
                 "REQUEST START" + System.lineSeparator() +
                 "-------------------------------------------" + System.lineSeparator() +
                 "Request url: " + getBaseUrl() + prefix + System.lineSeparator() +

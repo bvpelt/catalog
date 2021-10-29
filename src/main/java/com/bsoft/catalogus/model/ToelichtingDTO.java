@@ -8,17 +8,17 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Entity(name = "TrefwoordDTO")
-@Table(name = "TREFWOORD")
+@Entity(name = "ToelichtingDTO")
+@Table(name = "TOELICHTING")
 @Data
-public class TrefwoordDTO implements Serializable {
+public class ToelichtingDTO implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "TREFWOORD")
-    private String trefwoord;
+    @Column(name = "TOELICHTING")
+    private String toelichting;
 
     @ManyToMany(mappedBy = "trefwoorden", fetch = FetchType.LAZY)
     private Set<ConceptDTO> concept = new HashSet<>();
@@ -26,13 +26,13 @@ public class TrefwoordDTO implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TrefwoordDTO)) return false;
-        TrefwoordDTO that = (TrefwoordDTO) o;
-        return Objects.equals(trefwoord, that.trefwoord) && Objects.equals(concept, that.concept);
+        if (!(o instanceof ToelichtingDTO)) return false;
+        ToelichtingDTO that = (ToelichtingDTO) o;
+        return Objects.equals(toelichting, that.toelichting) && Objects.equals(concept, that.concept);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(trefwoord, concept);
+        return Objects.hash(toelichting, concept);
     }
 }
