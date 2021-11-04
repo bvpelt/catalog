@@ -44,7 +44,7 @@ public class ConceptLoader {
         String gepubliceerdDoor = null;  //"https://standaarden.overheid.nl/owms/terms/Ministerie_van_Binnenlandse_Zaken_en_Koninkrijksrelaties";
         String geldigOp = null;          //new CatalogUtil().getCurrentDate();
         String zoekTerm = null;
-        Integer page = 719;
+        Integer page = 1;
         Integer pageSize = 10; // 10,20,40
         List<String> expandScope = null; //Arrays.asList("concepten", "collecties");
         boolean goOn = true;
