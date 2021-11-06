@@ -3,9 +3,9 @@ package com.bsoft.catalogus.model;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.awt.print.Book;
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -88,11 +88,10 @@ public class ConceptDTO implements Serializable {
     @Column(name = "METADATA")
     private String metadata;
 
-    /*
-    //@ManyToMany(mappedBy = "waarden", cascade = {CascadeType.ALL})
-    @ManyToMany(mappedBy = "waarden", fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
-    private Set<WaardelijstDTO> waardelijsten = new HashSet<>();
-*/
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "waardelijst_id", nullable = false)
+    private WaardelijstDTO waardelijst;
 
     @Override
     public boolean equals(Object o) {

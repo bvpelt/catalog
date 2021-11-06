@@ -1,6 +1,5 @@
 package com.bsoft.catalogus.util;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;

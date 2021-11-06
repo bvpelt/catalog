@@ -1,6 +1,5 @@
 package com.bsoft.catalogus.repository;
 
-import com.bsoft.catalogus.model.ConceptschemaTypeDTO;
 import com.bsoft.catalogus.model.TrefwoordDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 

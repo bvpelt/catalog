@@ -10,7 +10,10 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @NoArgsConstructor
@@ -272,7 +275,7 @@ public class ConceptSchemaLoader {
     /**
      * Determine if any releation from conceptschema to type
      *
-     * @param conceptschema The input conceptschema with related types
+     * @param conceptschema    The input conceptschema with related types
      * @param conceptschemaDTO The saved conceptschema with related types
      * @return false if type sets are not equal
      */

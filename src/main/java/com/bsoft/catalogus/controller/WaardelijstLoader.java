@@ -1,15 +1,16 @@
 package com.bsoft.catalogus.controller;
 
 import com.bsoft.catalogus.model.*;
-import com.bsoft.catalogus.repository.ConceptRepository;
-import com.bsoft.catalogus.repository.ConceptschemaRepository;
-import com.bsoft.catalogus.repository.WaardelijstRepository;
+import com.bsoft.catalogus.repository.*;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
+import com.bsoft.catalogus.util.SetUtils;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.transaction.Transactional;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 @Slf4j
@@ -18,16 +19,20 @@ public class WaardelijstLoader {
 
     private WaardelijstRepository waardelijstRepository;
 
-    private ConceptschemaRepository conceptschemaRepository;
-
     private ConceptRepository conceptRepository;
 
-    public WaardelijstLoader(WaardelijstRepository waardelijstRepository,
-                             ConceptschemaRepository conceptschemaRepository,
-                             ConceptRepository conceptRepository) {
+    private TrefwoordRepository trefwoordRepository;
+
+    private ToelichtingRepository toelichtingRepository;
+
+    public WaardelijstLoader(final WaardelijstRepository waardelijstRepository,
+                             final ConceptRepository conceptRepository,
+                             final TrefwoordRepository trefwoordRepository,
+                             final ToelichtingRepository toelichtingRepository) {
         this.waardelijstRepository = waardelijstRepository;
-        this.conceptschemaRepository = conceptschemaRepository;
         this.conceptRepository = conceptRepository;
+        this.trefwoordRepository = trefwoordRepository;
+        this.toelichtingRepository = toelichtingRepository;
     }
 
     public OperationResult loadWaardelijsten(final CatalogService catalogService) {
@@ -80,14 +85,20 @@ public class WaardelijstLoader {
         OperationResult<InlineResponse2004> result = null;
         boolean nextPage = false;
 
+        Instant start = Instant.now();
         result = catalogService.getWaardelijst(uri, gepubliceerdDoor, zoekTerm, expandScope, page, pageSize);
+        Instant finish = Instant.now();
+        long time = Duration.between(start, finish).toMillis();
+        log.info("Timing data getwaardelijsten: {} ms ", time);
 
-        if (result.isSuccess()) {
+        if ((result != null) && result.isSuccess()) {
             InlineResponse2004 inlineResponse2004 = result.getSuccessResult();
             InlineResponse2004Embedded embedded = inlineResponse2004.getEmbedded();
             List<Waardelijst> waardelijsts = embedded.getWaardelijsten();
 
-            persistWaardelijsten(waardelijsts, procesResult);
+            if ((waardelijsts != null) && (!waardelijsts.isEmpty())) {
+                persistWaardelijsten(waardelijsts, procesResult);
+            }
 
             if (procesResult.getStatus() == ProcesResult.SUCCESS) {
                 if (result.getSuccessResult().getLinks().getNext() != null) {
@@ -100,8 +111,15 @@ public class WaardelijstLoader {
             }
         } else {
             procesResult.setStatus(ProcesResult.ERROR);
-            procesResult.setMessage(result.getFailureResult().toString());
-            log.info("WaardelijstLoader getPage : no result stop processing");
+
+            if ((result != null) && result.getFailureResult() != null) {
+                log.debug("WaardelijstLoader getPage, result: " + result.getFailureResult().toString());
+                procesResult.setMessage(result.getFailureResult().toString());
+            } else {
+                procesResult.setMessage("Error during processing request /waardelijsten");
+            }
+
+            log.info("WaardelijstLoader getPage: no result stop processing");
         }
         procesResult.setMore(nextPage);
     }
@@ -117,7 +135,6 @@ public class WaardelijstLoader {
             log.debug("WaardelijstLoader persistWaardelijsten: end   found conceptschema: {}", waardelijstDTO == null ? "(null)" : waardelijstDTO.getNaam());
         }
     }
-
 
     public WaardelijstDTO convertToWaardelijstDTO(final Waardelijst waardelijst, ProcesResult procesResult) {
         log.info("WaardelijstLoader convertToWaardelijstDTO:: received uri: {} ", waardelijst.getUri());
@@ -135,69 +152,110 @@ public class WaardelijstLoader {
             waardelijstDTO = new WaardelijstDTO();
             newEntry = true;
         }
-        /*
 
-
-        List<WaardelijstDTO> waardelijstDTOS = waardelijstRepository.findWaardelijstUrl(waardelijst.getUri());
-        if (waardelijstDTOS.size() == 1) {
-            log.debug("WaardelijstLoader convertToWaardelijstDTO found uri (updating): {}", waardelijst.getUri());
-            waardelijstDTO = waardelijstDTOS.get(0);
-        } else if (waardelijstDTOS.size() == 0) {
-            log.debug("WaardelijstLoader convertToWaardelijstDTO found uri (new): {} - new", waardelijst.getUri());
-            waardelijstDTO = new WaardelijstDTO();
-            newEntry = true;
-        } else {
-            log.error("Unexpected number of entries: {} 0 or 1 expected", waardelijstDTOS.size());
-        }
-*/
         try {
-            waardelijstDTO.setEigenaar(waardelijst.getEigenaar());
-            waardelijstDTO.setMetadata(waardelijst.getMetadata());
-            waardelijstDTO.setNaam(waardelijst.getNaam().isPresent() ? waardelijst.getNaam().get() : null);
-            waardelijstDTO.setUri(waardelijst.getUri());
-            waardelijstDTO.setBeschrijving(waardelijst.getBeschrijving().isPresent() ? waardelijst.getBeschrijving().get() : null);
-            waardelijstDTO.setTitel(waardelijst.getTitel());
-            waardelijstDTO.setVersie(waardelijst.getVersie());
-            waardelijstDTO.setVersienotitie(waardelijst.getVersienotities().isPresent() ? waardelijst.getVersienotities().get() : null);
+            boolean attributesChanged = true; // always true for new entry
+            boolean relationWaardenChanged = true; // always true for new entry
 
-            boolean waardenChanged = false;
             if (!newEntry) {
-                waardenChanged = changedWaarden(waardelijstDTO, waardelijst);
+                attributesChanged = changedAttributes(waardelijst, waardelijstDTO);
+                relationWaardenChanged = changedWaarden(waardelijst, waardelijstDTO);
             }
 
-            // if (newEntry || waardenChanged || (optionalWaardelijstDTO.isPresent() && !optionalWaardelijstDTO.get().equals(waardelijstDTO))) {
-            if (newEntry || waardenChanged || (waardelijstDTO.getId() > 0)) {
-                log.debug("WaardelijstLoader convertToWaardelijstDTO: before 01 save conceptschemaDTO");
+            log.debug("WaardelijstLoader convertToWaardelijstDTO newEntry               : {}", newEntry);
+            log.debug("WaardelijstLoader convertToWaardelijstDTO attributesChanged      : {}", attributesChanged);
+            log.debug("WaardelijstLoader convertToWaardelijstDTO relationWaardenChanged : {}", relationWaardenChanged);
+
+            if (attributesChanged || newEntry) {
+                log.info("ConceptLoader convertToConceptDTO new or changed attributes");
+                //
+                // for new all attributes and for existing some attributes
+                //
+                waardelijstDTO.setUri(waardelijst.getUri());
+                waardelijstDTO.setNaam(waardelijst.getNaam().isPresent() ? waardelijst.getNaam().get() : null);
+                waardelijstDTO.setTitel(waardelijst.getTitel());
+                waardelijstDTO.setBeschrijving(waardelijst.getBeschrijving().isPresent() ? waardelijst.getBeschrijving().get() : null);
+                waardelijstDTO.setVersie(waardelijst.getVersie());
+                waardelijstDTO.setVersienotities(waardelijst.getVersienotities().isPresent() ? waardelijst.getVersienotities().get() : null);
+                waardelijstDTO.setEigenaar(waardelijst.getEigenaar());
+                waardelijstDTO.setMetadata(waardelijst.getMetadata());
+
                 savedWaardelijst = waardelijstRepository.save(waardelijstDTO);
-                log.debug("WaardelijstLoader convertToWaardelijstDTO: after 01 save conceptschemaDTO");
+            } else {
+                log.debug("WaardelijstLoader convertToWaardelijstDTO existing, not new or changed attributes");
+                savedWaardelijst = waardelijstDTO;
+            }
 
-                List<Concept> concepten = null;
+            if (relationWaardenChanged) {
+                log.debug("WaardelijstLoader convertToWaardelijstDTO relation termen changed, remove all relations");
+                if (savedWaardelijst.getWaarden() != null) {
+                    savedWaardelijst.getWaarden().removeAll(savedWaardelijst.getWaarden());
+                }
+            }
 
-                if (waardelijst.getEmbedded() != null) {
-                    if ((waardelijst.getEmbedded().getWaarden() != null) && waardelijst.getEmbedded().getWaarden().isPresent()) {
-                        concepten = waardelijst.getEmbedded().getWaarden().get();
-                        Set<ConceptDTO> types = findConcepten(concepten);
+            if (newEntry || relationWaardenChanged) {
+                log.debug("WaardelijstLoader convertToWaardelijstDTO new or relations changed, add all relations");
 
-                        /*
-                        for (ConceptDTO x : types) {
-                            log.trace("WaardelijstLoader convertToWaardelijstDTO findTypes: used id: {} conceptschematype before change: {}", x.getId(), x.getType());
-                            x.getWaardelijsten().add(savedWaardelijst);
-                            conceptRepository.save(x);
-                            log.trace("WaardelijstLoader convertToWaardelijstDTO findTypes: used id: {} conceptschematype after change: {}", x.getId(), x.getType());
+                Set<ConceptDTO> waarden = new HashSet<>();
+                Set<WaardelijstDTO> waardelijsten = new HashSet<>();
+                waardelijsten.add(savedWaardelijst);
+
+                // Waarden
+                if (waardelijst.getEmbedded().getWaarden().isPresent() && waardelijst.getEmbedded().getWaarden().get() != null) {
+                    List<Concept> concepten = waardelijst.getEmbedded().getWaarden().get(); // de waarden van de waardelijst
+
+                    for (int i = 0; i < concepten.size(); i++) { // for each concept (waarde)
+                        Concept concept = concepten.get(i);
+                        ConceptDTO savedConcept;
+
+                        log.trace("WaardelijstLoader convertToWaardelijstDTO: checking [{}] concept: {}", i, concept.getUri());
+                        Optional<ConceptDTO> conceptDTOOptional = conceptRepository.findByUri(concept.getUri());
+
+                        if (conceptDTOOptional.isPresent()) { // existing concept (waarde)
+                            ConceptDTO conceptDTOold = conceptDTOOptional.get();
+                            log.trace("WaardelijstLoader convertToWaardelijstDTO: found concept - id: {} uri: {}", conceptDTOold.getId(), conceptDTOold.getUri());
+                            conceptDTOold.setWaardelijst(savedWaardelijst);
+                            savedConcept = conceptRepository.save(conceptDTOold);
+                        } else { // new concept (waarde)
+                            ConceptDTO newConcept = new ConceptDTO();
+                            newConcept.setUri(concept.getUri());
+                            newConcept.setType(concept.getType());
+                            newConcept.setNaam(concept.getNaam());
+                            newConcept.setTerm(concept.getTerm());
+                            newConcept.setUitleg(concept.getUitleg().isPresent() ? concept.getUitleg().get() : null);
+                            newConcept.setDefinitie(concept.getDefinitie().isPresent() ? concept.getDefinitie().get() : null);
+                            newConcept.setEigenaar(concept.getEigenaar().isPresent() ? concept.getEigenaar().get() : null);
+                            newConcept.setConceptschema(concept.getConceptschema());
+                            newConcept.setBegindatumGeldigheid(concept.getBegindatumGeldigheid());
+                            newConcept.setEinddatumGeldigheid(concept.getEinddatumGeldigheid().isPresent() ? concept.getEinddatumGeldigheid().get() : null);
+                            newConcept.setMetadata(concept.getMetadata());
+                            newConcept.setWaardelijst(savedWaardelijst);
+                            savedConcept = conceptRepository.save(newConcept);
+
+                            Set<ConceptDTO> conceptSet = new HashSet<>();
+                            conceptSet.add(savedConcept);
+
+                            // Trefwoorden
+                            if (concept.getTrefwoorden().isPresent() && concept.getTrefwoorden().get() != null) {
+                                addTrefwoorden(concept.getTrefwoorden().get(), savedConcept,  conceptSet);
+                            }
+
+                            // Toelichtingen
+                            if (concept.getToelichtingen().isPresent() && concept.getToelichtingen().get() != null) {
+                                addToelichtingen(concept.getToelichtingen().get(), savedConcept, conceptSet);
+                            }
                         }
-*/
-                        savedWaardelijst.getWaarden().addAll(types);
-
-                        log.trace("WaardelijstLoader convertToWaardelijstDTO: before 02 save conceptschemaDTO");
-                        waardelijstRepository.save(savedWaardelijst);
-                        log.trace("WaardelijstLoader convertToWaardelijstDTO: after 02 save conceptschemaDTO");
+                        waarden.add(savedConcept);
                     }
+                    savedWaardelijst.setWaarden(waarden);
+                    waardelijstRepository.save(savedWaardelijst);
                 }
-                if (newEntry) { // new entry
-                    procesResult.setNewEntries(procesResult.getNewEntries() + 1);
-                } else { // changed
-                    procesResult.setUpdatedEntries(procesResult.getUpdatedEntries() + 1);
-                }
+            }
+
+            if (newEntry) { // new entry
+                procesResult.setNewEntries(procesResult.getNewEntries() + 1);
+            } else if (attributesChanged || relationWaardenChanged) { // changed
+                procesResult.setUpdatedEntries(procesResult.getUpdatedEntries() + 1);
             } else { // unchanged
                 procesResult.setUnchangedEntries(procesResult.getUnchangedEntries() + 1);
             }
@@ -207,104 +265,145 @@ public class WaardelijstLoader {
             procesResult.setMore(false);
             procesResult.setMessage(e.getMessage());
         }
+
         return savedWaardelijst;
     }
 
-    private boolean inWaarden(final String uri, final List<Concept> concepten) {
-        boolean inList = false;
+    private void addToelichtingen(final List<String> toelichtingenList, ConceptDTO savedConcept,  final Set<ConceptDTO> concepten) {
+        Set<ToelichtingDTO> toelichtingen = new HashSet<>();
 
-        for (Concept concept : concepten) {
-            inList = inList || uri.equals(concept.getUri());
+        for (int i = 0; i < toelichtingenList.size(); i++) {
+            String toelichting = toelichtingenList.get(i);
+            ToelichtingDTO savedToelichting;
+
+            log.trace("ConceptLoader addToelichtingen: checking [{}] toelichting: {}", i, toelichting);
+            Optional<ToelichtingDTO> toelichtingDTOOptional = toelichtingRepository.findByToelichting(toelichting);
+
+            if (toelichtingDTOOptional.isPresent()) {  // existing conceptschema trefwoord
+                ToelichtingDTO toelichtingDTOold = toelichtingDTOOptional.get();
+                log.trace("ConceptLoader addToelichtingen: found conceptschematype - id: {} toelichting: {}", toelichtingDTOold.getId(), toelichtingDTOold.getToelichting());
+                toelichtingDTOold.setConcept(concepten);
+                savedToelichting = toelichtingRepository.save(toelichtingDTOold);
+            } else {                                          // new conceptschema
+                ToelichtingDTO newToelichting = new ToelichtingDTO();
+                newToelichting.setToelichting(toelichting);
+                newToelichting.setConcept(concepten);
+                log.trace("ConceptLoader addToelichtingen: before save conceptschemaTypeDTO");
+                savedToelichting = toelichtingRepository.save(newToelichting);
+                log.trace("ConceptLoader addToelichtingen: after save conceptschemaTypeDTO - id: {}, toelichting: {}", newToelichting.getId(), newToelichting.getToelichting());
+            }
+            toelichtingen.add(savedToelichting);
         }
-        return inList;
+        savedConcept.getToelichtingen().addAll(toelichtingen);
+        conceptRepository.save(savedConcept);
     }
 
-    private boolean changedWaarden(WaardelijstDTO waardelijstDTO, Waardelijst waardelijst) {
-        boolean changed = true;
+    private void addTrefwoorden(final List<String> trefwoordenLijst, ConceptDTO savedConcept,  final Set<ConceptDTO> concepten) {
+        Set<TrefwoordDTO> trefwoorden = new HashSet<>();
 
-        if (waardelijstDTO != null) {
-            Set<ConceptDTO> waardelijstDTOS = waardelijstDTO.getWaarden();
-            List<Concept> concepten = new ArrayList<Concept>();
+        for (int i = 0; i < trefwoordenLijst.size(); i++) {
+            String trefwoord = trefwoordenLijst.get(i);
+            TrefwoordDTO savedTrefwoord;
 
-            if (waardelijst.getEmbedded() != null) {
-                if (waardelijst.getEmbedded().getWaarden().isPresent()) {
-                    concepten = waardelijst.getEmbedded().getWaarden().get();
-                }
+            log.trace("ConceptLoader addTrefwoorden: checking [{}] trefwoord: {}", i, trefwoord);
+            Optional<TrefwoordDTO> trefwoordDTOOptional = trefwoordRepository.findByTrefwoord(trefwoord);
+
+            if (trefwoordDTOOptional.isPresent()) {  // existing conceptschema trefwoord
+                TrefwoordDTO trefwoordDTOold = trefwoordDTOOptional.get();
+                log.trace("ConceptLoader addTrefwoorden: found conceptschematype - id: {} trefwoord: {}", trefwoordDTOold.getId(), trefwoordDTOold.getTrefwoord());
+                trefwoordDTOold.setConcept(concepten);
+                savedTrefwoord = trefwoordRepository.save(trefwoordDTOold);
+            } else {                                          // new conceptschema
+                TrefwoordDTO newTrefwoord = new TrefwoordDTO();
+                newTrefwoord.setTrefwoord(trefwoord);
+                newTrefwoord.setConcept(concepten);
+                log.trace("ConceptLoader addTrefwoorden: before save conceptschemaTypeDTO");
+                savedTrefwoord = trefwoordRepository.save(newTrefwoord);
+                log.trace("ConceptLoader addTrefwoorden: after save conceptschemaTypeDTO - id: {}, type: {}", newTrefwoord.getId(), newTrefwoord.getTrefwoord());
             }
+            trefwoorden.add(savedTrefwoord);
+        }
+        savedConcept.getTrefwoorden().addAll(trefwoorden);
+        conceptRepository.save(savedConcept);
+    }
 
-            if (waardelijstDTOS.size() == concepten.size()) {
-                Iterator<ConceptDTO> conceptDTOIterator = waardelijstDTOS.iterator();
+    private boolean changedAttributes(final Waardelijst waardelijst, final WaardelijstDTO waardelijstDTO) {
+        boolean changed = false;
 
-                changed = true;
+        changed = !waardelijst.getUri().equals(waardelijstDTO.getUri());
 
-                while (conceptDTOIterator.hasNext()) {
-                    ConceptDTO conceptDTO = conceptDTOIterator.next();
-                    String uri = conceptDTO.getUri();
-                    boolean uriin = inWaarden(uri, concepten);
-                    changed = changed || uriin;
-                }
-            } else {
-                changed = true;
-            }
-        } else {
-            if (waardelijst.getEmbedded() == null) {
-                changed = false;
-            } else {
-                if (waardelijst.getEmbedded().getWaarden().isPresent() && waardelijst.getEmbedded().getWaarden().get().size() == 0) {
-                    changed = false;
+        if (!changed) {
+            if (waardelijst.getNaam().isPresent() && (waardelijst.getNaam().get() != null)) {
+                changed = !waardelijst.getNaam().get().equals(waardelijstDTO.getNaam());
+            } else { // naam nog present == null
+                if (waardelijstDTO.getNaam() != null) {
+                    changed = waardelijstDTO.getNaam().length() > 0;
                 }
             }
         }
+
+        if (!changed) {
+            changed = !waardelijst.getTitel().equals(waardelijstDTO.getTitel());
+        }
+
+        if (!changed) {
+            if (waardelijst.getBeschrijving().isPresent() && (waardelijst.getBeschrijving().get() != null)) {
+                changed = !waardelijst.getBeschrijving().get().equals(waardelijstDTO.getBeschrijving());
+            } else { // naam nog present == null
+                if (waardelijstDTO.getBeschrijving() != null) {
+                    changed = waardelijstDTO.getBeschrijving().length() > 0;
+                }
+            }
+        }
+
+        if (!changed) {
+            changed = !waardelijst.getVersie().equals(waardelijstDTO.getVersie());
+        }
+
+        if (!changed) {
+            if (waardelijst.getVersienotities().isPresent() && (waardelijst.getVersienotities().get() != null)) {
+                changed = !waardelijst.getVersienotities().get().equals(waardelijstDTO.getVersienotities());
+            } else { // naam nog present == null
+                if (waardelijstDTO.getVersienotities() != null) {
+                    changed = waardelijstDTO.getVersienotities().length() > 0;
+                }
+            }
+        }
+
+        if (!changed) {
+            changed = !waardelijst.getEigenaar().equals(waardelijstDTO.getEigenaar());
+        }
+
+        if (!changed) {
+            changed = !waardelijst.getMetadata().equals(waardelijstDTO.getMetadata());
+        }
+
         return changed;
     }
 
-    private Set<ConceptDTO> findConcepten(final List<Concept> concepten) {
-        log.trace("WaardelijstLoader findConcepten: found concepten");
-        List<ConceptDTO> types = new ArrayList<>();
+    private boolean changedWaarden(final Waardelijst waardelijst, final WaardelijstDTO waardelijstDTO) {
+        boolean changed = false;
 
-        for (int i = 0; i < concepten.size(); i++) {
-            Concept type = concepten.get(i);
-            log.trace("WaardelijstLoader findConcepten: checking [{}] concept: {}", i, type.getUri());
-            Optional<ConceptDTO> conceptDTOOptional = conceptRepository.findByUri(type.getUri());
-            if (conceptDTOOptional.isPresent()) {
-                ConceptDTO conceptDTOold = conceptDTOOptional.get();
-                log.trace("WaardelijstLoader findConcepten: found conceptschematype - id: {} concept: {}", conceptDTOold.getId(), conceptDTOold.getUri());
-                types.add(conceptDTOold);
-            } else {
-                ConceptDTO newType = new ConceptDTO();
-                newType.setType(type.getType());
-                newType.setUitleg(type.getUitleg().isPresent() ? type.getUitleg().get() : null);
-                newType.setTerm(type.getTerm());
-                newType.setUri(type.getUri());
-                newType.setEinddatumGeldigheid(type.getEinddatumGeldigheid().isPresent() ? type.getEinddatumGeldigheid().get() : null);
-                newType.setDefinitie(type.getDefinitie().isPresent() ? type.getDefinitie().get() : null);
-                newType.setNaam(type.getNaam());
-                newType.setMetadata(type.getMetadata());
-                newType.setEigenaar(type.getEigenaar().isPresent() ? type.getEigenaar().get() : null);
-                newType.setBegindatumGeldigheid(type.getBegindatumGeldigheid());
+        List<Concept> waarden = null;
+        Set<Concept> waardenSet = new HashSet<>();
 
-                /*
-                Optional<ConceptschemaDTO> conceptschemaDTO = conceptschemaRepository.findByUri(type.getConceptschema());
-                if (conceptschemaDTO.isPresent()) {
-                    newType.setConceptschema(conceptschemaDTO.get());
-                }
+        if (waardelijst.getEmbedded().getWaarden().isPresent() && waardelijst.getEmbedded().getWaarden().get() != null) {
+            // waarden aanwezig
+            waarden = waardelijst.getEmbedded().getWaarden().get();
 
-                 */
-                log.trace("WaardelijstLoader findConcepten: before save conceptschemaTypeDTO");
-                //ConceptschemaTypeDTO savedConceptschemaTypeDTO = conceptschemaTypeRepository.save(newType);
-                conceptRepository.save(newType);
-                log.trace("WaardelijstLoader findConcepten: after save conceptschemaTypeDTO - id: {}, concept: {}", newType.getId(), newType.getUri());
-                types.add(newType);
+            for (Concept c: waarden) {
+                waardenSet.add(c);
             }
         }
 
-        Set<ConceptDTO> typesSet = new HashSet<>();
-        for (ConceptDTO x : types) {
-            log.info("WaardelijstLoader findConcepten: used id: {} concept: {}", x.getId(), x.getUri());
-            typesSet.add(x);
+        // both sets need values
+        // waardenSet is empty set
+        if (waardelijstDTO.getWaarden() != null) {
+            changed = !SetUtils.equals(waardenSet, waardelijstDTO.getWaarden());
+        } else {
+            changed = waardenSet.size() != 0;
         }
-
-        return typesSet;
+        return changed;
     }
 
 }

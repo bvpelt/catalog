@@ -1,9 +1,7 @@
 package com.bsoft.catalogus.controller;
 
 import com.bsoft.catalogus.model.ProcesResult;
-import com.bsoft.catalogus.repository.ConceptRepository;
-import com.bsoft.catalogus.repository.ConceptschemaRepository;
-import com.bsoft.catalogus.repository.WaardelijstRepository;
+import com.bsoft.catalogus.repository.*;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
 import lombok.NoArgsConstructor;
@@ -28,7 +26,10 @@ public class WaardelijstController {
     WaardelijstRepository waardelijstRepository;
 
     @Autowired
-    ConceptschemaRepository conceptschemaRepository;
+    ToelichtingRepository toelichtingRepository;
+
+    @Autowired
+    TrefwoordRepository trefwoordRepository;
 
     @Autowired
     ConceptRepository conceptRepository;
@@ -38,7 +39,7 @@ public class WaardelijstController {
         log.info("WaardelijstController getWaardelijsten");
         ProcesResult procesResult = null;
 
-        WaardelijstLoader waardelijstLoader = new WaardelijstLoader(waardelijstRepository, conceptschemaRepository, conceptRepository);
+        WaardelijstLoader waardelijstLoader = new WaardelijstLoader(waardelijstRepository, conceptRepository, trefwoordRepository, toelichtingRepository);
         OperationResult<ProcesResult> result = waardelijstLoader.loadWaardelijsten(catalogService);
         if (result.isSuccess()) {
             procesResult = result.getSuccessResult();

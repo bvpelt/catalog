@@ -5,7 +5,9 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity(name = "ConceptschemaTypeDTO")
 @Table(name = "CONCEPTSCHEMATYPE")

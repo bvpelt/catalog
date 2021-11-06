@@ -2,7 +2,6 @@ package com.bsoft.catalogus.controller;
 
 import com.bsoft.catalogus.model.ProcesResult;
 import com.bsoft.catalogus.repository.CollectieRepository;
-import com.bsoft.catalogus.repository.ConceptschemaRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
 import lombok.NoArgsConstructor;
@@ -24,9 +23,6 @@ public class CollectieController {
     private CatalogService catalogService;
 
     @Autowired
-    private ConceptschemaRepository conceptschemaRepository;
-
-    @Autowired
     private CollectieRepository collectieRepository;
 
     @RequestMapping(value = "/collecties", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -34,7 +30,7 @@ public class CollectieController {
         log.info("CollectieController getCollecties");
         ProcesResult procesResult = null;
 
-        CollectieLoader collectieLoader = new CollectieLoader(conceptschemaRepository, collectieRepository);
+        CollectieLoader collectieLoader = new CollectieLoader(collectieRepository);
         OperationResult<ProcesResult> result = collectieLoader.loadCollectie(catalogService);
         if (result.isSuccess()) {
             procesResult = result.getSuccessResult();

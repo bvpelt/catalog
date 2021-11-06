@@ -26,7 +26,13 @@ databaseChangeLog:
                   name: TERM
                   type: text
               - column:
+                  name: NAAM
+                  type: text
+              - column:
                   name: EIGENAAR
+                  type: text
+              - column:
+                  name: CONCEPTSCHEMA
                   type: text
               - column:
                   name: BEGINDATUM
@@ -37,9 +43,6 @@ databaseChangeLog:
               - column:
                   name: METADATA
                   type: text
-              - column:
-                  name: CONCEPTSCHEMA_ID
-                  type: BIGINT
 
         - rollback:
             dropTable:
@@ -52,7 +55,7 @@ databaseChangeLog:
       comment: Create COLLECTIE uri index
       changes:
         - createIndex:
-            clustered:  true
+            clustered:  false
             columns:
               - column:
                   descending:  true
@@ -66,15 +69,33 @@ databaseChangeLog:
       id:  420
       author:  bart
       dbms: PostgreSQL
-      comment: Create COLLECTIE CONCEPTSCHEMA_ID index
+      comment: Create COLLECTIE NAAM index
+      changes:
+        - createIndex:
+            clustered:  false
+            columns:
+              - column:
+                  descending:  true
+                  name:  NAAM
+            indexName:  idx_collectie_naam
+            schemaName:  public
+            tableName:  COLLECTIE
+            unique:  false
+
+  - changeSet:
+      id:  430
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create COLLECTIE CONCEPTSCHEMA index
       changes:
         - createIndex:
             clustered:  true
             columns:
               - column:
                   descending:  true
-                  name:  CONCEPTSCHEMA_ID
-            indexName:  idx_collectie_conceptschema_id
+                  name:  NAAM
+            indexName:  idx_collectie_conceptschema
             schemaName:  public
             tableName:  COLLECTIE
             unique:  false
+

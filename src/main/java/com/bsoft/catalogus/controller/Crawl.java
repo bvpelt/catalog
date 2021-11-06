@@ -69,7 +69,7 @@ public class Crawl {
         if (result.isSuccess()) {
             crawlResult.setConcepten(result.getSuccessResult());
 
-            CollectieLoader collectieLoader = new CollectieLoader(conceptschemaRepository, collectieRepository);
+            CollectieLoader collectieLoader = new CollectieLoader(collectieRepository);
             result = collectieLoader.loadCollectie(catalogService);
         }
 
@@ -83,7 +83,7 @@ public class Crawl {
         if (result.isSuccess()) {
             crawlResult.setBronnen(result.getSuccessResult());
 
-            WaardelijstLoader waardelijstLoader = new WaardelijstLoader(waardelijstRepository, conceptschemaRepository, conceptRepository);
+            WaardelijstLoader waardelijstLoader = new WaardelijstLoader(waardelijstRepository, conceptRepository, trefwoordRepository, toelichtingRepository);
             result = waardelijstLoader.loadWaardelijsten(catalogService);
         }
 

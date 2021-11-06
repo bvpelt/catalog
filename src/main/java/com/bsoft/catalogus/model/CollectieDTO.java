@@ -21,15 +21,17 @@ public class CollectieDTO implements Serializable {
     @Column(name = "TYPE")
     private String type;
 
+    @Column(name = "NAAM")
+    private String naam;
+
     @Column(name = "TERM")
     private String term;
 
     @Column(name = "EIGENAAR")
     private String eigenaar;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "CONCEPTSCHEMA_ID")
-    private ConceptschemaDTO conceptschema;
+    @Column(name = "CONCEPTSCHEMA")
+    private String conceptschema;
 
     @Column(name = "BEGINDATUM")
     private String begindatumGeldigheid;
@@ -45,11 +47,11 @@ public class CollectieDTO implements Serializable {
         if (this == o) return true;
         if (!(o instanceof CollectieDTO)) return false;
         CollectieDTO that = (CollectieDTO) o;
-        return Objects.equals(uri, that.uri) && Objects.equals(type, that.type) && Objects.equals(term, that.term) && Objects.equals(eigenaar, that.eigenaar) && Objects.equals(conceptschema, that.conceptschema) && Objects.equals(begindatumGeldigheid, that.begindatumGeldigheid) && Objects.equals(einddatumGeldigheid, that.einddatumGeldigheid) && Objects.equals(metadata, that.metadata);
+        return uri.equals(that.uri) && Objects.equals(type, that.type) && Objects.equals(naam, that.naam) && Objects.equals(term, that.term) && Objects.equals(eigenaar, that.eigenaar) && Objects.equals(conceptschema, that.conceptschema) && Objects.equals(begindatumGeldigheid, that.begindatumGeldigheid) && Objects.equals(einddatumGeldigheid, that.einddatumGeldigheid) && Objects.equals(metadata, that.metadata);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri, type, term, eigenaar, conceptschema, begindatumGeldigheid, einddatumGeldigheid, metadata);
+        return Objects.hash(uri, type, naam, term, eigenaar, conceptschema, begindatumGeldigheid, einddatumGeldigheid, metadata);
     }
 }

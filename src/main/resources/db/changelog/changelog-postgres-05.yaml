@@ -17,10 +17,10 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: TITEL
+                  name: URI
                   type: text
               - column:
-                  name: METADATA
+                  name: TITEL
                   type: text
               - column:
                   name: WEBPAGINA
@@ -29,21 +29,20 @@ databaseChangeLog:
                   name: RESOURCE
                   type: text
               - column:
+                  name: TYPE
+                  type: text
+              - column:
                   name: BEGINDATUM
                   type: varchar(10)
               - column:
                   name: EINDDATUM
                   type: varchar(10)
               - column:
-                  name: TYPE
-                  type: text
-              - column:
                   name: EIGENAAR
                   type: text
               - column:
-                  name: URI
+                  name: METADATA
                   type: text
-
         - rollback:
             dropTable:
               - tableName: BRON

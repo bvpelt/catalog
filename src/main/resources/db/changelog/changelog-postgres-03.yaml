@@ -49,6 +49,9 @@ databaseChangeLog:
               - column:
                   name: METADATA
                   type: text
+              - column:
+                  name: WAARDELIJST_ID
+                  type: BIGINT
 
         - rollback:
             dropTable:
@@ -61,7 +64,7 @@ databaseChangeLog:
       comment: Create CONCEPT uri index
       changes:
         - createIndex:
-            clustered:  true
+            clustered:  false
             columns:
               - column:
                   descending:  true
@@ -88,6 +91,22 @@ databaseChangeLog:
             tableName:  CONCEPT
             unique:  false
 
+  - changeSet:
+      id:  325
+      author:  bart
+      dbms: PostgreSQL
+      comment: Create CONCEPT WAARDELIJST_ID index
+      changes:
+        - createIndex:
+            clustered:  false
+            columns:
+              - column:
+                  descending:  true
+                  name:  CONCEPTSCHEMA
+            indexName:  idx_concept_waardelijst_id
+            schemaName:  public
+            tableName:  CONCEPT
+            unique:  false
 
   - changeSet:
       id: 330

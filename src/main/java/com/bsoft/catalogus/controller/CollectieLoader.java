@@ -2,13 +2,14 @@ package com.bsoft.catalogus.controller;
 
 import com.bsoft.catalogus.model.*;
 import com.bsoft.catalogus.repository.CollectieRepository;
-import com.bsoft.catalogus.repository.ConceptschemaRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.transaction.Transactional;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,13 +17,9 @@ import java.util.Optional;
 @NoArgsConstructor
 public class CollectieLoader {
 
-    private ConceptschemaRepository conceptschemaRepository;
-
     private CollectieRepository collectieRepository;
 
-    public CollectieLoader(ConceptschemaRepository conceptschemaRepository,
-                           CollectieRepository collectieRepository) {
-        this.conceptschemaRepository = conceptschemaRepository;
+    public CollectieLoader(CollectieRepository collectieRepository) {
         this.collectieRepository = collectieRepository;
     }
 
@@ -56,7 +53,7 @@ public class CollectieLoader {
                 }
             }
         } catch (Exception ex) {
-            log.error("CollectieLoader loadCollectie error loading concept: {}", ex);
+            log.error("CollectieLoader loadCollectie error loading collectie: {}", ex);
             procesResult.setStatus(ProcesResult.ERROR);
             procesResult.setMessage(ex.getMessage());
             procesResult.setMore(false);
@@ -78,9 +75,13 @@ public class CollectieLoader {
         OperationResult<InlineResponse2001> result = null;
         boolean nextPage = false;
 
-        result = catalogService.getCollecties(uri, gepubliceerdDoor, geldigOp, zoekTerm,null, page, pageSize, expandScope);
+        Instant start = Instant.now();
+        result = catalogService.getCollecties(uri, gepubliceerdDoor, geldigOp, zoekTerm, null, page, pageSize, expandScope);
+        Instant finish = Instant.now();
+        long time = Duration.between(start, finish).toMillis();
+        log.info("Timing data getcollecties: {} ms ", time);
 
-        if (result.isSuccess()) {
+        if ((result != null) && result.isSuccess()) {
             InlineResponse2001 inlineResponse2001 = result.getSuccessResult();
             InlineResponse2001Embedded embedded = inlineResponse2001.getEmbedded();
             List<Collectie> collecties = embedded.getCollecties();
@@ -98,11 +99,16 @@ public class CollectieLoader {
             }
         } else {
             procesResult.setStatus(ProcesResult.ERROR);
-            procesResult.setMessage(result.getFailureResult().toString());
+
+            if ((result != null) && result.getFailureResult() != null) {
+                log.debug("CollectieLoader getPage, result: " + result.getFailureResult().toString());
+                procesResult.setMessage(result.getFailureResult().toString());
+            } else {
+                procesResult.setMessage("Error during processing request /collecties");
+            }
             log.info("CollectieLoader getPage: no result stop processing");
         }
         procesResult.setMore(nextPage);
-
     }
 
     private void persistCollecties(final List<Collectie> collecties, final ProcesResult procesResult) {
@@ -128,35 +134,46 @@ public class CollectieLoader {
             log.debug("CollectieLoader convertToCollectieDTO:: found uri: {} - updating", collectie.getUri());
             collectieDTO = optionalCollectieDTO.get();
         } else {
+            log.debug("CollectieLoader convertToCollectieDTO: found uri: {} - new", collectie.getUri());
             collectieDTO = new CollectieDTO();
             newEntry = true;
         }
 
         try {
-            Optional<ConceptschemaDTO> optionalConceptschemaDTO = conceptschemaRepository.findByUri(collectie.getConceptschema());
-            ConceptschemaDTO conceptschemaDTO = null;
-            if (optionalConceptschemaDTO.isPresent()) {
-                conceptschemaDTO = optionalConceptschemaDTO.get();
+            boolean attributesChanged = true; // always true for new entry
+
+            if (!newEntry) {
+                attributesChanged = changedAttributes(collectie, collectieDTO);
             }
 
-            collectieDTO.setUri(collectie.getUri());
-            collectieDTO.setType(collectie.getType());
-            collectieDTO.setTerm(collectie.getTerm());
-            collectieDTO.setEigenaar(collectie.getEigenaar());
-            collectieDTO.setConceptschema(conceptschemaDTO);
-            collectieDTO.setBegindatumGeldigheid(collectie.getBegindatumGeldigheid());
-            collectieDTO.setEinddatumGeldigheid(collectie.getEinddatumGeldigheid().isPresent() ? collectie.getEinddatumGeldigheid().get() : null);
-            collectieDTO.setMetadata(collectie.getMetadata());
+            log.debug("CollectieLoader convertToCollectieDTO newEntry                     : {}", newEntry);
+            log.debug("CollectieLoader convertToCollectieDTO attributesChanged            : {}", attributesChanged);
 
-            if (newEntry || (optionalCollectieDTO.isPresent() && !optionalCollectieDTO.get().equals(collectieDTO))) { // new entry or updated entry
-                log.trace("CollectieLoader convertToCollectieDTO: before 02 save collectieDTO");
+            if (attributesChanged || newEntry) {
+                log.info("CollectieLoader convertToCollectieDTO new or changed attributes");
+                //
+                // for new all attributes and for existing some attributes
+                //
+                collectieDTO.setUri(collectie.getUri());
+                collectieDTO.setType(collectie.getType());
+                collectieDTO.setNaam(collectie.getNaam());
+                collectieDTO.setTerm(collectie.getTerm());
+                collectieDTO.setEigenaar(collectie.getEigenaar());
+                collectieDTO.setConceptschema(collectie.getConceptschema());
+                collectieDTO.setBegindatumGeldigheid(collectie.getBegindatumGeldigheid());
+                collectieDTO.setEinddatumGeldigheid(collectie.getEinddatumGeldigheid().isPresent() ? collectie.getEinddatumGeldigheid().get() : null);
+                collectieDTO.setMetadata(collectie.getMetadata());
+
                 savedCollectie = collectieRepository.save(collectieDTO);
-                log.trace("CollectieLoader convertToCollectieDTO: after 02 save collectieDTO");
-                if (newEntry) { // new entry
-                    procesResult.setNewEntries(procesResult.getNewEntries() + 1);
-                } else { // changed
-                    procesResult.setUpdatedEntries(procesResult.getUpdatedEntries() + 1);
-                }
+            } else {
+                log.debug("CollectieLoader convertToCollectieDTO existing, not new or changed attributes");
+                savedCollectie = collectieDTO;
+            }
+
+            if (newEntry) { // new entry
+                procesResult.setNewEntries(procesResult.getNewEntries() + 1);
+            } else if (attributesChanged) { // changed
+                procesResult.setUpdatedEntries(procesResult.getUpdatedEntries() + 1);
             } else { // unchanged
                 procesResult.setUnchangedEntries(procesResult.getUnchangedEntries() + 1);
             }
@@ -167,7 +184,54 @@ public class CollectieLoader {
             procesResult.setMore(false);
             procesResult.setMessage(e.getMessage());
         }
+
         return savedCollectie;
     }
 
+
+    private boolean changedAttributes(final Collectie collectie, final CollectieDTO collectieDTO) {
+        boolean changed = false;
+
+        changed = !collectie.getUri().equals(collectieDTO.getUri());
+
+        if (!changed) {
+            changed = !collectie.getType().equals(collectieDTO.getType());
+        }
+
+        if (!changed) {
+            changed = !collectie.getNaam().equals(collectieDTO.getNaam());
+        }
+
+        if (!changed) {
+            changed = !collectie.getTerm().equals(collectieDTO.getTerm());
+        }
+
+        if (!changed) {
+            changed = !collectie.getEigenaar().equals(collectieDTO.getEigenaar());
+        }
+
+        if (!changed) {
+            changed = !collectie.getConceptschema().equals(collectieDTO.getConceptschema());
+        }
+
+        if (!changed) {
+            changed = !collectie.getBegindatumGeldigheid().equals(collectieDTO.getBegindatumGeldigheid());
+        }
+
+        if (!changed) {
+            if (collectie.getEinddatumGeldigheid().isPresent() && (collectie.getEinddatumGeldigheid().get() != null)) {
+                changed = !collectie.getEinddatumGeldigheid().get().equals(collectieDTO.getEinddatumGeldigheid());
+            } else { // einddatum not present == null
+                if (collectieDTO.getEinddatumGeldigheid() != null) {
+                    changed = collectieDTO.getEinddatumGeldigheid().length() > 0;
+                }
+            }
+        }
+
+        if (!changed) {
+            changed = !collectie.getMetadata().equals(collectieDTO.getMetadata());
+        }
+
+        return changed;
+    }
 }

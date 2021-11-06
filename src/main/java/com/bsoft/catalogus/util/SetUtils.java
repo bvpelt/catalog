@@ -4,13 +4,13 @@ import java.util.Set;
 
 public class SetUtils {
 
-    public static boolean equals(Set<?> set1, Set<?> set2){
+    public static boolean equals(Set<?> set1, Set<?> set2) {
 
-        if(set1 == null || set2 ==null){
+        if (set1 == null || set2 == null) {
             return false;
         }
 
-        if(set1.size()!=set2.size()){
+        if (set1.size() != set2.size()) {
             return false;
         }
 
