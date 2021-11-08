@@ -4,6 +4,7 @@ import com.bsoft.catalogus.model.*;
 import com.bsoft.catalogus.repository.BronRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
+import com.bsoft.catalogus.util.StringChanged;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -196,15 +197,15 @@ public class BronLoader {
     private boolean changedAttributes(final Bron bron, final BronDTO bronDTO) {
         boolean changed = false;
 
-        changed = !bron.getUri().equals(bronDTO.getUri());
+        changed = StringChanged.stringChanged(bron.getUri(), bronDTO.getUri());
 
         if (!changed) {
-            changed = !bron.getTitel().equals(bronDTO.getTitel());
+            changed = StringChanged.stringChanged(bron.getTitel(),bronDTO.getTitel());
         }
 
         if (!changed) {
             if (bron.getWebpagina().isPresent() && (bron.getWebpagina().get() != null)) {
-                changed = !bron.getWebpagina().get().equals(bronDTO.getWebpagina());
+                changed = StringChanged.stringChanged(bron.getWebpagina().get(),bronDTO.getWebpagina());
             } else { // webpagina not present == null
                 if (bronDTO.getWebpagina() != null) {
                     changed = bronDTO.getWebpagina().length() > 0;
@@ -214,7 +215,7 @@ public class BronLoader {
 
         if (!changed) {
             if (bron.getResource().isPresent() && (bron.getResource().get() != null)) {
-                changed = !bron.getResource().get().equals(bronDTO.getResource());
+                changed = StringChanged.stringChanged(bron.getResource().get(),bronDTO.getResource());
             } else { // resource not present == null
                 if (bronDTO.getResource() != null) {
                     changed = bronDTO.getResource().length() > 0;
@@ -223,16 +224,16 @@ public class BronLoader {
         }
 
         if (!changed) {
-            changed = !bron.getType().equals(bronDTO.getType());
+            changed = StringChanged.stringChanged(bron.getType(), bronDTO.getType());
         }
 
         if (!changed) {
-            changed = !bron.getBegindatumGeldigheid().equals(bronDTO.getBegindatumGeldigheid());
+            changed = StringChanged.stringChanged(bron.getBegindatumGeldigheid(), bronDTO.getBegindatumGeldigheid());
         }
 
         if (!changed) {
             if (bron.getEinddatumGeldigheid().isPresent() && (bron.getEinddatumGeldigheid().get() != null)) {
-                changed = !bron.getEinddatumGeldigheid().get().equals(bronDTO.getEinddatumGeldigheid());
+                changed = StringChanged.stringChanged(bron.getEinddatumGeldigheid().get(), bronDTO.getEinddatumGeldigheid());
             } else { // einddatum not present == null
                 if (bronDTO.getEinddatumGeldigheid() != null) {
                     changed = bronDTO.getEinddatumGeldigheid().length() > 0;
@@ -242,7 +243,7 @@ public class BronLoader {
 
         if (!changed) {
             if (bron.getEigenaar().isPresent() && (bron.getEigenaar().get() != null)) {
-                changed = !bron.getEigenaar().get().equals(bronDTO.getEigenaar());
+                changed = StringChanged.stringChanged(bron.getEigenaar().get(), bronDTO.getEigenaar());
             } else { // einddatum not present == null
                 if (bronDTO.getEigenaar() != null) {
                     changed = bronDTO.getEigenaar().length() > 0;
@@ -251,7 +252,7 @@ public class BronLoader {
         }
 
         if (!changed) {
-            changed = !bron.getMetadata().equals(bronDTO.getMetadata());
+            changed = StringChanged.stringChanged(bron.getMetadata(), bronDTO.getMetadata());
         }
 
         return changed;
