@@ -89,8 +89,8 @@ public class ConceptDTO implements Serializable {
     private String metadata;
 
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "waardelijst_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "waardelijst_id", nullable = true)
     private WaardelijstDTO waardelijst;
 
     @Override

@@ -371,7 +371,11 @@ public class WaardelijstLoader {
         }
 
         if (!changed) {
-            changed = !waardelijst.getEigenaar().equals(waardelijstDTO.getEigenaar());
+            if ((waardelijst.getEigenaar() == null) && (waardelijstDTO.getEigenaar() != null)) {
+                   changed = true;
+            } else if (waardelijst.getEigenaar() != null) {
+                changed = !waardelijst.getEigenaar().equals(waardelijstDTO.getEigenaar());
+            }
         }
 
         if (!changed) {
