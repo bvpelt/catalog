@@ -5,6 +5,7 @@ import com.bsoft.catalogus.repository.*;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
 import com.bsoft.catalogus.util.SetUtils;
+import com.bsoft.catalogus.util.StringChanged;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -89,7 +90,7 @@ public class WaardelijstLoader {
         result = catalogService.getWaardelijst(uri, gepubliceerdDoor, zoekTerm, expandScope, page, pageSize);
         Instant finish = Instant.now();
         long time = Duration.between(start, finish).toMillis();
-        log.info("Timing data getwaardelijsten: {} ms ", time);
+        log.debug("Timing data getwaardelijsten: {} ms ", time);
 
         if ((result != null) && result.isSuccess()) {
             InlineResponse2004 inlineResponse2004 = result.getSuccessResult();
@@ -330,56 +331,34 @@ public class WaardelijstLoader {
     private boolean changedAttributes(final Waardelijst waardelijst, final WaardelijstDTO waardelijstDTO) {
         boolean changed = false;
 
-        changed = !waardelijst.getUri().equals(waardelijstDTO.getUri());
+        changed = StringChanged.stringChanged(waardelijst.getUri(), waardelijstDTO.getUri());
 
         if (!changed) {
-            if (waardelijst.getNaam().isPresent() && (waardelijst.getNaam().get() != null)) {
-                changed = !waardelijst.getNaam().get().equals(waardelijstDTO.getNaam());
-            } else { // naam nog present == null
-                if (waardelijstDTO.getNaam() != null) {
-                    changed = waardelijstDTO.getNaam().length() > 0;
-                }
-            }
+            changed = StringChanged.stringChanged(waardelijst.getNaam(), waardelijstDTO.getNaam());
         }
 
         if (!changed) {
-            changed = !waardelijst.getTitel().equals(waardelijstDTO.getTitel());
+            changed = StringChanged.stringChanged(waardelijst.getTitel(), waardelijstDTO.getTitel());
         }
 
         if (!changed) {
-            if (waardelijst.getBeschrijving().isPresent() && (waardelijst.getBeschrijving().get() != null)) {
-                changed = !waardelijst.getBeschrijving().get().equals(waardelijstDTO.getBeschrijving());
-            } else { // naam nog present == null
-                if (waardelijstDTO.getBeschrijving() != null) {
-                    changed = waardelijstDTO.getBeschrijving().length() > 0;
-                }
-            }
+            changed = StringChanged.stringChanged(waardelijst.getBeschrijving(), waardelijstDTO.getBeschrijving());
         }
 
         if (!changed) {
-            changed = !waardelijst.getVersie().equals(waardelijstDTO.getVersie());
+            changed = StringChanged.stringChanged(waardelijst.getVersie(), waardelijstDTO.getVersie());
         }
 
         if (!changed) {
-            if (waardelijst.getVersienotities().isPresent() && (waardelijst.getVersienotities().get() != null)) {
-                changed = !waardelijst.getVersienotities().get().equals(waardelijstDTO.getVersienotities());
-            } else { // naam nog present == null
-                if (waardelijstDTO.getVersienotities() != null) {
-                    changed = waardelijstDTO.getVersienotities().length() > 0;
-                }
-            }
+            changed = StringChanged.stringChanged(waardelijst.getVersienotities(), waardelijstDTO.getVersienotities());
         }
 
         if (!changed) {
-            if ((waardelijst.getEigenaar() == null) && (waardelijstDTO.getEigenaar() != null)) {
-                   changed = true;
-            } else if (waardelijst.getEigenaar() != null) {
-                changed = !waardelijst.getEigenaar().equals(waardelijstDTO.getEigenaar());
-            }
+            changed = StringChanged.stringChanged(waardelijst.getEigenaar(), waardelijstDTO.getEigenaar());
         }
 
         if (!changed) {
-            changed = !waardelijst.getMetadata().equals(waardelijstDTO.getMetadata());
+            changed = StringChanged.stringChanged(waardelijst.getMetadata(), waardelijstDTO.getMetadata());
         }
 
         return changed;

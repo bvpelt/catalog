@@ -6,10 +6,13 @@ import com.bsoft.catalogus.repository.ConceptschemaTypeRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
 import com.bsoft.catalogus.util.SetUtils;
+import com.bsoft.catalogus.util.StringChanged;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.transaction.Transactional;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -81,7 +84,11 @@ public class ConceptSchemaLoader {
         OperationResult<InlineResponse200> result;
         boolean nextPage = false;
 
+        Instant start = Instant.now();
         result = catalogService.getConceptschemas(uri, gepubliceerdDoor, geldigOp, zoekTerm, page, pageSize, expandScope);
+        Instant finish = Instant.now();
+        long time = Duration.between(start, finish).toMillis();
+        log.debug("Timing data getconceptschemas: {} ms ", time);
 
         if (result.isSuccess()) {
             InlineResponse200 inlineResponse200 = result.getSuccessResult();
@@ -229,45 +236,32 @@ public class ConceptSchemaLoader {
         boolean changed = false;
 
 
-        changed = !conceptschema.getUri().equals(conceptschemaDTO.getUri());
+        changed = StringChanged.stringChanged(conceptschema.getUri(), conceptschemaDTO.getUri());
 
 
         if (!changed) {
-            changed = !conceptschema.getNaam().equals(conceptschemaDTO.getNaam());
+            changed = StringChanged.stringChanged(conceptschema.getNaam(), conceptschemaDTO.getNaam());
         }
 
         if (!changed) {
-            if (conceptschema.getUitleg().isPresent() && (conceptschema.getUitleg().get() != null)) {
-                changed = !conceptschema.getUitleg().get().equals(conceptschemaDTO.getUitleg());
-            } else { // uitleg not present == null
-                if (conceptschemaDTO.getUitleg() != null) {
-                    changed = conceptschemaDTO.getUitleg().length() > 0;
-                }
-            }
+            changed = StringChanged.stringChanged(conceptschema.getUitleg(), conceptschemaDTO.getUitleg());
         }
 
         if (!changed) {
-            changed = !conceptschema.getEigenaar().equals(conceptschemaDTO.getEigenaar());
+            changed = StringChanged.stringChanged(conceptschema.getEigenaar(), conceptschemaDTO.getEigenaar());
         }
 
         if (!changed) {
-            changed = !conceptschema.getBegindatumGeldigheid().equals(conceptschemaDTO.getBegindatumGeldigheid());
+            changed = StringChanged.stringChanged(conceptschema.getBegindatumGeldigheid(), conceptschemaDTO.getBegindatumGeldigheid());
         }
 
         if (!changed) {
-            if (conceptschema.getEinddatumGeldigheid().isPresent() && (conceptschema.getEinddatumGeldigheid().get() != null)) {
-                changed = !conceptschema.getEinddatumGeldigheid().get().equals(conceptschemaDTO.getEinddatumGeldigheid());
-            } else { // einddatum not present == null
-                if (conceptschemaDTO.getEinddatumGeldigheid() != null) {
-                    changed = conceptschemaDTO.getEinddatumGeldigheid().length() > 0;
-                }
-            }
+            changed = StringChanged.stringChanged(conceptschema.getEinddatumGeldigheid(), conceptschemaDTO.getEinddatumGeldigheid());
         }
 
         if (!changed) {
-            changed = !conceptschema.getMetadata().equals(conceptschemaDTO.getMetadata());
+            changed = StringChanged.stringChanged(conceptschema.getMetadata(), conceptschemaDTO.getMetadata());
         }
-
 
         return changed;
     }

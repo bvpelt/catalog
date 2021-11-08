@@ -80,7 +80,7 @@ public class BronLoader {
         result = catalogService.getBron(uri, gepubliceerdDoor, geldigOp, zoekTerm, page, pageSize);
         Instant finish = Instant.now();
         long time = Duration.between(start, finish).toMillis();
-        log.info("Timing data getbron: {} ms ", time);
+        log.debug("Timing data getbron: {} ms ", time);
 
         if ((result != null) && result.isSuccess()) {
             InlineResponse2003 inlineResponse2003 = result.getSuccessResult();
@@ -204,23 +204,11 @@ public class BronLoader {
         }
 
         if (!changed) {
-            if (bron.getWebpagina().isPresent() && (bron.getWebpagina().get() != null)) {
-                changed = StringChanged.stringChanged(bron.getWebpagina().get(),bronDTO.getWebpagina());
-            } else { // webpagina not present == null
-                if (bronDTO.getWebpagina() != null) {
-                    changed = bronDTO.getWebpagina().length() > 0;
-                }
-            }
+            changed = StringChanged.stringChanged(bron.getWebpagina(),bronDTO.getWebpagina());
         }
 
         if (!changed) {
-            if (bron.getResource().isPresent() && (bron.getResource().get() != null)) {
-                changed = StringChanged.stringChanged(bron.getResource().get(),bronDTO.getResource());
-            } else { // resource not present == null
-                if (bronDTO.getResource() != null) {
-                    changed = bronDTO.getResource().length() > 0;
-                }
-            }
+            changed = StringChanged.stringChanged(bron.getResource(), bronDTO.getResource());
         }
 
         if (!changed) {
@@ -232,23 +220,11 @@ public class BronLoader {
         }
 
         if (!changed) {
-            if (bron.getEinddatumGeldigheid().isPresent() && (bron.getEinddatumGeldigheid().get() != null)) {
-                changed = StringChanged.stringChanged(bron.getEinddatumGeldigheid().get(), bronDTO.getEinddatumGeldigheid());
-            } else { // einddatum not present == null
-                if (bronDTO.getEinddatumGeldigheid() != null) {
-                    changed = bronDTO.getEinddatumGeldigheid().length() > 0;
-                }
-            }
+            changed = StringChanged.stringChanged(bron.getEinddatumGeldigheid(), bronDTO.getEinddatumGeldigheid());
         }
 
         if (!changed) {
-            if (bron.getEigenaar().isPresent() && (bron.getEigenaar().get() != null)) {
-                changed = StringChanged.stringChanged(bron.getEigenaar().get(), bronDTO.getEigenaar());
-            } else { // einddatum not present == null
-                if (bronDTO.getEigenaar() != null) {
-                    changed = bronDTO.getEigenaar().length() > 0;
-                }
-            }
+            changed = StringChanged.stringChanged(bron.getEigenaar(), bronDTO.getEigenaar());
         }
 
         if (!changed) {

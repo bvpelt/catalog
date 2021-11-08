@@ -4,6 +4,7 @@ import com.bsoft.catalogus.model.*;
 import com.bsoft.catalogus.repository.CollectieRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
+import com.bsoft.catalogus.util.StringChanged;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -79,7 +80,7 @@ public class CollectieLoader {
         result = catalogService.getCollecties(uri, gepubliceerdDoor, geldigOp, zoekTerm, null, page, pageSize, expandScope);
         Instant finish = Instant.now();
         long time = Duration.between(start, finish).toMillis();
-        log.info("Timing data getcollecties: {} ms ", time);
+        log.debug("Timing data getcollecties: {} ms ", time);
 
         if ((result != null) && result.isSuccess()) {
             InlineResponse2001 inlineResponse2001 = result.getSuccessResult();
@@ -192,44 +193,38 @@ public class CollectieLoader {
     private boolean changedAttributes(final Collectie collectie, final CollectieDTO collectieDTO) {
         boolean changed = false;
 
-        changed = !collectie.getUri().equals(collectieDTO.getUri());
+        changed = StringChanged.stringChanged(collectie.getUri(), collectieDTO.getUri());
 
         if (!changed) {
-            changed = !collectie.getType().equals(collectieDTO.getType());
+            changed = StringChanged.stringChanged(collectie.getType(), collectieDTO.getType());
         }
 
         if (!changed) {
-            changed = !collectie.getNaam().equals(collectieDTO.getNaam());
+            changed = StringChanged.stringChanged(collectie.getNaam(), collectieDTO.getNaam());
         }
 
         if (!changed) {
-            changed = !collectie.getTerm().equals(collectieDTO.getTerm());
+            changed = StringChanged.stringChanged(collectie.getTerm(), collectieDTO.getTerm());
         }
 
         if (!changed) {
-            changed = !collectie.getEigenaar().equals(collectieDTO.getEigenaar());
+            changed = StringChanged.stringChanged(collectie.getEigenaar(), collectieDTO.getEigenaar());
         }
 
         if (!changed) {
-            changed = !collectie.getConceptschema().equals(collectieDTO.getConceptschema());
+            changed = StringChanged.stringChanged(collectie.getConceptschema(), collectieDTO.getConceptschema());
         }
 
         if (!changed) {
-            changed = !collectie.getBegindatumGeldigheid().equals(collectieDTO.getBegindatumGeldigheid());
+            changed = StringChanged.stringChanged(collectie.getBegindatumGeldigheid(), collectieDTO.getBegindatumGeldigheid());
         }
 
         if (!changed) {
-            if (collectie.getEinddatumGeldigheid().isPresent() && (collectie.getEinddatumGeldigheid().get() != null)) {
-                changed = !collectie.getEinddatumGeldigheid().get().equals(collectieDTO.getEinddatumGeldigheid());
-            } else { // einddatum not present == null
-                if (collectieDTO.getEinddatumGeldigheid() != null) {
-                    changed = collectieDTO.getEinddatumGeldigheid().length() > 0;
-                }
-            }
+            changed = StringChanged.stringChanged(collectie.getEinddatumGeldigheid(), collectieDTO.getEinddatumGeldigheid());
         }
 
         if (!changed) {
-            changed = !collectie.getMetadata().equals(collectieDTO.getMetadata());
+            changed = StringChanged.stringChanged(collectie.getMetadata(), collectieDTO.getMetadata());
         }
 
         return changed;

@@ -7,6 +7,7 @@ import com.bsoft.catalogus.repository.TrefwoordRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
 import com.bsoft.catalogus.util.SetUtils;
+import com.bsoft.catalogus.util.StringChanged;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -91,7 +92,7 @@ public class ConceptLoader {
         result = catalogService.getConcepten(uri, gepubliceerdDoor, geldigOp, zoekTerm, null, null, null, page, pageSize);
         Instant finish = Instant.now();
         long time = Duration.between(start, finish).toMillis();
-        log.info("Timing data getconcepten: {} ms ", time);
+        log.debug("Timing data getconcepten: {} ms ", time);
 
         if ((result != null) && result.isSuccess()) {
             InlineResponse2002 inlineResponse2002 = result.getSuccessResult();
@@ -296,70 +297,46 @@ public class ConceptLoader {
 
     private boolean changedAttributes(final Concept concept, final ConceptDTO conceptDTO) {
         boolean changed = false;
-        changed = !concept.getUri().equals(conceptDTO.getUri());
+        changed = StringChanged.stringChanged(concept.getUri(), conceptDTO.getUri());
 
         if (!changed) {
-            changed = !concept.getType().equals(conceptDTO.getType());
+            changed = StringChanged.stringChanged(concept.getType(), conceptDTO.getType());
         }
 
         if (!changed) {
-            changed = !concept.getNaam().equals(conceptDTO.getNaam());
+            changed = StringChanged.stringChanged(concept.getNaam(), conceptDTO.getNaam());
         }
 
         if (!changed) {
-            changed = !concept.getTerm().equals(conceptDTO.getTerm());
+            changed = StringChanged.stringChanged(concept.getTerm(), conceptDTO.getTerm());
         }
 
         if (!changed) {
-            if (concept.getUitleg().isPresent() && (concept.getUitleg().get() != null)) {
-                changed = !concept.getUitleg().get().equals(conceptDTO.getUitleg());
-            } else { // uitleg not present == null
-                if (conceptDTO.getUitleg() != null) {
-                    changed = conceptDTO.getUitleg().length() > 0;
-                }
-            }
+            changed = StringChanged.stringChanged(concept.getUitleg(), conceptDTO.getUitleg());
         }
 
         if (!changed) {
-            if (concept.getDefinitie().isPresent() && (concept.getDefinitie().get() != null)) {
-                changed = !concept.getDefinitie().get().equals(conceptDTO.getDefinitie());
-            } else { // definitie not present == null
-                if (conceptDTO.getDefinitie() != null) {
-                    changed = conceptDTO.getDefinitie().length() > 0;
-                }
-            }
+            changed = StringChanged.stringChanged(concept.getDefinitie(), conceptDTO.getDefinitie());
         }
 
         if (!changed) {
-            if (concept.getEigenaar().isPresent() && (concept.getEigenaar().get() != null)) {
-                changed = !concept.getEigenaar().get().equals(conceptDTO.getEigenaar());
-            } else { // eigenaar not present == null
-                if (conceptDTO.getEigenaar() != null) {
-                    changed = conceptDTO.getEigenaar().length() > 0;
-                }
-            }
+            changed = StringChanged.stringChanged(concept.getEigenaar(), conceptDTO.getEigenaar());
         }
 
         if (!changed) {
-            changed = !concept.getConceptschema().equals(conceptDTO.getConceptschema());
+            changed = StringChanged.stringChanged(concept.getConceptschema(), conceptDTO.getConceptschema());
         }
 
         if (!changed) {
-            changed = !concept.getBegindatumGeldigheid().equals(conceptDTO.getBegindatumGeldigheid());
+            changed = StringChanged.stringChanged(concept.getBegindatumGeldigheid(), conceptDTO.getBegindatumGeldigheid());
         }
 
         if (!changed) {
-            if (concept.getEinddatumGeldigheid().isPresent() && (concept.getEinddatumGeldigheid().get() != null)) {
-                changed = !concept.getEinddatumGeldigheid().get().equals(conceptDTO.getEinddatumGeldigheid());
-            } else { // einddatumgeldigheid not present == null
-                if (conceptDTO.getEinddatumGeldigheid() != null) {
-                    changed = conceptDTO.getEinddatumGeldigheid().length() > 0;
-                }
-            }
+            changed = StringChanged.stringChanged(concept.getEinddatumGeldigheid(), conceptDTO.getEinddatumGeldigheid());
         }
 
         if (!changed) {
-            changed = !concept.getMetadata().equals(conceptDTO.getMetadata());
+            changed = StringChanged.stringChanged(concept.getMetadata(), conceptDTO.getMetadata());
         }
 
         return changed;
