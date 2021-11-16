@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.transaction.Transactional;
-import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -115,14 +114,14 @@ public class BronLoader {
     }
 
     private void persistBronnen(final List<Bron> bronnen, final ProcesResult procesResult) {
-        int maxsize =  bronnen.size();
-            log.info("BronLoader persistConceptSchemas number found: {}", maxsize);
+        int maxsize = bronnen.size();
+        log.info("BronLoader persistConceptSchemas number found: {}", maxsize);
 
-            for (int i = 0; i < maxsize; i++) {
-                log.debug("CollectieLoader persistCollecties: begin found collectie: {}", bronnen.get(i).getUri());
-                BronDTO bronDTO = convertToBronDTO(bronnen.get(i), procesResult);
-                log.debug("CollectieLoader persistCollecties: end   found collectie: {}", bronDTO == null ? "(null)" : bronDTO.getUri());
-            }
+        for (int i = 0; i < maxsize; i++) {
+            log.debug("CollectieLoader persistCollecties: begin found collectie: {}", bronnen.get(i).getUri());
+            BronDTO bronDTO = convertToBronDTO(bronnen.get(i), procesResult);
+            log.debug("CollectieLoader persistCollecties: end   found collectie: {}", bronDTO == null ? "(null)" : bronDTO.getUri());
+        }
     }
 
     @Transactional
@@ -200,11 +199,11 @@ public class BronLoader {
         changed = StringChanged.stringChanged(bron.getUri(), bronDTO.getUri());
 
         if (!changed) {
-            changed = StringChanged.stringChanged(bron.getTitel(),bronDTO.getTitel());
+            changed = StringChanged.stringChanged(bron.getTitel(), bronDTO.getTitel());
         }
 
         if (!changed) {
-            changed = StringChanged.stringChanged(bron.getWebpagina(),bronDTO.getWebpagina());
+            changed = StringChanged.stringChanged(bron.getWebpagina(), bronDTO.getWebpagina());
         }
 
         if (!changed) {

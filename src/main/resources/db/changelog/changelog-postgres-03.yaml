@@ -58,55 +58,55 @@ databaseChangeLog:
               - tableName: CONCEPT
 
   - changeSet:
-      id:  310
-      author:  bart
+      id: 310
+      author: bart
       dbms: PostgreSQL
       comment: Create CONCEPT uri index
       changes:
         - createIndex:
-            clustered:  false
+            clustered: false
             columns:
               - column:
-                  descending:  true
-                  name:  URI
-            indexName:  idx_concept_uri
-            schemaName:  public
-            tableName:  CONCEPT
-            unique:  true
+                  descending: true
+                  name: URI
+            indexName: idx_concept_uri
+            schemaName: public
+            tableName: CONCEPT
+            unique: true
 
   - changeSet:
-      id:  320
-      author:  bart
+      id: 320
+      author: bart
       dbms: PostgreSQL
       comment: Create CONCEPT CONCEPTSCHEMA index
       changes:
         - createIndex:
-            clustered:  true
+            clustered: true
             columns:
               - column:
-                  descending:  true
-                  name:  CONCEPTSCHEMA
-            indexName:  idx_concept_conceptschema
-            schemaName:  public
-            tableName:  CONCEPT
-            unique:  false
+                  descending: true
+                  name: CONCEPTSCHEMA
+            indexName: idx_concept_conceptschema
+            schemaName: public
+            tableName: CONCEPT
+            unique: false
 
   - changeSet:
-      id:  325
-      author:  bart
+      id: 325
+      author: bart
       dbms: PostgreSQL
       comment: Create CONCEPT WAARDELIJST_ID index
       changes:
         - createIndex:
-            clustered:  false
+            clustered: false
             columns:
               - column:
-                  descending:  true
-                  name:  CONCEPTSCHEMA
-            indexName:  idx_concept_waardelijst_id
-            schemaName:  public
-            tableName:  CONCEPT
-            unique:  false
+                  descending: true
+                  name: CONCEPTSCHEMA
+            indexName: idx_concept_waardelijst_id
+            schemaName: public
+            tableName: CONCEPT
+            unique: false
 
   - changeSet:
       id: 330
@@ -136,38 +136,38 @@ databaseChangeLog:
               - tableName: CONCEPT_TREFWOORD
 
   - changeSet:
-      id:  340
-      author:  bart
+      id: 340
+      author: bart
       dbms: PostgreSQL
       comment: Create CONCEPT_TREFWOORD CONCEPT_ID index
       changes:
         - createIndex:
-            clustered:  true
+            clustered: true
             columns:
               - column:
-                  descending:  true
-                  name:  CONCEPT_ID
-            indexName:  idx_concept_id
-            schemaName:  public
-            tableName:  CONCEPT_TREFWOORD
-            unique:  false
+                  descending: true
+                  name: CONCEPT_ID
+            indexName: idx_concept_id
+            schemaName: public
+            tableName: CONCEPT_TREFWOORD
+            unique: false
 
   - changeSet:
-      id:  350
-      author:  bart
+      id: 350
+      author: bart
       dbms: PostgreSQL
       comment: Create CONCEPT_TREFWOORD TREFWOORD_ID index
       changes:
         - createIndex:
-            clustered:  false
+            clustered: false
             columns:
               - column:
-                  descending:  true
-                  name:  TREFWOORD_ID
-            indexName:  idx_trefwoord_id
-            schemaName:  public
-            tableName:  CONCEPT_TREFWOORD
-            unique:  false
+                  descending: true
+                  name: TREFWOORD_ID
+            indexName: idx_trefwoord_id
+            schemaName: public
+            tableName: CONCEPT_TREFWOORD
+            unique: false
 
   - changeSet:
       id: 360
@@ -194,21 +194,21 @@ databaseChangeLog:
               - tableName: TREFWOORD
 
   - changeSet:
-      id:  370
-      author:  bart
+      id: 370
+      author: bart
       dbms: PostgreSQL
       comment: Create TREFWOORD TREFWOORD index
       changes:
         - createIndex:
-            clustered:  false
+            clustered: false
             columns:
               - column:
-                  descending:  true
-                  name:  TREFWOORD
-            indexName:  idx_trefwoord
-            schemaName:  public
-            tableName:  TREFWOORD
-            unique:  true
+                  descending: true
+                  name: TREFWOORD
+            indexName: idx_trefwoord
+            schemaName: public
+            tableName: TREFWOORD
+            unique: true
 
   - changeSet:
       id: 380
@@ -235,21 +235,21 @@ databaseChangeLog:
               - tableName: TOELICHTING
 
   - changeSet:
-      id:  385
-      author:  bart
+      id: 385
+      author: bart
       dbms: PostgreSQL
       comment: Create TOELICHTING TOELICHTING index
       changes:
         - createIndex:
-            clustered:  false
+            clustered: false
             columns:
               - column:
-                  descending:  true
-                  name:  TOELICHTING
-            indexName:  idx_toelichting
-            schemaName:  public
-            tableName:  TOELICHTING
-            unique:  true
+                  descending: true
+                  name: TOELICHTING
+            indexName: idx_toelichting
+            schemaName: public
+            tableName: TOELICHTING
+            unique: true
 
 
   - changeSet:
@@ -280,35 +280,35 @@ databaseChangeLog:
               - tableName: CONCEPT_TOELICHTING
 
   - changeSet:
-      id:  395
-      author:  bart
+      id: 395
+      author: bart
       dbms: PostgreSQL
       comment: Create CONCEPT_TOELICHTING CONCEPT_ID index
       changes:
         - createIndex:
-            clustered:  true
+            clustered: true
             columns:
               - column:
-                  descending:  true
-                  name:  CONCEPT_ID
-            indexName:  idx_concept_toelichting_id
-            schemaName:  public
-            tableName:  CONCEPT_TOELICHTING
-            unique:  false
+                  descending: true
+                  name: CONCEPT_ID
+            indexName: idx_concept_toelichting_id
+            schemaName: public
+            tableName: CONCEPT_TOELICHTING
+            unique: false
 
   - changeSet:
-      id:  397
-      author:  bart
+      id: 397
+      author: bart
       dbms: PostgreSQL
       comment: Create CONCEPT_TOELICHTING TOELICHTING_ID index
       changes:
         - createIndex:
-            clustered:  false
+            clustered: false
             columns:
               - column:
-                  descending:  true
-                  name:  TOELICHTING_ID
-            indexName:  idx_toelichting_id
-            schemaName:  public
-            tableName:  CONCEPT_TOELICHTING
-            unique:  false
+                  descending: true
+                  name: TOELICHTING_ID
+            indexName: idx_toelichting_id
+            schemaName: public
+            tableName: CONCEPT_TOELICHTING
+            unique: false

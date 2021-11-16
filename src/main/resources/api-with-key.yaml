@@ -1252,4 +1252,4 @@ components:
       name: api_key
       in: header
 security:
-  - api_key: []
+  - api_key: [ ]

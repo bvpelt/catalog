@@ -48,18 +48,18 @@ databaseChangeLog:
               - tableName: BRON
 
   - changeSet:
-      id:  510
-      author:  bart
+      id: 510
+      author: bart
       dbms: PostgreSQL
       comment: Create BRON uri index
       changes:
         - createIndex:
-            clustered:  true
+            clustered: true
             columns:
               - column:
-                  descending:  true
-                  name:  URI
-            indexName:  idx_bron_uri
-            schemaName:  public
-            tableName:  BRON
-            unique:  true
+                  descending: true
+                  name: URI
+            indexName: idx_bron_uri
+            schemaName: public
+            tableName: BRON
+            unique: true

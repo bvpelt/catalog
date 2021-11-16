@@ -1,7 +1,6 @@
 package com.bsoft.catalogus.model;
 
 import lombok.Data;
-import org.springframework.data.domain.Page;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -42,8 +41,18 @@ public class WaardelijstDTO implements Serializable {
     @Column(name = "METADATA")
     private String metadata;
 
-    @OneToMany(mappedBy = "waardelijst", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<ConceptDTO> waarden;
+    @OneToMany(mappedBy = "waardelijst", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ConceptDTO> waarden = new HashSet<>();
+
+    public void addWaarde(final ConceptDTO waarde) {
+        waarden.add(waarde);
+        waarde.setWaardelijst(this);
+    }
+
+    public void removeWaarde(final ConceptDTO waarde) {
+        waarden.remove(waarde);
+        waarde.setWaardelijst(null);
+    }
 
     @Override
     public boolean equals(Object o) {

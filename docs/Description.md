@@ -35,6 +35,7 @@ Start h2 console in seperate session
 ## JPA
 See
 - https://attacomsian.com/blog/spring-data-jpa-one-to-many-mapping
+- https://vladmihalcea.com/the-best-way-to-map-a-onetomany-association-with-jpa-and-hibernate/
 - https://attacomsian.com/blog/spring-data-jpa-many-to-many-mapping
 - https://www.javaguides.net/2019/08/spring-boot-hibernate-many-to-many-example.html
 

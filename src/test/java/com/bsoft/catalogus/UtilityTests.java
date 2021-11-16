@@ -8,7 +8,6 @@ import org.locationtech.jts.util.Assert;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.print.DocFlavor;
 import java.util.Optional;
 
 @Slf4j
@@ -22,7 +21,8 @@ public class UtilityTests {
         log.info("Current data: {}", date);
     }
 
-    @Test void stringChangedTest() {
+    @Test
+    void stringChangedTest() {
         String snull = null;
         String s1 = "s1";
         String s2 = "s2";

@@ -49,53 +49,53 @@ databaseChangeLog:
               - tableName: COLLECTIE
 
   - changeSet:
-      id:  410
-      author:  bart
+      id: 410
+      author: bart
       dbms: PostgreSQL
       comment: Create COLLECTIE uri index
       changes:
         - createIndex:
-            clustered:  false
+            clustered: false
             columns:
               - column:
-                  descending:  true
-                  name:  URI
-            indexName:  idx_collectie_uri
-            schemaName:  public
-            tableName:  COLLECTIE
-            unique:  true
+                  descending: true
+                  name: URI
+            indexName: idx_collectie_uri
+            schemaName: public
+            tableName: COLLECTIE
+            unique: true
 
   - changeSet:
-      id:  420
-      author:  bart
+      id: 420
+      author: bart
       dbms: PostgreSQL
       comment: Create COLLECTIE NAAM index
       changes:
         - createIndex:
-            clustered:  false
+            clustered: false
             columns:
               - column:
-                  descending:  true
-                  name:  NAAM
-            indexName:  idx_collectie_naam
-            schemaName:  public
-            tableName:  COLLECTIE
-            unique:  false
+                  descending: true
+                  name: NAAM
+            indexName: idx_collectie_naam
+            schemaName: public
+            tableName: COLLECTIE
+            unique: false
 
   - changeSet:
-      id:  430
-      author:  bart
+      id: 430
+      author: bart
       dbms: PostgreSQL
       comment: Create COLLECTIE CONCEPTSCHEMA index
       changes:
         - createIndex:
-            clustered:  true
+            clustered: true
             columns:
               - column:
-                  descending:  true
-                  name:  NAAM
-            indexName:  idx_collectie_conceptschema
-            schemaName:  public
-            tableName:  COLLECTIE
-            unique:  false
+                  descending: true
+                  name: NAAM
+            indexName: idx_collectie_conceptschema
+            schemaName: public
+            tableName: COLLECTIE
+            unique: false
 

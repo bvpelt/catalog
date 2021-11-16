@@ -1,7 +1,10 @@
 package com.bsoft.catalogus.controller;
 
 import com.bsoft.catalogus.model.*;
-import com.bsoft.catalogus.repository.*;
+import com.bsoft.catalogus.repository.ConceptRepository;
+import com.bsoft.catalogus.repository.ToelichtingRepository;
+import com.bsoft.catalogus.repository.TrefwoordRepository;
+import com.bsoft.catalogus.repository.WaardelijstRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
 import com.bsoft.catalogus.util.SetUtils;
@@ -215,7 +218,8 @@ public class WaardelijstLoader {
                         if (conceptDTOOptional.isPresent()) { // existing concept (waarde)
                             ConceptDTO conceptDTOold = conceptDTOOptional.get();
                             log.trace("WaardelijstLoader convertToWaardelijstDTO: found concept - id: {} uri: {}", conceptDTOold.getId(), conceptDTOold.getUri());
-                            conceptDTOold.setWaardelijst(savedWaardelijst);
+                            savedWaardelijst.addWaarde(conceptDTOold);
+                            //conceptDTOold.setWaardelijst(savedWaardelijst);
                             savedConcept = conceptRepository.save(conceptDTOold);
                         } else { // new concept (waarde)
                             ConceptDTO newConcept = new ConceptDTO();
@@ -230,20 +234,23 @@ public class WaardelijstLoader {
                             newConcept.setBegindatumGeldigheid(concept.getBegindatumGeldigheid());
                             newConcept.setEinddatumGeldigheid(concept.getEinddatumGeldigheid().isPresent() ? concept.getEinddatumGeldigheid().get() : null);
                             newConcept.setMetadata(concept.getMetadata());
-                            newConcept.setWaardelijst(savedWaardelijst);
-                            savedConcept = conceptRepository.save(newConcept);
 
+                            //newConcept.setWaardelijst(savedWaardelijst);
+                            savedConcept = conceptRepository.save(newConcept);
+                            savedWaardelijst.addWaarde(savedConcept);
+                            /*
                             Set<ConceptDTO> conceptSet = new HashSet<>();
                             conceptSet.add(savedConcept);
+                            */
 
                             // Trefwoorden
                             if (concept.getTrefwoorden().isPresent() && concept.getTrefwoorden().get() != null) {
-                                addTrefwoorden(concept.getTrefwoorden().get(), savedConcept,  conceptSet);
+                                addTrefwoorden(concept.getTrefwoorden().get(), savedConcept);
                             }
 
                             // Toelichtingen
                             if (concept.getToelichtingen().isPresent() && concept.getToelichtingen().get() != null) {
-                                addToelichtingen(concept.getToelichtingen().get(), savedConcept, conceptSet);
+                                addToelichtingen(concept.getToelichtingen().get(), savedConcept);
                             }
                         }
                         waarden.add(savedConcept);
@@ -270,8 +277,10 @@ public class WaardelijstLoader {
         return savedWaardelijst;
     }
 
-    private void addToelichtingen(final List<String> toelichtingenList, ConceptDTO savedConcept,  final Set<ConceptDTO> concepten) {
+    private void addToelichtingen(final List<String> toelichtingenList, ConceptDTO savedConcept) {
         Set<ToelichtingDTO> toelichtingen = new HashSet<>();
+        Set<ConceptDTO> conceptSet = new HashSet<>();
+        conceptSet.add(savedConcept);
 
         for (int i = 0; i < toelichtingenList.size(); i++) {
             String toelichting = toelichtingenList.get(i);
@@ -283,12 +292,12 @@ public class WaardelijstLoader {
             if (toelichtingDTOOptional.isPresent()) {  // existing conceptschema trefwoord
                 ToelichtingDTO toelichtingDTOold = toelichtingDTOOptional.get();
                 log.trace("ConceptLoader addToelichtingen: found conceptschematype - id: {} toelichting: {}", toelichtingDTOold.getId(), toelichtingDTOold.getToelichting());
-                toelichtingDTOold.setConcept(concepten);
+                toelichtingDTOold.setConcept(conceptSet);
                 savedToelichting = toelichtingRepository.save(toelichtingDTOold);
             } else {                                          // new conceptschema
                 ToelichtingDTO newToelichting = new ToelichtingDTO();
                 newToelichting.setToelichting(toelichting);
-                newToelichting.setConcept(concepten);
+                newToelichting.setConcept(conceptSet);
                 log.trace("ConceptLoader addToelichtingen: before save conceptschemaTypeDTO");
                 savedToelichting = toelichtingRepository.save(newToelichting);
                 log.trace("ConceptLoader addToelichtingen: after save conceptschemaTypeDTO - id: {}, toelichting: {}", newToelichting.getId(), newToelichting.getToelichting());
@@ -299,8 +308,10 @@ public class WaardelijstLoader {
         conceptRepository.save(savedConcept);
     }
 
-    private void addTrefwoorden(final List<String> trefwoordenLijst, ConceptDTO savedConcept,  final Set<ConceptDTO> concepten) {
+    private void addTrefwoorden(final List<String> trefwoordenLijst, ConceptDTO savedConcept) {
         Set<TrefwoordDTO> trefwoorden = new HashSet<>();
+        Set<ConceptDTO> conceptSet = new HashSet<>();
+        conceptSet.add(savedConcept);
 
         for (int i = 0; i < trefwoordenLijst.size(); i++) {
             String trefwoord = trefwoordenLijst.get(i);
@@ -312,12 +323,12 @@ public class WaardelijstLoader {
             if (trefwoordDTOOptional.isPresent()) {  // existing conceptschema trefwoord
                 TrefwoordDTO trefwoordDTOold = trefwoordDTOOptional.get();
                 log.trace("ConceptLoader addTrefwoorden: found conceptschematype - id: {} trefwoord: {}", trefwoordDTOold.getId(), trefwoordDTOold.getTrefwoord());
-                trefwoordDTOold.setConcept(concepten);
+                trefwoordDTOold.setConcept(conceptSet);
                 savedTrefwoord = trefwoordRepository.save(trefwoordDTOold);
             } else {                                          // new conceptschema
                 TrefwoordDTO newTrefwoord = new TrefwoordDTO();
                 newTrefwoord.setTrefwoord(trefwoord);
-                newTrefwoord.setConcept(concepten);
+                newTrefwoord.setConcept(conceptSet);
                 log.trace("ConceptLoader addTrefwoorden: before save conceptschemaTypeDTO");
                 savedTrefwoord = trefwoordRepository.save(newTrefwoord);
                 log.trace("ConceptLoader addTrefwoorden: after save conceptschemaTypeDTO - id: {}, type: {}", newTrefwoord.getId(), newTrefwoord.getTrefwoord());
@@ -374,7 +385,7 @@ public class WaardelijstLoader {
             // waarden aanwezig
             waarden = waardelijst.getEmbedded().getWaarden().get();
 
-            for (Concept c: waarden) {
+            for (Concept c : waarden) {
                 waardenSet.add(c);
             }
         }

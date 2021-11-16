@@ -46,21 +46,21 @@ databaseChangeLog:
               - tableName: WAARDELIJST
 
   - changeSet:
-      id:  610
-      author:  bart
+      id: 610
+      author: bart
       dbms: PostgreSQL
       comment: Create WAARDELIJST uri index
       changes:
         - createIndex:
-            clustered:  true
+            clustered: true
             columns:
               - column:
-                  descending:  true
-                  name:  URI
-            indexName:  idx_waardelijst_uri
-            schemaName:  public
-            tableName:  WAARDELIJST
-            unique:  true
+                  descending: true
+                  name: URI
+            indexName: idx_waardelijst_uri
+            schemaName: public
+            tableName: WAARDELIJST
+            unique: true
 
   - changeSet:
       id: 620
@@ -91,21 +91,21 @@ databaseChangeLog:
               - tableName: WAARDELIJST_WAARDE
 
   - changeSet:
-      id:  630
-      author:  bart
+      id: 630
+      author: bart
       dbms: PostgreSQL
       comment: Create WAARDELIJST_WAARDE uri index
       changes:
         - createIndex:
-            clustered:  true
+            clustered: true
             columns:
               - column:
-                  descending:  true
-                  name:  WAARDELIJST_ID
+                  descending: true
+                  name: WAARDELIJST_ID
               - column:
-                  descending:  true
-                  name:  CONCEPT_ID
-            indexName:  idx_waardelijst_waarde
-            schemaName:  public
-            tableName:  WAARDELIJST_WAARDE
-            unique:  true
+                  descending: true
+                  name: CONCEPT_ID
+            indexName: idx_waardelijst_waarde
+            schemaName: public
+            tableName: WAARDELIJST_WAARDE
+            unique: true

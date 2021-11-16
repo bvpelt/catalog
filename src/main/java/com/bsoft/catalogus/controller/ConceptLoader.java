@@ -212,7 +212,7 @@ public class ConceptLoader {
 
                 // Trefwoorden
                 if (concept.getTrefwoorden().isPresent() && concept.getTrefwoorden().get() != null) {
-                    addTrefwoorden(concept.getTrefwoorden().get(), savedConcept,  concepten);
+                    addTrefwoorden(concept.getTrefwoorden().get(), savedConcept, concepten);
                 }
 
                 // Toelichtingen
@@ -237,7 +237,7 @@ public class ConceptLoader {
         return savedConcept;
     }
 
-    private void addToelichtingen(final List<String> toelichtingenList, ConceptDTO savedConcept,  final Set<ConceptDTO> concepten) {
+    private void addToelichtingen(final List<String> toelichtingenList, ConceptDTO savedConcept, final Set<ConceptDTO> concepten) {
         Set<ToelichtingDTO> toelichtingen = new HashSet<>();
 
         for (int i = 0; i < toelichtingenList.size(); i++) {
@@ -266,7 +266,7 @@ public class ConceptLoader {
         conceptRepository.save(savedConcept);
     }
 
-    private void addTrefwoorden(final List<String> trefwoordenLijst, ConceptDTO savedConcept,  final Set<ConceptDTO> concepten) {
+    private void addTrefwoorden(final List<String> trefwoordenLijst, ConceptDTO savedConcept, final Set<ConceptDTO> concepten) {
         Set<TrefwoordDTO> trefwoorden = new HashSet<>();
 
         for (int i = 0; i < trefwoordenLijst.size(); i++) {

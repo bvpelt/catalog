@@ -1,7 +1,10 @@
 package com.bsoft.catalogus.controller;
 
 import com.bsoft.catalogus.model.ProcesResult;
-import com.bsoft.catalogus.repository.*;
+import com.bsoft.catalogus.repository.ConceptRepository;
+import com.bsoft.catalogus.repository.ToelichtingRepository;
+import com.bsoft.catalogus.repository.TrefwoordRepository;
+import com.bsoft.catalogus.repository.WaardelijstRepository;
 import com.bsoft.catalogus.services.CatalogService;
 import com.bsoft.catalogus.services.OperationResult;
 import lombok.NoArgsConstructor;
